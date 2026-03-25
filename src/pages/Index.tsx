@@ -4,9 +4,10 @@ import HeroSection from "@/components/HeroSection";
 import GenesisIntake from "@/components/GenesisIntake";
 import BlueprintPreview from "@/components/BlueprintPreview";
 import ThirdWayInput from "@/components/ThirdWayInput";
+import ThirdWayResult from "@/components/ThirdWayResult";
 
 const Index = () => {
-  const [view, setView] = useState<"home" | "intake" | "blueprint" | "thirdway">("home");
+  const [view, setView] = useState<"home" | "intake" | "blueprint" | "thirdway" | "result">("home");
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,7 +29,16 @@ const Index = () => {
         )}
         {view === "thirdway" && (
           <motion.div key="thirdway" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
-            <ThirdWayInput onSubmit={() => console.log("Generate Third Way")} onBack={() => setView("blueprint")} />
+            <ThirdWayInput onSubmit={() => setView("result")} onBack={() => setView("blueprint")} />
+          </motion.div>
+        )}
+        {view === "result" && (
+          <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
+            <ThirdWayResult
+              onSave={() => console.log("Saved")}
+              onReject={() => setView("thirdway")}
+              onBack={() => setView("thirdway")}
+            />
           </motion.div>
         )}
       </AnimatePresence>
