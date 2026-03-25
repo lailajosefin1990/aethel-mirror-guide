@@ -55,7 +55,7 @@ const GenesisIntake = ({ onBack }: GenesisIntakeProps) => {
               placeholder="dd/mm/yyyy"
               value={dob}
               onChange={(e) => setDob(e.target.value)}
-              className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder:text-muted-foreground font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
             />
           </div>
 
@@ -70,14 +70,14 @@ const GenesisIntake = ({ onBack }: GenesisIntakeProps) => {
               value={tob}
               onChange={(e) => setTob(e.target.value)}
               disabled={unknownTime}
-              className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all disabled:opacity-40"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder:text-muted-foreground font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all disabled:opacity-40"
             />
             <label className="flex items-center gap-2 cursor-pointer mt-1">
               <input
                 type="checkbox"
                 checked={unknownTime}
                 onChange={(e) => setUnknownTime(e.target.checked)}
-                className="w-4 h-4 rounded border-border bg-secondary accent-primary"
+                className="w-4 h-4 rounded border-border bg-muted accent-primary"
               />
               <span className="text-xs text-muted-foreground font-body">
                 I don't know the exact time
@@ -95,7 +95,7 @@ const GenesisIntake = ({ onBack }: GenesisIntakeProps) => {
               placeholder="City, Country"
               value={birthPlace}
               onChange={(e) => setBirthPlace(e.target.value)}
-              className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder:text-muted-foreground font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-lg text-foreground placeholder:text-muted-foreground font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
             />
           </div>
 
