@@ -16,6 +16,7 @@ const GenesisIntake = ({ onBack, onSubmit }: GenesisIntakeProps) => {
     e.preventDefault();
     console.log({ dob, tob: unknownTime ? "unknown" : tob, birthPlace });
     onSubmit();
+  };
 
   return (
     <section className="min-h-screen flex items-center justify-center px-6 py-12">

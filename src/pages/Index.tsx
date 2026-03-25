@@ -27,7 +27,7 @@ const Index = () => {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
           >
-            <GenesisIntake onBack={() => setView("home")} />
+            <GenesisIntake onBack={() => setView("home")} onSubmit={() => setView("blueprint")} />
           </motion.div>
         )}
         {view === "blueprint" && (
