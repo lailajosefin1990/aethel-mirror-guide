@@ -5,21 +5,9 @@ interface HeroSectionProps {
 }
 
 const steps = [
-  {
-    number: "01",
-    title: "Enter your birth data",
-    body: "Date, time, and place — just once. We use it to pull your natal chart, Human Design, numerology, and more.",
-  },
-  {
-    number: "02",
-    title: "Ask your question",
-    body: "What's the decision you're stuck on? Business pivot, relationship, relocation — anything that matters.",
-  },
-  {
-    number: "03",
-    title: "Receive your mirror",
-    body: "One clear, synthesised answer drawn from every system — not a vague horoscope, a concrete next move.",
-  },
+  { number: "01", text: "We anchor your mirror\nin your birth moment." },
+  { number: "02", text: "We read your six systems\ntogether, not in pieces." },
+  { number: "03", text: "We give you one Third Way—\na clear next move, today." },
 ];
 
 const HeroSection = ({ onStart }: HeroSectionProps) => {
@@ -99,16 +87,16 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-foreground text-background p-6 rounded-none"
+              className="bg-foreground text-background px-6 py-5 rounded-none"
             >
-              <p className="font-body text-[12px] uppercase tracking-[0.2em] text-background/50 mb-2">
-                {step.number}
-              </p>
-              <h3 className="font-display text-[20px] font-normal text-background mb-2">
-                {step.title}
-              </h3>
-              <p className="font-body text-[14px] leading-relaxed text-background/70">
-                {step.body}
+              <p className="font-body text-[14px] leading-relaxed text-background">
+                <span className="text-background/50">{step.number} / </span>
+                {step.text.split("\n").map((line, j) => (
+                  <span key={j}>
+                    {j > 0 && <><br /><span className="inline-block w-[38px]" /></>}
+                    {line}
+                  </span>
+                ))}
               </p>
             </motion.div>
           ))}
