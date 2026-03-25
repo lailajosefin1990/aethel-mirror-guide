@@ -8,7 +8,7 @@ interface HeroSectionProps {
 
 const valueProps = [
   { icon: Sparkles, text: "One place for all your guidance" },
-  { icon: Compass, text: "Clear, concrete actions (no vague "trust the universe")" },
+  { icon: Compass, text: "Clear, concrete actions (no vague 'trust the universe')" },
   { icon: Flame, text: "Designed for soul-led founders and creators" },
 ];
 
