@@ -3,9 +3,10 @@ import { motion } from "framer-motion";
 
 interface GenesisIntakeProps {
   onBack: () => void;
+  onSubmit: () => void;
 }
 
-const GenesisIntake = ({ onBack }: GenesisIntakeProps) => {
+const GenesisIntake = ({ onBack, onSubmit }: GenesisIntakeProps) => {
   const [dob, setDob] = useState("");
   const [tob, setTob] = useState("");
   const [unknownTime, setUnknownTime] = useState(false);
@@ -14,6 +15,7 @@ const GenesisIntake = ({ onBack }: GenesisIntakeProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log({ dob, tob: unknownTime ? "unknown" : tob, birthPlace });
+    onSubmit();
   };
 
   return (
