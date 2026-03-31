@@ -253,6 +253,8 @@ export type Database = {
           birth_date: string | null
           birth_place: string | null
           birth_time: string | null
+          consent_accepted: boolean
+          consent_date: string | null
           consent_prompt_dismissed: boolean
           created_at: string
           id: string
@@ -265,6 +267,8 @@ export type Database = {
           birth_date?: string | null
           birth_place?: string | null
           birth_time?: string | null
+          consent_accepted?: boolean
+          consent_date?: string | null
           consent_prompt_dismissed?: boolean
           created_at?: string
           id?: string
@@ -277,6 +281,8 @@ export type Database = {
           birth_date?: string | null
           birth_place?: string | null
           birth_time?: string | null
+          consent_accepted?: boolean
+          consent_date?: string | null
           consent_prompt_dismissed?: boolean
           created_at?: string
           id?: string

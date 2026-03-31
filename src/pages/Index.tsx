@@ -14,6 +14,8 @@ import AuthScreen from "@/components/AuthScreen";
 import PaywallModal from "@/components/PaywallModal";
 import SettingsScreen from "@/components/SettingsScreen";
 import PushPermissionSheet from "@/components/PushPermissionSheet";
+import ConsentGate from "@/components/ConsentGate";
+import CrisisInterstitial from "@/components/CrisisInterstitial";
 import { subscribeToPush, wasPushDismissedRecently, dismissPushPrompt } from "@/lib/push";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +37,9 @@ const Index = () => {
   const [profileBirthData, setProfileBirthData] = useState<{ birth_date: string | null; birth_time: string | null; birth_place: string | null } | null>(null);
   const [pushSheetOpen, setPushSheetOpen] = useState(false);
   const [hasShownPushPrompt, setHasShownPushPrompt] = useState(false);
+  const [showConsentGate, setShowConsentGate] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [showCrisis, setShowCrisis] = useState(false);
 
   const transition = { duration: 0.3, ease: "easeInOut" as const };
 
@@ -45,10 +50,17 @@ const Index = () => {
       // Load profile birth data
       const { data: profile } = await supabase
         .from("profiles")
-        .select("birth_date, birth_time, birth_place")
+        .select("birth_date, birth_time, birth_place, consent_accepted")
         .eq("user_id", user.id)
         .single();
-      if (profile) setProfileBirthData(profile);
+      if (profile) {
+        setProfileBirthData(profile);
+        if (!profile.consent_accepted) {
+          setShowConsentGate(true);
+        } else {
+          setConsentChecked(true);
+        }
+      }
 
       // Load readings
       const { data: readings } = await supabase
@@ -168,6 +180,13 @@ const Index = () => {
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
 
+    // Crisis detection response
+    if (data?.is_crisis) {
+      track("crisis_signal_detected", { domain: data.domain, confidence: data.confidence });
+      setShowCrisis(true);
+      throw new Error("__crisis__");
+    }
+
     setReadingData(data as ReadingData);
   }, [birthData, questionData]);
 
@@ -260,8 +279,27 @@ const Index = () => {
 
   const remainingReadings = Math.max(0, FREE_READING_LIMIT - monthlyReadingCount);
 
+  const handleConsentAccept = async () => {
+    if (user) {
+      await supabase.from("profiles").update({
+        consent_accepted: true,
+        consent_date: new Date().toISOString(),
+      }).eq("user_id", user.id);
+    }
+    setShowConsentGate(false);
+    setConsentChecked(true);
+  };
+
+  const handleCrisisReturn = () => {
+    setShowCrisis(false);
+    setQuestionData(null);
+    setView("question");
+  };
+
   return (
     <>
+      {showConsentGate && <ConsentGate onAccept={handleConsentAccept} />}
+      {showCrisis && <CrisisInterstitial onReturn={handleCrisisReturn} />}
       <AnimatePresence mode="wait">
         {view === "home" && (
           <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
