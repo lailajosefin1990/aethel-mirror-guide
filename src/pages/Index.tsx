@@ -291,8 +291,11 @@ const Index = () => {
         birthLng: bd?.birthLng ?? null,
         birthTimezone: bd?.birthTimezone ?? null,
         language: i18n.language,
+        regenerationFeedback: regenerationFeedback,
       },
     });
+
+    if (regenerationFeedback) setRegenerationFeedback(null);
 
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
