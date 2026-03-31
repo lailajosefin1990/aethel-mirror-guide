@@ -7,7 +7,6 @@ import { generateThirdWayCard } from "@/lib/cardGenerator";
 import { useAuth } from "@/hooks/useAuth";
 import useOgImage from "@/hooks/useOgImage";
 import { toast } from "sonner";
-import { toast } from "sonner";
 
 interface ReadingOutputProps {
   domain: string;
