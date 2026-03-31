@@ -287,9 +287,8 @@ const Index = () => {
     setView("reading");
   }, []);
 
-  const handleLoadingError = useCallback((error: Error) => {
-    if (error.message === "__crisis__") return;
-    setLoadingError(error.message || "Something went wrong. Please try again.");
+  const handleLoadingError = useCallback(() => {
+    setLoadingError("Something went wrong. Please try again.");
     setView("question");
   }, []);
 
