@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 
 let loaderPromise: Promise<unknown> | null = null;
 let isLoaded = false;
+let optionsSet = false;
 
 export function useGoogleMaps() {
   const [ready, setReady] = useState(isLoaded);
@@ -16,12 +17,13 @@ export function useGoogleMaps() {
       return;
     }
 
+    if (!optionsSet) {
+      setOptions({ key: apiKey, libraries: ["places"] });
+      optionsSet = true;
+    }
+
     if (!loaderPromise) {
-      const loader = new Loader({
-        apiKey,
-        libraries: ["places"],
-      });
-      loaderPromise = loader.load();
+      loaderPromise = importLibrary("places");
     }
 
     loaderPromise
