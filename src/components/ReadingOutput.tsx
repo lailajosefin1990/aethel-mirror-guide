@@ -165,7 +165,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
         </motion.p>
 
         {/* Divider + Third Way */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}
+        <motion.div ref={thirdWayRef} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}
           className="border-t-2 border-primary/40 pt-8 mb-10">
           <p className={`${sectionLabel} text-center`}>Y O U R &nbsp; T H I R D &nbsp; W A Y</p>
           <p className="font-display text-[22px] sm:text-[24px] leading-[1.4] text-foreground text-center font-medium">
