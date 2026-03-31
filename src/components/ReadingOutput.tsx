@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown, Lock, Download, Link2, Share2, X } from "lucide-react";
+import VoicePlayer from "./VoicePlayer";
 import type { ReadingData } from "@/lib/reading";
 import { CONFIDENCE_MESSAGES } from "@/lib/reading";
 import { generateThirdWayCard } from "@/lib/cardGenerator";
@@ -211,6 +212,10 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
             className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300">
             Save to my mirror
           </button>
+
+          <VoicePlayer
+            text={`${reading.astrology_reading}\n\n${reading.design_insights.join("\n")}\n\nYour Third Way: ${reading.third_way}\n\nJournal prompt: ${reading.journal_prompt}`}
+          />
 
           {/* Share Third Way button */}
           {isPro ? (

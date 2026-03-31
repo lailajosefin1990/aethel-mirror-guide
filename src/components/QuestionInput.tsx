@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
+import VoiceRecorder from "./VoiceRecorder";
 import { track } from "@/lib/posthog";
 
 export interface QuestionData {
@@ -114,16 +115,24 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
             })}
           </div>
 
-          {/* Textarea */}
+          {/* Textarea + Voice */}
           <div className="relative">
-            <textarea
-              value={question}
-              onChange={handleTextChange}
-              placeholder="Describe your decision or situation... e.g. Should I go all-in on this opportunity?"
-              rows={4}
-              className="w-full px-4 py-3 rounded-sm bg-card text-foreground font-body text-[14px] leading-relaxed border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none"
-            />
-            <span className="absolute bottom-3 right-3 font-body text-[11px] text-muted-foreground">
+            <div className="flex gap-2 items-start">
+              <textarea
+                value={question}
+                onChange={handleTextChange}
+                placeholder="Describe your decision or situation... e.g. Should I go all-in on this opportunity?"
+                rows={4}
+                className="flex-1 px-4 py-3 rounded-sm bg-card text-foreground font-body text-[14px] leading-relaxed border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none"
+              />
+              <VoiceRecorder
+                onTranscription={(text) => setQuestion((prev) => {
+                  const combined = prev ? prev + " " + text : text;
+                  return combined.slice(0, MAX_CHARS);
+                })}
+              />
+            </div>
+            <span className="absolute bottom-3 right-12 font-body text-[11px] text-muted-foreground">
               {question.length}/{MAX_CHARS}
             </span>
           </div>
