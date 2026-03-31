@@ -159,6 +159,46 @@ const SettingsScreen = () => {
         </div>
       </motion.div>
 
+      {/* Referral programme */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.17 }}
+        className="bg-card border border-border rounded-md p-5 mb-5"
+      >
+        <p className={sectionLabel}>G I V E &nbsp; A &nbsp; F R E E &nbsp; R E A D I N G</p>
+        <p className="font-body text-[13px] text-muted-foreground mb-4">
+          Share your link. When a friend subscribes, you both get a free month.
+        </p>
+        {referralCode && (
+          <div className="flex items-center gap-2 mb-3">
+            <div className="flex-1 bg-background border border-border rounded-sm px-3 py-2 font-body text-[13px] text-foreground/80 truncate">
+              {window.location.origin}/?ref={referralCode}
+            </div>
+            <button
+              onClick={handleCopyReferral}
+              className="h-[36px] w-[36px] rounded-sm border border-border flex items-center justify-center text-foreground/60 hover:text-primary hover:border-primary/30 transition-colors"
+            >
+              {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+        )}
+        <div className="flex gap-4">
+          <p className="font-body text-[12px] text-muted-foreground">
+            You've referred <span className="text-foreground">{referralCount}</span> friend{referralCount !== 1 ? "s" : ""}
+          </p>
+          {rewardsEarned > 0 ? (
+            <p className="font-body text-[12px] text-primary">
+              Free month{rewardsEarned !== 1 ? "s" : ""} earned: {rewardsEarned}
+            </p>
+          ) : (
+            <p className="font-body text-[12px] text-muted-foreground">
+              Next reward: refer {Math.max(1, 1 - referralCount)} more friend{referralCount === 0 ? "" : "s"}
+            </p>
+          )}
+        </div>
+      </motion.div>
+
       {/* Subscription management */}
       {subscriptionTier !== "free" && (
         <motion.div
