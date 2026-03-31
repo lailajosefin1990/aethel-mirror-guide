@@ -4,6 +4,8 @@ export interface ReadingData {
   third_way: string;
   journal_prompt: string;
   confidence_level: "low" | "medium" | "high";
+  is_fallback?: boolean;
+  fallback_reason?: "api_error" | "timeout";
 }
 
 export const CONFIDENCE_MESSAGES: Record<string, string> = {
