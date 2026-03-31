@@ -48,7 +48,7 @@ const weeklyOptions = [
   { emoji: "🌕", label: "Clear" },
 ];
 
-const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision }: DailyNudgeProps) => {
+const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscriptionTier = "free", remainingReadings = 1, onUpgrade }: DailyNudgeProps) => {
   const today = new Date();
   const isSunday = today.getDay() === 0;
   const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
