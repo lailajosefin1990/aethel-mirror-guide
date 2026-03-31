@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown, Lock, Download, Link2, Share2, X } from "lucide-react";
+import VoicePlayer from "./VoicePlayer";
 import type { ReadingData } from "@/lib/reading";
 import { CONFIDENCE_MESSAGES } from "@/lib/reading";
 import { generateThirdWayCard } from "@/lib/cardGenerator";
