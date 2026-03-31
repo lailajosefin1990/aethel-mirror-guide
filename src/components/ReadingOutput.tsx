@@ -5,6 +5,8 @@ import type { ReadingData } from "@/lib/reading";
 import { CONFIDENCE_MESSAGES } from "@/lib/reading";
 import { generateThirdWayCard } from "@/lib/cardGenerator";
 import { useAuth } from "@/hooks/useAuth";
+import useOgImage from "@/hooks/useOgImage";
+import { toast } from "sonner";
 import { toast } from "sonner";
 
 interface ReadingOutputProps {
