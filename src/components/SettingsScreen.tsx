@@ -6,15 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { isPushActive, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
 import { track } from "@/lib/posthog";
+import { useNavigate } from "react-router-dom";
 
 const tierLabels: Record<string, string> = {
   free: "Free",
   mirror: "Mirror",
   mirror_pro: "Pro",
+  practitioner: "Practitioner",
 };
 
 const SettingsScreen = () => {
   const { user, subscriptionTier, signOut } = useAuth();
+  const navigate = useNavigate();
   const [portalLoading, setPortalLoading] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(true);
@@ -131,6 +134,23 @@ const SettingsScreen = () => {
             className="w-full h-[48px] rounded-sm border border-border bg-card text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300 disabled:opacity-50"
           >
             {portalLoading ? "..." : "Manage subscription"}
+          </button>
+        </motion.div>
+      )}
+
+      {/* Practitioner Portal link */}
+      {subscriptionTier === "practitioner" && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+          className="mb-5"
+        >
+          <button
+            onClick={() => navigate("/practitioner")}
+            className="w-full h-[48px] rounded-sm border border-primary bg-primary/5 text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300"
+          >
+            Practitioner Portal →
           </button>
         </motion.div>
       )}
