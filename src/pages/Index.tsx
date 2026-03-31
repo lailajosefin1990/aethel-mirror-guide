@@ -233,6 +233,13 @@ const Index = () => {
     }
   }, [subscriptionTier, monthlyReadingCount, profileBirthData]);
 
+  // Auto-proceed after OAuth redirect if we have pending question data
+  useEffect(() => {
+    if (user && !authLoading && questionData && view === "home") {
+      proceedAfterAuth();
+    }
+  }, [user, authLoading, questionData, view, proceedAfterAuth]);
+
   const handleAuthSuccess = () => {
     if (profileLoaded && profileBirthData?.birth_date) {
       proceedAfterAuth();
