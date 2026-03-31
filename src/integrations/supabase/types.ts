@@ -69,6 +69,7 @@ export type Database = {
       }
       outcomes: {
         Row: {
+          consent_to_share: boolean
           created_at: string
           followed: string
           id: string
@@ -77,6 +78,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          consent_to_share?: boolean
           created_at?: string
           followed: string
           id?: string
@@ -85,6 +87,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          consent_to_share?: boolean
           created_at?: string
           followed?: string
           id?: string

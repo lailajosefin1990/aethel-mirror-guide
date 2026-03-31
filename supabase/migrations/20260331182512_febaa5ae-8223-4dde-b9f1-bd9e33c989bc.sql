@@ -1,0 +1,1 @@
+ALTER TABLE public.outcomes ADD COLUMN consent_to_share boolean NOT NULL DEFAULT false;
