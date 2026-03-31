@@ -159,6 +159,11 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
               <ExpandableBullet key={i} text={item} />
             ))}
           </div>
+          {birthTimeUnknown && (
+            <p className="font-body text-[12px] italic text-muted-foreground mt-4">
+              *Human Design insights are estimated — for full accuracy, add your birth time in Settings.
+            </p>
+          )}
         </motion.div>
 
         {/* Confidence */}
