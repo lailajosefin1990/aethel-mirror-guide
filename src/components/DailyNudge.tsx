@@ -55,6 +55,10 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
   const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
   const todayNudge = nudges[dayOfYear % nudges.length];
 
+  useEffect(() => {
+    track("nudge_viewed");
+  }, []);
+
   const dateStr = today.toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
