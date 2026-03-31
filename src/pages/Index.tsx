@@ -279,8 +279,27 @@ const Index = () => {
 
   const remainingReadings = Math.max(0, FREE_READING_LIMIT - monthlyReadingCount);
 
+  const handleConsentAccept = async () => {
+    if (user) {
+      await supabase.from("profiles").update({
+        consent_accepted: true,
+        consent_date: new Date().toISOString(),
+      }).eq("user_id", user.id);
+    }
+    setShowConsentGate(false);
+    setConsentChecked(true);
+  };
+
+  const handleCrisisReturn = () => {
+    setShowCrisis(false);
+    setQuestionData(null);
+    setView("question");
+  };
+
   return (
     <>
+      {showConsentGate && <ConsentGate onAccept={handleConsentAccept} />}
+      {showCrisis && <CrisisInterstitial onReturn={handleCrisisReturn} />}
       <AnimatePresence mode="wait">
         {view === "home" && (
           <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
