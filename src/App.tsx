@@ -15,10 +15,8 @@ import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
-const SentryErrorBoundary = Sentry.withErrorBoundary;
-
 const App = () => (
-  <SentryErrorBoundary fallback={<div className="min-h-screen flex items-center justify-center font-body text-muted-foreground">Something went wrong. Please refresh.</div>}>
+  <Sentry.ErrorBoundary fallback={<div className="min-h-screen flex items-center justify-center font-body text-muted-foreground">Something went wrong. Please refresh.</div>}>
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
