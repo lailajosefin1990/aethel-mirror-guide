@@ -23,6 +23,10 @@ const SettingsScreen = () => {
   const [portalLoading, setPortalLoading] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(true);
+  const [referralCode, setReferralCode] = useState("");
+  const [referralCount, setReferralCount] = useState(0);
+  const [rewardsEarned, setRewardsEarned] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!user) return;
