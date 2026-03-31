@@ -36,6 +36,39 @@ const SettingsScreen = () => {
     });
   }, [user]);
 
+  // Load referral data
+  useEffect(() => {
+    if (!user) return;
+    const loadReferralData = async () => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("referral_code")
+        .eq("user_id", user.id)
+        .single();
+      if (profile?.referral_code) setReferralCode(profile.referral_code);
+
+      const { data: referrals } = await supabase
+        .from("referrals")
+        .select("id, status, reward_granted")
+        .eq("referrer_user_id", user.id);
+      if (referrals) {
+        setReferralCount(referrals.length);
+        setRewardsEarned(referrals.filter((r: any) => r.reward_granted).length);
+      }
+    };
+    loadReferralData();
+  }, [user]);
+
+  const handleCopyReferral = () => {
+    const link = `${window.location.origin}/?ref=${referralCode}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(true);
+      toast.success("Referral link copied!");
+      track("referral_link_copied");
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
   const handlePushToggle = async (checked: boolean) => {
     if (!user) return;
     setPushLoading(true);
