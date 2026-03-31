@@ -69,30 +69,57 @@ export type Database = {
       }
       outcomes: {
         Row: {
+          confidence_level: string | null
           consent_to_share: boolean
           created_at: string
+          domain: string | null
           followed: string
           id: string
+          memory_context: Json | null
+          mode: string | null
+          outcome_sentiment: string | null
           outcome_text: string | null
+          quality_score: number | null
           reading_id: string
+          third_way_text: string | null
+          time_to_outcome: number | null
+          transit_context: Json | null
           user_id: string
         }
         Insert: {
+          confidence_level?: string | null
           consent_to_share?: boolean
           created_at?: string
+          domain?: string | null
           followed: string
           id?: string
+          memory_context?: Json | null
+          mode?: string | null
+          outcome_sentiment?: string | null
           outcome_text?: string | null
+          quality_score?: number | null
           reading_id: string
+          third_way_text?: string | null
+          time_to_outcome?: number | null
+          transit_context?: Json | null
           user_id: string
         }
         Update: {
+          confidence_level?: string | null
           consent_to_share?: boolean
           created_at?: string
+          domain?: string | null
           followed?: string
           id?: string
+          memory_context?: Json | null
+          mode?: string | null
+          outcome_sentiment?: string | null
           outcome_text?: string | null
+          quality_score?: number | null
           reading_id?: string
+          third_way_text?: string | null
+          time_to_outcome?: number | null
+          transit_context?: Json | null
           user_id?: string
         }
         Relationships: [
@@ -226,6 +253,7 @@ export type Database = {
           birth_date: string | null
           birth_place: string | null
           birth_time: string | null
+          consent_prompt_dismissed: boolean
           created_at: string
           id: string
           stripe_customer_id: string | null
@@ -237,6 +265,7 @@ export type Database = {
           birth_date?: string | null
           birth_place?: string | null
           birth_time?: string | null
+          consent_prompt_dismissed?: boolean
           created_at?: string
           id?: string
           stripe_customer_id?: string | null
@@ -248,6 +277,7 @@ export type Database = {
           birth_date?: string | null
           birth_place?: string | null
           birth_time?: string | null
+          consent_prompt_dismissed?: boolean
           created_at?: string
           id?: string
           stripe_customer_id?: string | null
@@ -397,7 +427,74 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      high_quality_readings: {
+        Row: {
+          created_at: string | null
+          domain: string | null
+          followed: string | null
+          outcome_id: string | null
+          outcome_sentiment: string | null
+          quality_score: number | null
+          reading_id: string | null
+          time_to_outcome: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          domain?: string | null
+          followed?: string | null
+          outcome_id?: string | null
+          outcome_sentiment?: string | null
+          quality_score?: number | null
+          reading_id?: string | null
+          time_to_outcome?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          domain?: string | null
+          followed?: string | null
+          outcome_id?: string | null
+          outcome_sentiment?: string | null
+          quality_score?: number | null
+          reading_id?: string | null
+          time_to_outcome?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outcomes_reading_id_fkey"
+            columns: ["reading_id"]
+            isOneToOne: false
+            referencedRelation: "readings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_ready_outcomes: {
+        Row: {
+          birth_date: string | null
+          birth_place: string | null
+          confidence_level: string | null
+          domain: string | null
+          followed: string | null
+          memory_context: Json | null
+          mode: string | null
+          outcome_id: string | null
+          outcome_sentiment: string | null
+          question_summary: string | null
+          reading_id: string | null
+          third_way_text: string | null
+          time_to_outcome: number | null
+          transit_context: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outcomes_reading_id_fkey"
+            columns: ["reading_id"]
+            isOneToOne: false
+            referencedRelation: "readings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       get_monthly_reading_count: {
