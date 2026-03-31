@@ -9,6 +9,7 @@ import ReadingOutput from "@/components/ReadingOutput";
 import AppLayout from "@/components/AppLayout";
 import DecisionJournal, { type JournalEntry } from "@/components/DecisionJournal";
 import DailyNudge from "@/components/DailyNudge";
+import TransitCalendar from "@/components/TransitCalendar";
 import AuthScreen from "@/components/AuthScreen";
 import PaywallModal from "@/components/PaywallModal";
 import SettingsScreen from "@/components/SettingsScreen";
