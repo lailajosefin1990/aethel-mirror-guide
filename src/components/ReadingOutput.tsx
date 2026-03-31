@@ -213,6 +213,10 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
             Save to my mirror
           </button>
 
+          <VoicePlayer
+            text={`${reading.astrology_reading}\n\n${reading.design_insights.join("\n")}\n\nYour Third Way: ${reading.third_way}\n\nJournal prompt: ${reading.journal_prompt}`}
+          />
+
           {/* Share Third Way button */}
           {isPro ? (
             <button onClick={handleShare} disabled={generating}
