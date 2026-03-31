@@ -16,7 +16,7 @@ const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (open) track("paywall_shown", { trigger: "second_reading" });
+    if (open) track("paywall_shown", { trigger: "fourth_reading" });
   }, [open]);
 
   const handleCheckout = async (priceId: string, tierName: string) => {
