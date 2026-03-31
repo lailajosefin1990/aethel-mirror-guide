@@ -180,6 +180,13 @@ const Index = () => {
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
 
+    // Crisis detection response
+    if (data?.is_crisis) {
+      track("crisis_signal_detected", { domain: data.domain, confidence: data.confidence });
+      setShowCrisis(true);
+      throw new Error("__crisis__");
+    }
+
     setReadingData(data as ReadingData);
   }, [birthData, questionData]);
 
