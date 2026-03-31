@@ -226,10 +226,16 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
             </div>
           )}
 
-          <button onClick={() => setFeedbackOpen(true)}
-            className="w-full h-[48px] rounded-sm bg-transparent border border-border text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300">
-            That doesn't fit
-          </button>
+          {regenerationCount >= 3 ? (
+            <p className="font-body text-[13px] italic text-primary text-center py-3">
+              Your mirror has shown you three paths. Sometimes the resistance itself is the answer.
+            </p>
+          ) : (
+            <button onClick={() => setFeedbackOpen(true)}
+              className="w-full h-[48px] rounded-sm bg-transparent border border-border text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300">
+              That doesn't fit
+            </button>
+          )}
         </motion.div>
       </div>
 
