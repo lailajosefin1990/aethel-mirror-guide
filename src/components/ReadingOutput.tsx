@@ -189,7 +189,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
         {/* Buttons */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }}
           className="flex flex-col gap-3 pb-10">
-          <button onClick={onSave}
+          <button onClick={() => { track("reading_saved"); onSave(); }}
             className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300">
             Save to my mirror
           </button>
