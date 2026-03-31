@@ -14,6 +14,8 @@ import AuthScreen from "@/components/AuthScreen";
 import PaywallModal from "@/components/PaywallModal";
 import SettingsScreen from "@/components/SettingsScreen";
 import PushPermissionSheet from "@/components/PushPermissionSheet";
+import ConsentGate from "@/components/ConsentGate";
+import CrisisInterstitial from "@/components/CrisisInterstitial";
 import { subscribeToPush, wasPushDismissedRecently, dismissPushPrompt } from "@/lib/push";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
