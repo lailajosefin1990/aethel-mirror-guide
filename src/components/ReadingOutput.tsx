@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown, Lock, Download, Link2, Share2, X } from "lucide-react";
 import type { ReadingData } from "@/lib/reading";
@@ -7,6 +7,7 @@ import { generateThirdWayCard } from "@/lib/cardGenerator";
 import { useAuth } from "@/hooks/useAuth";
 import useOgImage from "@/hooks/useOgImage";
 import { toast } from "sonner";
+import { track } from "@/lib/posthog";
 
 interface ReadingOutputProps {
   domain: string;
