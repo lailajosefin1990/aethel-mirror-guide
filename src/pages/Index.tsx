@@ -196,11 +196,18 @@ const Index = () => {
         birth_date: data.date.toISOString().split("T")[0],
         birth_time: data.unknownTime ? null : data.time,
         birth_place: data.birthPlace,
+        birth_lat: data.birthLat ?? null,
+        birth_lng: data.birthLng ?? null,
+        birth_timezone: data.birthTimezone ?? null,
+        birth_place_name: data.birthPlace,
       }).eq("user_id", user.id);
       setProfileBirthData({
         birth_date: data.date.toISOString().split("T")[0],
         birth_time: data.unknownTime ? null : (data.time || null),
         birth_place: data.birthPlace,
+        birth_lat: data.birthLat ?? null,
+        birth_lng: data.birthLng ?? null,
+        birth_timezone: data.birthTimezone ?? null,
       });
     }
     setView("loading");
