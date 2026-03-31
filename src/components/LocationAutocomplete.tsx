@@ -68,6 +68,7 @@ const LocationAutocomplete = ({ value, onChange, className }: LocationAutocomple
     suggestions: { status, data },
     setValue,
     clearSuggestions,
+    init,
   } = usePlacesAutocomplete({
     requestOptions: {
       types: ["(cities)"],
@@ -79,7 +80,7 @@ const LocationAutocomplete = ({ value, onChange, className }: LocationAutocomple
   // Init when Google Maps is loaded
   useEffect(() => {
     if (mapsReady) {
-      // The hook will detect google.maps.places is available
+      init();
       setValue(value, false);
     }
   }, [mapsReady]);
