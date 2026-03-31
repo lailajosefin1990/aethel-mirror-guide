@@ -102,6 +102,122 @@ export type Database = {
           },
         ]
       }
+      practitioner_clients: {
+        Row: {
+          birth_date: string | null
+          birth_place: string | null
+          birth_time: string | null
+          client_email: string | null
+          client_name: string
+          created_at: string
+          id: string
+          notes: string | null
+          practitioner_id: string
+        }
+        Insert: {
+          birth_date?: string | null
+          birth_place?: string | null
+          birth_time?: string | null
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          practitioner_id: string
+        }
+        Update: {
+          birth_date?: string | null
+          birth_place?: string | null
+          birth_time?: string | null
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          practitioner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practitioner_clients_practitioner_id_fkey"
+            columns: ["practitioner_id"]
+            isOneToOne: false
+            referencedRelation: "practitioners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practitioner_readings: {
+        Row: {
+          client_id: string
+          created_at: string
+          domain: string
+          id: string
+          practitioner_id: string
+          question: string
+          reading_json: Json
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          domain: string
+          id?: string
+          practitioner_id: string
+          question: string
+          reading_json: Json
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          domain?: string
+          id?: string
+          practitioner_id?: string
+          question?: string
+          reading_json?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "practitioner_readings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "practitioner_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "practitioner_readings_practitioner_id_fkey"
+            columns: ["practitioner_id"]
+            isOneToOne: false
+            referencedRelation: "practitioners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practitioners: {
+        Row: {
+          bio: string | null
+          created_at: string
+          display_name: string
+          id: string
+          subscription_tier: string
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          subscription_tier?: string
+          user_id: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          subscription_tier?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           birth_date: string | null
@@ -248,7 +364,7 @@ export type Database = {
       }
     }
     Enums: {
-      subscription_tier: "free" | "mirror" | "mirror_pro"
+      subscription_tier: "free" | "mirror" | "mirror_pro" | "practitioner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -376,7 +492,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      subscription_tier: ["free", "mirror", "mirror_pro"],
+      subscription_tier: ["free", "mirror", "mirror_pro", "practitioner"],
     },
   },
 } as const
