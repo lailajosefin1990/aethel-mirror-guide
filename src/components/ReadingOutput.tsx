@@ -74,6 +74,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
   const handleShare = useCallback(async () => {
     if (!reading || !isPro) return;
     setGenerating(true);
+    track("share_card_opened");
     try {
       const blob = await generateThirdWayCard(reading.third_way, domain);
       setCardBlob(blob);
