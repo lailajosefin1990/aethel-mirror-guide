@@ -9,13 +9,25 @@ const corsHeaders = {
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-const SYSTEM_PROMPT = `You are an astrologer calculating personalised daily transits. Given a birth chart context and a specific date, return a daily guidance entry.
+const ASPECT_NAMES: Record<number, string> = {
+  0: "conjunction", 60: "sextile", 90: "square", 120: "trine", 180: "opposition",
+};
+const ASPECT_KEYWORDS: Record<string, string> = {
+  conjunction: "intensifying",
+  sextile: "easing",
+  square: "challenging",
+  trine: "harmonising",
+  opposition: "polarising",
+};
+const PLANET_NAMES = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"];
+
+const SYSTEM_PROMPT = `You are an astrologer calculating personalised daily transits. You will be given REAL calculated natal chart data and real transit aspects for a specific date. Use ONLY the provided data — do not guess planetary positions.
 
 Return valid JSON only, no markdown:
 {
   "traffic_light": "green" | "amber" | "red",
-  "transit_headline": "string (max 80 chars, specific transit e.g. 'Venus trine your natal Sun')",
-  "transit_detail": "string (max 200 chars, practical implication for this person)",
+  "transit_headline": "string (max 80 chars, reference the EXACT transit aspect provided, e.g. 'Venus trine your natal Sun')",
+  "transit_detail": "string (max 200 chars, practical implication for this person based on the house themes)",
   "moon_phase": "string (e.g. 'Waxing Gibbous in Scorpio')"
 }`;
 
@@ -23,6 +35,46 @@ const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "F
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function computeAspects(transitPlanets: any, natalPlanets: any): string[] {
+  const aspects: string[] = [];
+  for (const tName of PLANET_NAMES) {
+    if (!transitPlanets[tName]) continue;
+    for (const nName of PLANET_NAMES) {
+      if (!natalPlanets[nName]) continue;
+      const diff = Math.abs(transitPlanets[tName].longitude - natalPlanets[nName].longitude) % 360;
+      const angle = diff > 180 ? 360 - diff : diff;
+      for (const [target, aspectName] of Object.entries(ASPECT_NAMES)) {
+        const orb = Math.abs(angle - Number(target));
+        if (orb <= 6) {
+          const house = natalPlanets[nName].house || "unknown";
+          const keyword = ASPECT_KEYWORDS[aspectName] || aspectName;
+          aspects.push(
+            `Transit ${tName} ${aspectName} natal ${nName} (orb ${orb.toFixed(1)}°): ${keyword} your ${house} house themes`
+          );
+        }
+      }
+    }
+  }
+  return aspects;
+}
+
+async function fetchChartData(chartApiUrl: string, params: Record<string, string | number>, timeoutMs = 5000) {
+  const qs = new URLSearchParams(
+    Object.entries(params).map(([k, v]) => [k, String(v)])
+  ).toString();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${chartApiUrl}/chart?${qs}`, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    clearTimeout(timer);
+    return null;
+  }
 }
 
 serve(async (req) => {
@@ -33,6 +85,8 @@ serve(async (req) => {
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    const CHART_API_URL = Deno.env.get("CHART_API_URL");
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -51,7 +105,7 @@ serve(async (req) => {
     // Get user's birth data
     const { data: profile } = await supabase
       .from("profiles")
-      .select("birth_date, birth_time, birth_place")
+      .select("birth_date, birth_time, birth_place, birth_lat, birth_lng")
       .eq("user_id", userId)
       .single();
 
@@ -77,7 +131,6 @@ serve(async (req) => {
       .gt("expires_at", new Date().toISOString())
       .order("date", { ascending: true });
 
-    // If we have all 30 days cached, return them
     if (cached && cached.length >= 30) {
       return new Response(JSON.stringify({ transits: cached }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -112,9 +165,42 @@ serve(async (req) => {
       .filter((r: any) => !outcomeIds.has(r.id))
       .map((r: any) => r.domain);
 
+    // ─── Fetch natal chart data once ───
     const birthDate = profile.birth_date;
-    const birthTime = profile.birth_time || "unknown";
+    const birthTime = profile.birth_time || "12:00";
     const birthPlace = profile.birth_place || "unknown";
+    const birthLat = profile.birth_lat;
+    const birthLng = profile.birth_lng;
+
+    let natalChartData: any = null;
+    if (CHART_API_URL && birthLat && birthLng) {
+      const [year, month, day] = birthDate.split("-").map(Number);
+      const [hour, minute] = birthTime.split(":").map(Number);
+      natalChartData = await fetchChartData(CHART_API_URL, {
+        year, month, day, hour: hour || 12, minute: minute || 0,
+        lat: birthLat, lng: birthLng,
+      });
+    }
+
+    // Build natal context string (reused for every day)
+    let natalContext = "";
+    if (natalChartData) {
+      const planets = natalChartData.natal_chart?.planets || {};
+      const formatP = (name: string, data: any) => {
+        let line = `${name}: ${data.degrees}° ${data.sign} (${data.house} house)`;
+        if (data.retrograde) line += " RETROGRADE";
+        return line;
+      };
+      const lines = PLANET_NAMES
+        .filter(p => planets[p])
+        .map(p => formatP(p.charAt(0).toUpperCase() + p.slice(1), planets[p]));
+      const asc = natalChartData.natal_chart?.ascendant;
+      const mc = natalChartData.natal_chart?.midheaven;
+      if (asc) lines.push(`Ascendant: ${asc.degrees}° ${asc.sign}`);
+      if (mc) lines.push(`Midheaven: ${mc.degrees}° ${mc.sign}`);
+
+      natalContext = `\nNATAL CHART (Swiss Ephemeris):\n${lines.join("\n")}`;
+    }
 
     // Generate missing days
     const newTransits: any[] = [];
@@ -123,7 +209,42 @@ serve(async (req) => {
       const dateStr = date.toISOString().split("T")[0];
       const dayOfWeek = DAYS_OF_WEEK[date.getDay()];
 
+      // Fetch transit positions for this specific date
+      let transitAspects = "";
+      if (CHART_API_URL && birthLat && birthLng && natalChartData) {
+        const transitData = await fetchChartData(CHART_API_URL, {
+          year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate(),
+          hour: 12, minute: 0, lat: birthLat, lng: birthLng,
+        });
+
+        if (transitData?.natal_chart?.planets) {
+          const tp = transitData.natal_chart.planets;
+          const np = natalChartData.natal_chart?.planets || {};
+          const aspects = computeAspects(tp, np);
+
+          const transitLines = PLANET_NAMES
+            .filter(p => tp[p])
+            .map(p => `${p}: ${tp[p].degrees}° ${tp[p].sign}${tp[p].retrograde ? " RETROGRADE" : ""}`)
+            .join("\n");
+
+          transitAspects = `
+
+TODAY'S KEY TRANSITS (real, calculated):
+${transitLines}
+
+ASPECTS TO NATAL CHART:
+${aspects.length > 0 ? aspects.slice(0, 8).join("\n") : "No major aspects within 6° orb."}`;
+        }
+      }
+
       try {
+        const userContent = `Birth date: ${birthDate}
+Birth place: ${birthPlace}
+Date to read: ${dateStr}
+Day of week: ${dayOfWeek}${natalContext}${transitAspects}
+
+IMPORTANT: Reference the EXACT transit aspects provided above in your headline and detail. Do not invent planetary positions.`;
+
         const response = await fetch(GATEWAY_URL, {
           method: "POST",
           headers: {
@@ -134,17 +255,13 @@ serve(async (req) => {
             model: "google/gemini-2.5-flash-lite",
             messages: [
               { role: "system", content: SYSTEM_PROMPT },
-              {
-                role: "user",
-                content: `Birth date: ${birthDate}\nBirth place: ${birthPlace}\nBirth time: ${birthTime}\nDate to read: ${dateStr}\nDay of week: ${dayOfWeek}`,
-              },
+              { role: "user", content: userContent },
             ],
           }),
         });
 
         if (!response.ok) {
-          const errText = await response.text();
-          console.error(`AI error for ${dateStr}:`, response.status, errText);
+          console.error(`AI error for ${dateStr}:`, response.status);
           continue;
         }
 
@@ -152,12 +269,10 @@ serve(async (req) => {
         let content = result.choices?.[0]?.message?.content;
         if (!content) continue;
 
-        // Strip markdown code fences if present
         content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
-
         const parsed = JSON.parse(content);
 
-        const transit = {
+        newTransits.push({
           user_id: userId,
           date: dateStr,
           traffic_light: parsed.traffic_light || "amber",
@@ -167,9 +282,7 @@ serve(async (req) => {
           linked_domain: null as string | null,
           generated_at: new Date().toISOString(),
           expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        };
-
-        newTransits.push(transit);
+        });
       } catch (err) {
         console.error(`Failed to generate for ${dateStr}:`, err);
       }
@@ -201,10 +314,7 @@ serve(async (req) => {
       const { error: insertError } = await supabase
         .from("transit_cache")
         .upsert(newTransits, { onConflict: "user_id,date" });
-
-      if (insertError) {
-        console.error("Insert error:", insertError);
-      }
+      if (insertError) console.error("Insert error:", insertError);
     }
 
     // Fetch all transits for the period
