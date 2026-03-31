@@ -90,11 +90,12 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
 
   const handleLogSubmit = () => {
     if (!sheetEntryId || !followedChoice) return;
-    track("outcome_submitted", { followed: followedChoice, has_text: outcomeNote.length > 0 });
-    onUpdateEntry(sheetEntryId, { followed: followedChoice, note: outcomeNote });
+    track("outcome_submitted", { followed: followedChoice, has_text: outcomeNote.length > 0, consent_to_share: consentToShare });
+    onUpdateEntry(sheetEntryId, { followed: followedChoice, note: outcomeNote }, consentToShare);
     setSheetEntryId(null);
     setFollowedChoice(null);
     setOutcomeNote("");
+    setConsentToShare(false);
   };
 
   return (
