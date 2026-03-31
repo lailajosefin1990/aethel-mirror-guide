@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 
-let loaderPromise: Promise<void> | null = null;
+let loaderPromise: Promise<unknown> | null = null;
+let isLoaded = false;
 
 export function useGoogleMaps() {
-  const [ready, setReady] = useState(
-    typeof google !== "undefined" && !!google.maps?.places
-  );
+  const [ready, setReady] = useState(isLoaded);
 
   useEffect(() => {
     if (ready) return;
@@ -22,10 +21,15 @@ export function useGoogleMaps() {
         apiKey,
         libraries: ["places"],
       });
-      loaderPromise = loader.importLibrary("places").then(() => {});
+      loaderPromise = loader.load();
     }
 
-    loaderPromise.then(() => setReady(true)).catch(console.error);
+    loaderPromise
+      .then(() => {
+        isLoaded = true;
+        setReady(true);
+      })
+      .catch(console.error);
   }, [ready]);
 
   return ready;
