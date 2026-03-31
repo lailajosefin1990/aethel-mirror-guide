@@ -31,6 +31,10 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Hidden SEO content */}
+      <p className="sr-only">
+        Aethel Mirror helps you make decisions using astrology, Human Design, numerology, Gene Keys, and Destiny Matrix. Get your Third Way — one specific action you can take in the next 48 hours.
+      </p>
       {/* Main content */}
       <section className="flex-1 flex flex-col items-center justify-center px-5 py-16">
         <div className="w-full max-w-app flex flex-col items-center">
