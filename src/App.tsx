@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
+import { Sentry } from "@/lib/sentry";
 import Index from "./pages/Index.tsx";
 import PractitionerPortal from "./pages/PractitionerPortal.tsx";
 import Evidence from "./pages/Evidence.tsx";
@@ -15,6 +16,7 @@ import NotFound from "./pages/NotFound.tsx";
 const queryClient = new QueryClient();
 
 const App = () => (
+  <Sentry.ErrorBoundary fallback={<div className="min-h-screen flex items-center justify-center font-body text-muted-foreground">Something went wrong. Please refresh.</div>}>
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
@@ -35,6 +37,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
+  </Sentry.ErrorBoundary>
 );
 
 export default App;
