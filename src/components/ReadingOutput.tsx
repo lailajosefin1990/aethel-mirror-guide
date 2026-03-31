@@ -17,6 +17,7 @@ interface ReadingOutputProps {
   onBack: () => void;
   onRegenerate?: () => void;
   regenerationCount?: number;
+  birthTimeUnknown?: boolean;
 }
 
 const ExpandableText = ({ text }: { text: string }) => (
@@ -32,7 +33,7 @@ const ExpandableBullet = ({ text }: { text: string }) => (
   </div>
 );
 
-const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate, regenerationCount = 0 }: ReadingOutputProps) => {
+const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate, regenerationCount = 0, birthTimeUnknown = false }: ReadingOutputProps) => {
   const { subscriptionTier } = useAuth();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
@@ -158,6 +159,11 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
               <ExpandableBullet key={i} text={item} />
             ))}
           </div>
+          {birthTimeUnknown && (
+            <p className="font-body text-[12px] italic text-muted-foreground mt-4">
+              *Human Design insights are estimated — for full accuracy, add your birth time in Settings.
+            </p>
+          )}
         </motion.div>
 
         {/* Confidence */}

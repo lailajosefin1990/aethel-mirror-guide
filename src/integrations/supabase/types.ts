@@ -258,6 +258,7 @@ export type Database = {
           consent_prompt_dismissed: boolean
           created_at: string
           id: string
+          preferred_language: string
           referral_code: string
           stripe_customer_id: string | null
           subscription_tier: Database["public"]["Enums"]["subscription_tier"]
@@ -273,6 +274,7 @@ export type Database = {
           consent_prompt_dismissed?: boolean
           created_at?: string
           id?: string
+          preferred_language?: string
           referral_code?: string
           stripe_customer_id?: string | null
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
@@ -288,6 +290,7 @@ export type Database = {
           consent_prompt_dismissed?: boolean
           created_at?: string
           id?: string
+          preferred_language?: string
           referral_code?: string
           stripe_customer_id?: string | null
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]

@@ -7,8 +7,10 @@ import { Switch } from "@/components/ui/switch";
 import { isPushActive, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
 import { track } from "@/lib/posthog";
 import { useNavigate } from "react-router-dom";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const tierLabels: Record<string, string> = {
   free: "Free",
@@ -18,6 +20,7 @@ const tierLabels: Record<string, string> = {
 };
 
 const SettingsScreen = () => {
+  const { t } = useTranslation();
   const { user, subscriptionTier, signOut } = useAuth();
   const navigate = useNavigate();
   const [portalLoading, setPortalLoading] = useState(false);
@@ -27,6 +30,9 @@ const SettingsScreen = () => {
   const [referralCount, setReferralCount] = useState(0);
   const [rewardsEarned, setRewardsEarned] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [editingBirthTime, setEditingBirthTime] = useState(false);
+  const [birthTimeValue, setBirthTimeValue] = useState("");
+  const [currentBirthTime, setCurrentBirthTime] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -36,16 +42,19 @@ const SettingsScreen = () => {
     });
   }, [user]);
 
-  // Load referral data
   useEffect(() => {
     if (!user) return;
-    const loadReferralData = async () => {
+    const loadData = async () => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("referral_code")
+        .select("referral_code, birth_time")
         .eq("user_id", user.id)
         .single();
       if (profile?.referral_code) setReferralCode(profile.referral_code);
+      if (profile?.birth_time) {
+        setCurrentBirthTime(profile.birth_time);
+        setBirthTimeValue(profile.birth_time);
+      }
 
       const { data: referrals } = await supabase
         .from("referrals")
@@ -56,7 +65,7 @@ const SettingsScreen = () => {
         setRewardsEarned(referrals.filter((r: any) => r.reward_granted).length);
       }
     };
-    loadReferralData();
+    loadData();
   }, [user]);
 
   const handleCopyReferral = () => {
@@ -89,13 +98,27 @@ const SettingsScreen = () => {
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
       if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
+      if (data?.url) window.open(data.url, "_blank");
     } catch (err) {
       console.error("Portal error:", err);
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const handleSaveBirthTime = async () => {
+    if (!user || !birthTimeValue) return;
+    await supabase.from("profiles").update({ birth_time: birthTimeValue }).eq("user_id", user.id);
+    setCurrentBirthTime(birthTimeValue);
+    setEditingBirthTime(false);
+    toast.success("Birth time updated");
+    track("birth_time_updated_settings");
+  };
+
+  const handleLanguageChange = async (lang: string) => {
+    if (user) {
+      await supabase.from("profiles").update({ preferred_language: lang }).eq("user_id", user.id);
+      track("language_changed", { language: lang });
     }
   };
 
@@ -109,7 +132,7 @@ const SettingsScreen = () => {
         transition={{ duration: 0.5 }}
         className="font-display text-[14px] tracking-[0.35em] text-primary mb-8"
       >
-        S E T T I N G S
+        {t("settings_title")}
       </motion.p>
 
       {/* Account */}
@@ -119,16 +142,11 @@ const SettingsScreen = () => {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="bg-card border border-border rounded-md p-5 mb-5"
       >
-        <p className={sectionLabel}>A C C O U N T</p>
+        <p className={sectionLabel}>{t("settings_account")}</p>
         <div className="flex items-center gap-3 mb-1">
-          <p className="font-body text-[14px] text-card-foreground">
-            {user?.email}
-          </p>
+          <p className="font-body text-[14px] text-card-foreground">{user?.email}</p>
           {subscriptionTier !== "free" && (
-            <Badge
-              variant="default"
-              className="font-body text-[10px] uppercase tracking-wider"
-            >
+            <Badge variant="default" className="font-body text-[10px] uppercase tracking-wider">
               {tierLabels[subscriptionTier]}
             </Badge>
           )}
@@ -138,6 +156,65 @@ const SettingsScreen = () => {
         </p>
       </motion.div>
 
+      {/* Language */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.12 }}
+        className="bg-card border border-border rounded-md p-5 mb-5"
+      >
+        <p className={sectionLabel}>{t("settings_language")}</p>
+        <LanguageSelector onLanguageChange={handleLanguageChange} />
+      </motion.div>
+
+      {/* Birth time */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.13 }}
+        className="bg-card border border-border rounded-md p-5 mb-5"
+      >
+        <p className={sectionLabel}>{t("settings_birth_time")}</p>
+        {editingBirthTime ? (
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <input
+                type="time"
+                value={birthTimeValue}
+                onChange={(e) => setBirthTimeValue(e.target.value)}
+                className="w-full h-10 px-3 pr-10 rounded-sm bg-background text-foreground font-body text-[14px] border border-border focus:outline-none focus:border-primary/60 transition-colors"
+              />
+              <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            </div>
+            <button
+              onClick={handleSaveBirthTime}
+              disabled={!birthTimeValue}
+              className="h-10 px-4 rounded-sm bg-primary text-primary-foreground font-body text-[13px] disabled:opacity-30 hover:brightness-110 transition-all"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => setEditingBirthTime(false)}
+              className="h-10 px-3 rounded-sm border border-border text-foreground/60 font-body text-[13px] hover:border-foreground/30 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <p className="font-body text-[14px] text-card-foreground">
+              {currentBirthTime || "Not set"}
+            </p>
+            <button
+              onClick={() => setEditingBirthTime(true)}
+              className="font-body text-[13px] text-primary hover:text-primary/80 transition-colors"
+            >
+              {t("settings_edit_birth_time")} →
+            </button>
+          </div>
+        )}
+      </motion.div>
+
       {/* Push notifications toggle */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -145,17 +222,13 @@ const SettingsScreen = () => {
         transition={{ duration: 0.5, delay: 0.15 }}
         className="bg-card border border-border rounded-md p-5 mb-5"
       >
-        <p className={sectionLabel}>N O T I F I C A T I O N S</p>
+        <p className={sectionLabel}>{t("settings_notifications")}</p>
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-body text-[14px] text-card-foreground">Push notifications</p>
-            <p className="font-body text-[12px] text-muted-foreground">48-hour check-ins & daily nudges</p>
+            <p className="font-body text-[14px] text-card-foreground">{t("settings_push")}</p>
+            <p className="font-body text-[12px] text-muted-foreground">{t("settings_push_detail")}</p>
           </div>
-          <Switch
-            checked={pushEnabled}
-            onCheckedChange={handlePushToggle}
-            disabled={pushLoading}
-          />
+          <Switch checked={pushEnabled} onCheckedChange={handlePushToggle} disabled={pushLoading} />
         </div>
       </motion.div>
 
@@ -166,9 +239,9 @@ const SettingsScreen = () => {
         transition={{ duration: 0.5, delay: 0.17 }}
         className="bg-card border border-border rounded-md p-5 mb-5"
       >
-        <p className={sectionLabel}>G I V E &nbsp; A &nbsp; F R E E &nbsp; R E A D I N G</p>
+        <p className={sectionLabel}>{t("settings_referral_title")}</p>
         <p className="font-body text-[13px] text-muted-foreground mb-4">
-          Share your link. When a friend subscribes, you both get a free month.
+          {t("settings_referral_body")}
         </p>
         {referralCode && (
           <div className="flex items-center gap-2 mb-3">
@@ -212,7 +285,7 @@ const SettingsScreen = () => {
             disabled={portalLoading}
             className="w-full h-[48px] rounded-sm border border-border bg-card text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300 disabled:opacity-50"
           >
-            {portalLoading ? "..." : "Manage subscription"}
+            {portalLoading ? "..." : t("settings_manage_sub")}
           </button>
         </motion.div>
       )}
@@ -229,7 +302,7 @@ const SettingsScreen = () => {
             onClick={() => navigate("/practitioner")}
             className="w-full h-[48px] rounded-sm border border-primary bg-primary/5 text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300"
           >
-            Practitioner Portal →
+            {t("settings_practitioner")}
           </button>
         </motion.div>
       )}
@@ -241,12 +314,12 @@ const SettingsScreen = () => {
         transition={{ duration: 0.5, delay: 0.28 }}
         className="bg-card border border-border rounded-md p-5 mb-5"
       >
-        <p className={sectionLabel}>A B O U T</p>
+        <p className={sectionLabel}>{t("settings_about")}</p>
         <button
           onClick={() => navigate("/evidence")}
           className="font-body text-[14px] text-primary hover:text-primary/80 transition-colors"
         >
-          Evidence →
+          {t("settings_evidence")}
         </button>
       </motion.div>
 
@@ -257,16 +330,16 @@ const SettingsScreen = () => {
         transition={{ duration: 0.5, delay: 0.3 }}
         className="bg-card border border-border rounded-md p-5 mb-5"
       >
-        <p className={sectionLabel}>L E G A L</p>
+        <p className={sectionLabel}>{t("settings_legal")}</p>
         <div className="space-y-2">
           <button onClick={() => navigate("/privacy")} className="block font-body text-[14px] text-primary hover:text-primary/80 transition-colors">
-            Privacy Policy →
+            {t("settings_privacy")}
           </button>
           <button onClick={() => navigate("/terms")} className="block font-body text-[14px] text-primary hover:text-primary/80 transition-colors">
-            Terms of Service →
+            {t("settings_terms")}
           </button>
           <button onClick={() => navigate("/cookies")} className="block font-body text-[14px] text-primary hover:text-primary/80 transition-colors">
-            Cookie Policy →
+            {t("settings_cookies")}
           </button>
         </div>
       </motion.div>
@@ -281,7 +354,7 @@ const SettingsScreen = () => {
           onClick={signOut}
           className="w-full h-[48px] rounded-sm border border-destructive/30 text-destructive font-body text-[14px] hover:bg-destructive/10 transition-all duration-300"
         >
-          Sign out
+          {t("settings_sign_out")}
         </button>
       </motion.div>
     </section>

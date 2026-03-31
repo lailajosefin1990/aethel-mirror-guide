@@ -73,7 +73,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const { domain, question, mode, birthDate, birthPlace, birthTime } = await req.json();
+    const { domain, question, mode, birthDate, birthPlace, birthTime, language } = await req.json();
     if (!domain || !question) throw new Error("Missing domain or question");
 
     // ─── Crisis detection pre-check ───
@@ -120,13 +120,25 @@ serve(async (req) => {
 
     const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
+    // Build language instruction
+    const LANGUAGE_MAP: Record<string, string> = { en: "English", es: "Spanish", fr: "French", pt: "Brazilian Portuguese" };
+    const langName = LANGUAGE_MAP[language || "en"] || "English";
+    const langInstruction = language && language !== "en"
+      ? `\nRespond entirely in ${langName}. All reading text, Third Way, and journal prompt must be in ${langName}.`
+      : "";
+
+    // Build domain-specific instruction for "Everything at once"
+    const everythingInstruction = domain === "Everything at once"
+      ? `\n\nSPECIAL INSTRUCTION FOR 'EVERYTHING AT ONCE' DOMAIN:\nThe user is overwhelmed and cannot identify a single decision to focus on. Your most important job here is to find THE ONE thread that, if pulled, would create the most movement across all areas. Do not try to address everything — pick the single highest leverage decision point and make the Third Way about that one thing only. Start the astrology reading with: 'Of everything you're carrying, the one thread worth pulling first is...'`
+      : "";
+
     const userMessage = `Domain: ${domain}
 Question: ${question}
 Mode: ${mode || "Both"}
 Birth date: ${birthDate || "unknown"}
 Birth place: ${birthPlace || "unknown"}
 Today's date: ${today}
-Birth time: ${birthTime || "unknown"}`;
+Birth time: ${birthTime || "unknown"}${langInstruction}${everythingInstruction}`;
 
     // Use AbortController for 12s timeout
     const controller = new AbortController();

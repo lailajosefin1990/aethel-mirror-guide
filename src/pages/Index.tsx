@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { track } from "@/lib/posthog";
+import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
 import QuestionInput, { type QuestionData } from "@/components/QuestionInput";
@@ -26,6 +27,7 @@ type View = "home" | "question" | "auth" | "birth" | "loading" | "reading" | "da
 const FREE_READING_LIMIT = 3;
 
 const Index = () => {
+  const { i18n } = useTranslation();
   const { user, loading: authLoading, subscriptionTier, monthlyReadingCount, refreshReadingCount } = useAuth();
   const [view, setView] = useState<View>("home");
   const [activeTab, setActiveTab] = useState("mirror");
@@ -87,11 +89,14 @@ const Index = () => {
       // Load profile birth data
       const { data: profile } = await supabase
         .from("profiles")
-        .select("birth_date, birth_time, birth_place, consent_accepted")
+        .select("birth_date, birth_time, birth_place, consent_accepted, preferred_language")
         .eq("user_id", user.id)
         .single();
       if (profile) {
         setProfileBirthData(profile);
+        if (profile.preferred_language && profile.preferred_language !== i18n.language) {
+          i18n.changeLanguage(profile.preferred_language);
+        }
         if (!profile.consent_accepted) {
           setShowConsentGate(true);
         } else {
@@ -211,6 +216,7 @@ const Index = () => {
         birthDate: bd?.date ? new Date(bd.date).toLocaleDateString("en-GB") : "unknown",
         birthPlace: bd?.birthPlace || "unknown",
         birthTime: bd?.unknownTime ? "unknown" : (bd?.time || "unknown"),
+        language: i18n.language,
       },
     });
 
@@ -376,6 +382,7 @@ const Index = () => {
               onSave={() => { setRegenerationCount(0); handleSave(); }}
               onBack={() => setView("birth")}
               regenerationCount={regenerationCount}
+              birthTimeUnknown={birthData?.unknownTime || !profileBirthData?.birth_time}
               onRegenerate={() => {
                 setRegenerationCount((c) => c + 1);
                 setView("loading");
