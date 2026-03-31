@@ -55,6 +55,7 @@ const Index = () => {
   const [consentChecked, setConsentChecked] = useState(false);
   const [showCrisis, setShowCrisis] = useState(false);
   const [regenerationCount, setRegenerationCount] = useState(0);
+  const [regenerationFeedback, setRegenerationFeedback] = useState<string | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
