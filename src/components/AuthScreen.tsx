@@ -42,6 +42,8 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
   const handleGoogle = async () => {
     setError("");
     try {
+      // Persist current view state so the app knows to resume after redirect
+      sessionStorage.setItem("aethel_oauth_pending", "true");
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
