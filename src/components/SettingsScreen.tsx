@@ -138,6 +138,23 @@ const SettingsScreen = () => {
         </motion.div>
       )}
 
+      {/* Practitioner Portal link */}
+      {subscriptionTier === "practitioner" && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
+          className="mb-5"
+        >
+          <button
+            onClick={() => navigate("/practitioner")}
+            className="w-full h-[48px] rounded-sm border border-primary bg-primary/5 text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300"
+          >
+            Practitioner Portal →
+          </button>
+        </motion.div>
+      )}
+
       {/* Sign out */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
