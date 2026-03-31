@@ -171,6 +171,27 @@ const SettingsScreen = () => {
         </button>
       </motion.div>
 
+      {/* Legal */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="bg-card border border-border rounded-md p-5 mb-5"
+      >
+        <p className={sectionLabel}>L E G A L</p>
+        <div className="space-y-2">
+          <button onClick={() => navigate("/privacy")} className="block font-body text-[14px] text-primary hover:text-primary/80 transition-colors">
+            Privacy Policy →
+          </button>
+          <button onClick={() => navigate("/terms")} className="block font-body text-[14px] text-primary hover:text-primary/80 transition-colors">
+            Terms of Service →
+          </button>
+          <button onClick={() => navigate("/cookies")} className="block font-body text-[14px] text-primary hover:text-primary/80 transition-colors">
+            Cookie Policy →
+          </button>
+        </div>
+      </motion.div>
+
       {/* Sign out */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}

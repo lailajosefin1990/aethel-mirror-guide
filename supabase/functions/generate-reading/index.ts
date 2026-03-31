@@ -76,6 +76,48 @@ serve(async (req) => {
     const { domain, question, mode, birthDate, birthPlace, birthTime } = await req.json();
     if (!domain || !question) throw new Error("Missing domain or question");
 
+    // ─── Crisis detection pre-check ───
+    try {
+      const crisisResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            {
+              role: "system",
+              content: `You are a safety classifier. Given a user's question, determine if it contains any signals of mental health crisis, suicidal ideation, self-harm, or acute emotional distress.\n\nReturn JSON only:\n{\n  "is_crisis": boolean,\n  "confidence": "low" | "medium" | "high"\n}`,
+            },
+            { role: "user", content: question },
+          ],
+        }),
+      });
+
+      if (crisisResponse.ok) {
+        const crisisData = await crisisResponse.json();
+        let crisisContent = crisisData.choices?.[0]?.message?.content || "";
+        crisisContent = crisisContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+        try {
+          const crisisResult = JSON.parse(crisisContent);
+          if (crisisResult.is_crisis === true && (crisisResult.confidence === "medium" || crisisResult.confidence === "high")) {
+            return new Response(JSON.stringify({
+              is_crisis: true,
+              confidence: crisisResult.confidence,
+              domain,
+            }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 200,
+            });
+          }
+        } catch { /* crisis parse failed, continue with reading */ }
+      }
+    } catch (err) {
+      console.error("Crisis check failed, continuing with reading:", err);
+    }
+
     const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
     const userMessage = `Domain: ${domain}
