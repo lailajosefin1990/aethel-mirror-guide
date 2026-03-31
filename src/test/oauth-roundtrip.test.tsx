@@ -110,15 +110,18 @@ function filterDomProps(props: Record<string, any>) {
 
 vi.mock("framer-motion", async () => {
   const actual = await vi.importActual("framer-motion");
+  const motionProxy = new Proxy({}, {
+    get: (_target, prop) => {
+      return ({ children, ...props }: any) => {
+        const Tag = prop as any;
+        return <Tag {...filterDomProps(props)}>{children}</Tag>;
+      };
+    },
+  });
   return {
     ...actual,
     AnimatePresence: ({ children }: any) => children,
-    motion: {
-      div: ({ children, ...props }: any) => <div {...filterDomProps(props)}>{children}</div>,
-      p: ({ children, ...props }: any) => <p {...filterDomProps(props)}>{children}</p>,
-      button: ({ children, ...props }: any) => <button {...filterDomProps(props)}>{children}</button>,
-      form: ({ children, ...props }: any) => <form {...filterDomProps(props)}>{children}</form>,
-    },
+    motion: motionProxy,
   };
 });
 
