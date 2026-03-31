@@ -4,7 +4,10 @@ import "./index.css";
 import "@/lib/i18n";
 import { initPostHog } from "@/lib/posthog";
 import { registerServiceWorker } from "@/lib/push";
+import { initSentry } from "@/lib/sentry";
 
+// Init monitoring first
+initSentry();
 initPostHog();
 registerServiceWorker();
 
