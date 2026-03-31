@@ -79,6 +79,10 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
   const [followedChoice, setFollowedChoice] = useState<"yes" | "no" | "partially" | null>(null);
   const [outcomeNote, setOutcomeNote] = useState("");
 
+  useEffect(() => {
+    track("journal_viewed");
+  }, []);
+
   const openEntries = entries.filter((e) => !e.outcome);
   const closedEntries = entries.filter((e) => e.outcome);
   const displayedEntries = tab === "open" ? openEntries : closedEntries;
