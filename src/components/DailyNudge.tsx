@@ -6,6 +6,9 @@ interface DailyNudgeProps {
   journalEntries: JournalEntry[];
   onNewReading: () => void;
   onRevisitDecision: () => void;
+  subscriptionTier?: string;
+  remainingReadings?: number;
+  onUpgrade?: () => void;
 }
 
 const nudges = [
@@ -45,7 +48,7 @@ const weeklyOptions = [
   { emoji: "🌕", label: "Clear" },
 ];
 
-const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision }: DailyNudgeProps) => {
+const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscriptionTier = "free", remainingReadings = 1, onUpgrade }: DailyNudgeProps) => {
   const today = new Date();
   const isSunday = today.getDay() === 0;
   const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
@@ -171,6 +174,26 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision }: DailyNu
               ))}
             </div>
           )}
+        </motion.div>
+      )}
+
+      {/* Free tier banner */}
+      {subscriptionTier === "free" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.38 }}
+          className="bg-card border border-border rounded-md p-4 mb-4"
+        >
+          <p className="font-body text-[13px] text-muted-foreground text-center">
+            {remainingReadings > 0
+              ? `${remainingReadings} reading remaining this month`
+              : "No readings remaining this month"}
+            {" · "}
+            <button onClick={onUpgrade} className="text-primary hover:text-primary/80 transition-colors">
+              Upgrade for unlimited readings
+            </button>
+          </p>
         </motion.div>
       )}
 
