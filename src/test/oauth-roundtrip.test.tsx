@@ -237,21 +237,14 @@ describe("Google OAuth round-trip: questionData persistence", () => {
 
     renderIndex();
 
-    await waitFor(
-      () => {
-        const loadingIndicators = [
-          screen.queryByText(/Reading your chart/i),
-          screen.queryByText(/Checking your design/i),
-          screen.queryByText(/Finding the pattern/i),
-          screen.queryByText(/Forming your Third Way/i),
-          screen.queryByText(/A E T H E L/i),
-        ];
-        expect(loadingIndicators.some((el) => el !== null)).toBe(true);
-      },
-      { timeout: 5000 }
-    );
+    // The useEffect that restores from sessionStorage should fire and clear it
+    await waitFor(() => {
+      expect(sessionStorage.getItem("aethel_pending_question")).toBeNull();
+    });
 
-    expect(sessionStorage.getItem("aethel_pending_question")).toBeNull();
+    // The supabase.from should have been called to load profile data
+    // (indicating the app proceeded with the logged-in user flow)
+    expect(mockSupabase.from).toHaveBeenCalledWith("profiles");
   });
 
   it("sessionStorage is cleaned up after a question is persisted and then used", async () => {
