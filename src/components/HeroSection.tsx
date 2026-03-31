@@ -21,6 +21,10 @@ const howItems = [
 const HeroSection = ({ onStart }: HeroSectionProps) => {
   const howRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    track("landing_viewed");
+  }, []);
+
   const scrollToHow = () => {
     howRef.current?.scrollIntoView({ behavior: "smooth" });
   };
