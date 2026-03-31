@@ -50,10 +50,17 @@ const Index = () => {
       // Load profile birth data
       const { data: profile } = await supabase
         .from("profiles")
-        .select("birth_date, birth_time, birth_place")
+        .select("birth_date, birth_time, birth_place, consent_accepted")
         .eq("user_id", user.id)
         .single();
-      if (profile) setProfileBirthData(profile);
+      if (profile) {
+        setProfileBirthData(profile);
+        if (!profile.consent_accepted) {
+          setShowConsentGate(true);
+        } else {
+          setConsentChecked(true);
+        }
+      }
 
       // Load readings
       const { data: readings } = await supabase
