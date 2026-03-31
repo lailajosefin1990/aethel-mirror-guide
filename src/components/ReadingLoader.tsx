@@ -26,6 +26,7 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
   useEffect(() => {
     if (started.current) return;
     started.current = true;
+    track("reading_generating");
     generateReading()
       .then(() => setApiDone(true))
       .catch(() => {

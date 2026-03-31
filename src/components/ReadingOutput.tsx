@@ -91,6 +91,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
 
   const handleDownload = useCallback(() => {
     if (!cardUrl || !cardBlob) return;
+    track("share_card_downloaded");
     const a = document.createElement("a");
     a.href = cardUrl;
     a.download = "aethel-third-way.png";
