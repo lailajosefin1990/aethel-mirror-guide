@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Playfair Display"', 'serif'],
+        display: ['"Cormorant Garamond"', 'serif'],
         body: ['Inter', 'sans-serif'],
       },
       colors: {
@@ -52,10 +52,8 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         gold: {
-          glow: "hsl(var(--gold-glow))",
-          dim: "hsl(var(--gold-dim))",
+          DEFAULT: "hsl(var(--gold))",
         },
-        blush: "hsl(var(--blush))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -81,20 +79,13 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        "pulse-glow": {
-          "0%, 100%": { opacity: "0.4" },
-          "50%": { opacity: "1" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        shimmer: "shimmer 3s ease-in-out infinite",
-        "pulse-glow": "pulse-glow 4s ease-in-out infinite",
+      },
+      maxWidth: {
+        app: "420px",
       },
     },
   },
