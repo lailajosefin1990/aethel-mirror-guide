@@ -210,7 +210,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         className="pt-2"
       >
         <button
-          onClick={onNewReading}
+          onClick={() => { track("new_reading_from_nudge"); onNewReading(); }}
           className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300"
         >
           New reading →
