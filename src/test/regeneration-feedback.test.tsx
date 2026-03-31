@@ -3,6 +3,18 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
+// Polyfill IntersectionObserver for jsdom
+class MockIntersectionObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+  constructor() {}
+}
+Object.defineProperty(window, 'IntersectionObserver', {
+  writable: true,
+  value: MockIntersectionObserver,
+});
+
 // ─── Hoisted Mocks ─────────────────────────────────────────────────
 const { mockUser, mockSupabase, mockInvoke } = vi.hoisted(() => {
   const mockUser = { id: "user-123", email: "test@aethel.com" };
