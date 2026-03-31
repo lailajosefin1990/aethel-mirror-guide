@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 const FROM_EMAIL = "hello@aethelmirror.com";
 
 const corsHeaders = {
@@ -11,6 +10,8 @@ const corsHeaders = {
 };
 
 async function sendEmail(to: string, subject: string, html: string) {
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY is not configured");
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {

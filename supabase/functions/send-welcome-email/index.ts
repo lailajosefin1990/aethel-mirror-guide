@@ -6,15 +6,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 const FROM_EMAIL = "hello@aethelmirror.com";
 const APP_URL = "https://aethelmirror.com";
 
 async function sendEmail(to: string, subject: string, html: string) {
+  const apiKey = Deno.env.get("RESEND_API_KEY");
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is not configured");
+  }
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ from: `Aethel Mirror <${FROM_EMAIL}>`, to: [to], subject, html }),
