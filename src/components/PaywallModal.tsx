@@ -16,7 +16,7 @@ const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (open) track("paywall_shown", { trigger: "second_reading" });
+    if (open) track("paywall_shown", { trigger: "fourth_reading" });
   }, [open]);
 
   const handleCheckout = async (priceId: string, tierName: string) => {
@@ -66,9 +66,12 @@ const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
             </p>
 
             <h2 className="font-display text-[24px] sm:text-[28px] leading-[1.2] text-foreground text-center mb-2">
-              Your mirror is ready to go deeper.
+              Your mirror is starting to know you.
             </h2>
-            <p className="font-body text-[14px] text-muted-foreground text-center mb-8">
+            <p className="font-body text-[14px] text-muted-foreground text-center mb-2">
+              You've now seen how the Third Way works. Mirror gives you unlimited readings and the patterns your mirror has learned about you.
+            </p>
+            <p className="font-body text-[13px] text-muted-foreground text-center mb-8">
               Unlock unlimited readings and your full decision journal.
             </p>
 

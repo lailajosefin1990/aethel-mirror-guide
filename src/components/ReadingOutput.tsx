@@ -15,6 +15,8 @@ interface ReadingOutputProps {
   reading: ReadingData | null;
   onSave: () => void;
   onBack: () => void;
+  onRegenerate?: () => void;
+  regenerationCount?: number;
 }
 
 const ExpandableText = ({ text }: { text: string }) => (
@@ -30,7 +32,7 @@ const ExpandableBullet = ({ text }: { text: string }) => (
   </div>
 );
 
-const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOutputProps) => {
+const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate, regenerationCount = 0 }: ReadingOutputProps) => {
   const { subscriptionTier } = useAuth();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
@@ -224,10 +226,16 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
             </div>
           )}
 
-          <button onClick={() => setFeedbackOpen(true)}
-            className="w-full h-[48px] rounded-sm bg-transparent border border-border text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300">
-            That doesn't fit
-          </button>
+          {regenerationCount >= 3 ? (
+            <p className="font-body text-[13px] italic text-primary text-center py-3">
+              Your mirror has shown you three paths. Sometimes the resistance itself is the answer.
+            </p>
+          ) : (
+            <button onClick={() => setFeedbackOpen(true)}
+              className="w-full h-[48px] rounded-sm bg-transparent border border-border text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300">
+              That doesn't fit
+            </button>
+          )}
         </motion.div>
       </div>
 
@@ -293,7 +301,12 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
               <textarea value={feedbackText} onChange={(e) => setFeedbackText(e.target.value)}
                 placeholder="What felt off?" rows={3}
                 className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-4" />
-              <button onClick={() => { track("reading_regenerated"); setFeedbackOpen(false); setFeedbackText(""); }}
+              <button onClick={() => { 
+                  track("reading_regenerated", { regeneration_number: (regenerationCount || 0) + 1 }); 
+                  setFeedbackOpen(false); 
+                  setFeedbackText(""); 
+                  onRegenerate?.(); 
+                }}
                 className="w-full h-[48px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] hover:brightness-110 transition-all duration-300">
                 Regenerate
               </button>

@@ -23,7 +23,7 @@ import type { ReadingData } from "@/lib/reading";
 
 type View = "home" | "question" | "auth" | "birth" | "loading" | "reading" | "dashboard";
 
-const FREE_READING_LIMIT = 1;
+const FREE_READING_LIMIT = 3;
 
 const Index = () => {
   const { user, loading: authLoading, subscriptionTier, monthlyReadingCount, refreshReadingCount } = useAuth();
@@ -40,8 +40,45 @@ const Index = () => {
   const [showConsentGate, setShowConsentGate] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
   const [showCrisis, setShowCrisis] = useState(false);
+  const [regenerationCount, setRegenerationCount] = useState(0);
 
   const transition = { duration: 0.3, ease: "easeInOut" as const };
+
+  // Capture referral code from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      localStorage.setItem("aethel_ref", ref);
+    }
+  }, []);
+
+  // Link referral on signup
+  useEffect(() => {
+    if (!user) return;
+    const ref = localStorage.getItem("aethel_ref");
+    if (!ref) return;
+    
+    const linkReferral = async () => {
+      // Find the referrer by code
+      const { data: referrerProfile } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("referral_code", ref)
+        .maybeSingle();
+      
+      if (referrerProfile && referrerProfile.user_id !== user.id) {
+        await supabase.from("referrals").insert({
+          referrer_user_id: referrerProfile.user_id,
+          referred_email: user.email,
+          referred_user_id: user.id,
+          status: "signed_up",
+        });
+        localStorage.removeItem("aethel_ref");
+      }
+    };
+    linkReferral().catch(console.error);
+  }, [user]);
 
   // Load journal entries and profile from Supabase
   useEffect(() => {
@@ -336,8 +373,13 @@ const Index = () => {
               domain={questionData?.domain ?? "General"}
               question={questionData?.question ?? ""}
               reading={readingData}
-              onSave={handleSave}
+              onSave={() => { setRegenerationCount(0); handleSave(); }}
               onBack={() => setView("birth")}
+              regenerationCount={regenerationCount}
+              onRegenerate={() => {
+                setRegenerationCount((c) => c + 1);
+                setView("loading");
+              }}
             />
           </motion.div>
         )}
