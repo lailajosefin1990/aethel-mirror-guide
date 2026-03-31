@@ -17,7 +17,7 @@ export interface JournalEntry {
 
 interface DecisionJournalProps {
   entries: JournalEntry[];
-  onUpdateEntry: (id: string, outcome: JournalEntry["outcome"]) => void;
+  onUpdateEntry: (id: string, outcome: JournalEntry["outcome"], consentToShare?: boolean) => void;
   onStartReading: () => void;
 }
 
