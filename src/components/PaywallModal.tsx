@@ -13,6 +13,7 @@ interface PaywallModalProps {
 
 const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
   const [loading, setLoading] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (open) track("paywall_shown", { trigger: "second_reading" });
