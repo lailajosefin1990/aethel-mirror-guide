@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_TIERS } from "@/lib/stripe";
 import { track } from "@/lib/posthog";
@@ -12,6 +13,7 @@ interface PaywallModalProps {
 
 const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
   const [loading, setLoading] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (open) track("paywall_shown", { trigger: "second_reading" });
@@ -120,6 +122,17 @@ const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
               className="w-full font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors mb-3"
             >
               Maybe later
+            </button>
+
+            <button
+              onClick={() => {
+                track("paywall_practitioner_clicked");
+                onClose();
+                navigate("/practitioner");
+              }}
+              className="w-full font-body text-[13px] text-primary hover:text-primary/80 transition-colors mb-3"
+            >
+              For practitioners →
             </button>
 
             <p className="font-body text-[11px] text-foreground/40 text-center">
