@@ -7,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { isPushActive, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
 import { track } from "@/lib/posthog";
 import { useNavigate } from "react-router-dom";
+import { Copy, Check } from "lucide-react";
+import { toast } from "sonner";
 
 const tierLabels: Record<string, string> = {
   free: "Free",
