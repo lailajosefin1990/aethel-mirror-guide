@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { track } from "@/lib/posthog";
 import { AnimatePresence, motion } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
 import QuestionInput, { type QuestionData } from "@/components/QuestionInput";
