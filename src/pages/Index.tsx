@@ -201,6 +201,18 @@ const Index = () => {
 
     setActiveTab("journey");
     setView("dashboard");
+
+    // Show push permission sheet after first save (if not dismissed recently)
+    if (
+      !hasShownPushPrompt &&
+      "PushManager" in window &&
+      Notification.permission === "default" &&
+      !wasPushDismissedRecently()
+    ) {
+      setHasShownPushPrompt(true);
+      // Small delay to let dashboard render first
+      setTimeout(() => setPushSheetOpen(true), 800);
+    }
   };
 
   const handleUpdateEntry = async (id: string, outcome: JournalEntry["outcome"]) => {
