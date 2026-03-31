@@ -134,6 +134,7 @@ serve(async (req) => {
 
     // ─── Call Chart API for real astronomical data ───
     let chartData: any = null;
+    let transitData: any = null;
     const CHART_API_URL = Deno.env.get("CHART_API_URL");
     if (CHART_API_URL && birthDate && birthDate !== "unknown" && birthLat != null && birthLng != null) {
       try {
@@ -145,7 +146,6 @@ serve(async (req) => {
           bMonth = parseInt(dateParts[1], 10);
           bYear = parseInt(dateParts[2], 10);
         } else {
-          // Try ISO format
           const d = new Date(birthDate);
           bDay = d.getDate();
           bMonth = d.getMonth() + 1;
@@ -159,50 +159,128 @@ serve(async (req) => {
           bMinute = parseInt(timeParts[1], 10);
         }
 
-        const chartUrl = `${CHART_API_URL}/chart?year=${bYear}&month=${bMonth}&day=${bDay}&hour=${bHour}&minute=${bMinute}&lat=${birthLat}&lng=${birthLng}`;
-        const chartController = new AbortController();
-        const chartTimeout = setTimeout(() => chartController.abort(), 5000);
+        // Fetch natal chart and today's transits in parallel
+        const now = new Date();
+        const natalUrl = `${CHART_API_URL}/chart?year=${bYear}&month=${bMonth}&day=${bDay}&hour=${bHour}&minute=${bMinute}&lat=${birthLat}&lng=${birthLng}`;
+        const transitUrl = `${CHART_API_URL}/chart?year=${now.getFullYear()}&month=${now.getMonth() + 1}&day=${now.getDate()}&hour=${now.getHours()}&minute=${now.getMinutes()}&lat=${birthLat}&lng=${birthLng}`;
 
-        const chartResponse = await fetch(chartUrl, { signal: chartController.signal });
-        clearTimeout(chartTimeout);
+        const controller1 = new AbortController();
+        const controller2 = new AbortController();
+        const t1 = setTimeout(() => controller1.abort(), 5000);
+        const t2 = setTimeout(() => controller2.abort(), 5000);
 
-        if (chartResponse.ok) {
-          chartData = await chartResponse.json();
-          console.log("Chart API response received:", JSON.stringify(chartData).slice(0, 200));
+        const [natalRes, transitRes] = await Promise.allSettled([
+          fetch(natalUrl, { signal: controller1.signal }),
+          fetch(transitUrl, { signal: controller2.signal }),
+        ]);
+
+        clearTimeout(t1);
+        clearTimeout(t2);
+
+        if (natalRes.status === "fulfilled" && natalRes.value.ok) {
+          chartData = await natalRes.value.json();
+        }
+        if (transitRes.status === "fulfilled" && transitRes.value.ok) {
+          transitData = await transitRes.value.json();
         }
       } catch (chartErr) {
         console.error("Chart API call failed, continuing without chart data:", chartErr);
       }
     }
 
-    // Build chart context for the AI prompt
+    // ─── Build structured chart context ───
     let chartContext = "";
     if (chartData) {
       const nc = chartData.natal_chart;
       const hd = chartData.human_design;
       const num = chartData.numerology;
+      const planets = nc.planets || {};
 
-      const planetPositions = Object.entries(nc.planets || {})
-        .map(([name, data]: [string, any]) =>
-          `${name}: ${data.sign} ${data.degrees}° (${data.house} house)${data.retrograde ? " ℞" : ""}`)
-        .join("\n  ");
+      // Format natal planets
+      const formatPlanet = (name: string, data: any, extra?: string) => {
+        let line = `${name}: ${data.degrees}° ${data.sign} (${data.house} house)`;
+        if (data.retrograde) line += " RETROGRADE";
+        if (extra) line += extra;
+        return line;
+      };
 
-      chartContext = `\n\nREAL CALCULATED CHART DATA (use this instead of guessing):
-  Ascendant: ${nc.ascendant?.sign} ${nc.ascendant?.degrees}°
-  Midheaven: ${nc.midheaven?.sign} ${nc.midheaven?.degrees}°
-  Moon Phase: ${nc.moon_phase}
-  Planetary Positions:
-  ${planetPositions}
+      const natalLines = [
+        formatPlanet("Sun", planets.sun),
+        formatPlanet("Moon", planets.moon, ` — ${nc.moon_phase}`),
+        formatPlanet("Mercury", planets.mercury),
+        formatPlanet("Venus", planets.venus),
+        formatPlanet("Mars", planets.mars),
+        formatPlanet("Jupiter", planets.jupiter),
+        formatPlanet("Saturn", planets.saturn),
+        planets.uranus ? formatPlanet("Uranus", planets.uranus) : null,
+        planets.neptune ? formatPlanet("Neptune", planets.neptune) : null,
+        planets.pluto ? formatPlanet("Pluto", planets.pluto) : null,
+        planets.north_node ? formatPlanet("North Node", planets.north_node) : null,
+      ].filter(Boolean).join("\n");
 
-  Human Design Type: ${hd.type}
-  Profile: ${hd.profile}
-  Active Gates: ${hd.active_gates?.join(", ")}
-  Natal Gates: ${hd.natal_gates?.join(", ")}
-  Design Gates: ${hd.design_gates?.join(", ")}
+      // Compute aspects between transit and natal planets
+      let transitContext = "";
+      if (transitData) {
+        const tp = transitData.natal_chart?.planets || {};
+        const aspectNames: Record<number, string> = {
+          0: "conjunction", 60: "sextile", 90: "square", 120: "trine", 180: "opposition"
+        };
 
-  Life Path Number: ${num.life_path}
+        const aspects: string[] = [];
+        const transitPlanets = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"];
+        const natalPlanets = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"];
 
-IMPORTANT: Reference these EXACT planetary positions, signs, and houses in your astrology reading. Reference the EXACT Human Design type and profile. Do not guess or fabricate chart data.`;
+        for (const tName of transitPlanets) {
+          if (!tp[tName]) continue;
+          for (const nName of natalPlanets) {
+            if (!planets[nName]) continue;
+            const diff = Math.abs(tp[tName].longitude - planets[nName].longitude) % 360;
+            const angle = diff > 180 ? 360 - diff : diff;
+            for (const [target, aspectName] of Object.entries(aspectNames)) {
+              const orb = Math.abs(angle - Number(target));
+              if (orb <= 6) {
+                aspects.push(`Transit ${tName} ${aspectName} natal ${nName} (orb ${orb.toFixed(1)}°)`);
+              }
+            }
+          }
+        }
+
+        const transitLines = transitPlanets
+          .filter(p => tp[p])
+          .map(p => `${p}: ${tp[p].degrees}° ${tp[p].sign}${tp[p].retrograde ? " RETROGRADE" : ""}`)
+          .join("\n");
+
+        transitContext = `
+
+TODAY'S TRANSITS (current planetary positions):
+${transitLines}
+
+KEY ASPECTS TO NATAL CHART:
+${aspects.length > 0 ? aspects.slice(0, 10).join("\n") : "No major aspects within 6° orb today."}`;
+      }
+
+      // Select top 6 gates by relevance
+      const topGates = (hd.active_gates || []).slice(0, 6);
+
+      chartContext = `
+
+REAL CALCULATED CHART DATA (computed from Swiss Ephemeris — do not guess or approximate these values):
+
+NATAL PLANETS:
+${natalLines}
+Ascendant: ${nc.ascendant?.degrees}° ${nc.ascendant?.sign}
+Midheaven: ${nc.midheaven?.degrees}° ${nc.midheaven?.sign}
+
+HUMAN DESIGN:
+Type: ${hd.type}
+Profile: ${hd.profile}
+Active Gates: ${topGates.join(", ")}
+
+NUMEROLOGY:
+Life Path: ${num.life_path}
+${transitContext}
+
+IMPORTANT: Reference these EXACT planetary positions, signs, houses, and aspects in your astrology reading. Reference the EXACT Human Design type and profile. Do not guess or fabricate any chart data.`;
     }
 
     const userMessage = `Domain: ${domain}
