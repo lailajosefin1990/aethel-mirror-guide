@@ -55,6 +55,7 @@ const Index = () => {
   const [consentChecked, setConsentChecked] = useState(false);
   const [showCrisis, setShowCrisis] = useState(false);
   const [regenerationCount, setRegenerationCount] = useState(0);
+  const [regenerationFeedback, setRegenerationFeedback] = useState<string | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
 
@@ -290,8 +291,11 @@ const Index = () => {
         birthLng: bd?.birthLng ?? null,
         birthTimezone: bd?.birthTimezone ?? null,
         language: i18n.language,
+        regenerationFeedback: regenerationFeedback,
       },
     });
+
+    if (regenerationFeedback) setRegenerationFeedback(null);
 
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
@@ -304,7 +308,7 @@ const Index = () => {
 
     setReadingData(data as ReadingData);
     return data;
-  }, [birthData, questionData, i18n.language]);
+  }, [birthData, questionData, i18n.language, regenerationFeedback]);
 
   const handleLoadingComplete = useCallback(() => {
     setView("reading");
@@ -476,7 +480,8 @@ const Index = () => {
               onBack={() => setView(readingBackTarget as View)}
               regenerationCount={regenerationCount}
               birthTimeUnknown={birthTimeUnknown}
-              onRegenerate={regenerationCount < MAX_REGENERATIONS ? () => {
+              onRegenerate={regenerationCount < MAX_REGENERATIONS ? (feedback?: string) => {
+                setRegenerationFeedback(feedback || null);
                 setRegenerationCount((c) => c + 1);
                 setLoadingError(null);
                 setView("loading");
