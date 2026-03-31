@@ -78,6 +78,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
   const [sheetEntryId, setSheetEntryId] = useState<string | null>(null);
   const [followedChoice, setFollowedChoice] = useState<"yes" | "no" | "partially" | null>(null);
   const [outcomeNote, setOutcomeNote] = useState("");
+  const [consentToShare, setConsentToShare] = useState(false);
 
   useEffect(() => {
     track("journal_viewed");
