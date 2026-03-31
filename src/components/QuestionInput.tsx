@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
+import VoiceRecorder from "./VoiceRecorder";
 import { track } from "@/lib/posthog";
 
 export interface QuestionData {
