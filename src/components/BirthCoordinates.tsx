@@ -34,6 +34,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid || !date) return;
+    track("birth_data_submitted", { has_birth_time: !unknownTime });
     onSubmit({
       date,
       time: unknownTime ? null : time || null,

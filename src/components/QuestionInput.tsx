@@ -98,10 +98,10 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
             {domains.map((domain) => {
               const isSelected = selectedDomain === domain;
               return (
-                <button
-                  key={domain}
-                  type="button"
-                  onClick={() => setSelectedDomain(domain)}
+                 <button
+                   key={domain}
+                   type="button"
+                   onClick={() => { setSelectedDomain(domain); track("question_domain_selected", { domain }); }}
                   className={`px-4 py-3.5 rounded-sm font-body text-[13px] border transition-all duration-300 text-left ${
                     isSelected
                       ? "border-primary text-primary bg-primary/5"
