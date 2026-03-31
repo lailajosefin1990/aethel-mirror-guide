@@ -89,10 +89,10 @@ vi.mock("@/hooks/useAuth", () => ({
     signOut: vi.fn(),
   }),
 }));
-
-
+vi.mock("@/hooks/useOgImage", () => ({
   default: vi.fn(),
 }));
+
 
 vi.mock("@/lib/cardGenerator", () => ({
   generateThirdWayCard: vi.fn(() => Promise.resolve(new Blob(["img"], { type: "image/png" }))),
