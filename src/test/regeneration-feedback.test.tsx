@@ -79,7 +79,18 @@ vi.mock("@/lib/posthog", () => ({
   reset: vi.fn(),
 }));
 
-vi.mock("@/hooks/useOgImage", () => ({
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({
+    user: mockUser,
+    loading: false,
+    subscriptionTier: "free",
+    monthlyReadingCount: 0,
+    refreshReadingCount: vi.fn(),
+    signOut: vi.fn(),
+  }),
+}));
+
+
   default: vi.fn(),
 }));
 
