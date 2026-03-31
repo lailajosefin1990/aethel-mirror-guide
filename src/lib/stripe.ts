@@ -22,6 +22,18 @@ export const STRIPE_TIERS = {
       "Pattern insights unlocked",
     ],
   },
+  practitioner: {
+    price_id: "price_1TH6rgCqqf8VlckxNET9wkVH",
+    product_id: "prod_UFc5n43D1PnJ3Z",
+    name: "Practitioner",
+    price: "£49/month",
+    features: [
+      "Up to 20 clients",
+      "Unlimited client readings",
+      "PDF export",
+      "Session prep view",
+    ],
+  },
 } as const;
 
-export type SubscriptionTier = "free" | "mirror" | "mirror_pro";
+export type SubscriptionTier = "free" | "mirror" | "mirror_pro" | "practitioner";
