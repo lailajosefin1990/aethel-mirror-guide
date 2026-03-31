@@ -1,7 +1,12 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { MapPin, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import usePlacesAutocomplete, {
+  getGeocode,
+  getLatLng,
+} from "use-places-autocomplete";
+import { useGoogleMaps } from "@/hooks/useGoogleMaps";
 
 export interface LocationResult {
   name: string;
@@ -16,20 +21,7 @@ interface LocationAutocompleteProps {
   className?: string;
 }
 
-interface NominatimResult {
-  display_name: string;
-  lat: string;
-  lon: string;
-  address?: {
-    city?: string;
-    town?: string;
-    village?: string;
-    state?: string;
-    country?: string;
-  };
-}
-
-// Lazy-load tz-lookup
+// Lazy-load tz-lookup as fallback for timezone
 let tzLookup: ((lat: number, lng: number) => string) | null = null;
 async function getTzLookup() {
   if (!tzLookup) {
@@ -39,130 +31,158 @@ async function getTzLookup() {
   return tzLookup;
 }
 
+async function fetchTimezone(lat: number, lng: number): Promise<string> {
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  if (apiKey) {
+    try {
+      const timestamp = Math.floor(Date.now() / 1000);
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${timestamp}&key=${apiKey}`
+      );
+      const data = await res.json();
+      if (data.status === "OK" && data.timeZoneId) {
+        return data.timeZoneId;
+      }
+    } catch (err) {
+      console.warn("Google Timezone API failed, falling back to tz-lookup:", err);
+    }
+  }
+
+  // Fallback to tz-lookup
+  try {
+    const lookup = await getTzLookup();
+    return lookup(lat, lng);
+  } catch {
+    return "UTC";
+  }
+}
+
 const LocationAutocomplete = ({ value, onChange, className }: LocationAutocompleteProps) => {
   const { t } = useTranslation();
-  const [query, setQuery] = useState(value);
-  const [results, setResults] = useState<NominatimResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [noResults, setNoResults] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mapsReady = useGoogleMaps();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const {
+    ready,
+    value: inputValue,
+    suggestions: { status, data },
+    setValue,
+    clearSuggestions,
+  } = usePlacesAutocomplete({
+    requestOptions: {
+      types: ["(cities)"],
+    },
+    debounce: 300,
+    initOnMount: false,
+  });
+
+  // Init when Google Maps is loaded
+  useEffect(() => {
+    if (mapsReady) {
+      // The hook will detect google.maps.places is available
+      setValue(value, false);
+    }
+  }, [mapsReady]);
 
   // Close dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setShowDropdown(false);
+        clearSuggestions();
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const search = useCallback(async (q: string) => {
-    if (q.length < 2) {
-      setResults([]);
-      setShowDropdown(false);
-      setNoResults(false);
-      return;
-    }
-    setLoading(true);
-    setNoResults(false);
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=1`,
-        { headers: { "Accept-Language": "en" } }
-      );
-      const data: NominatimResult[] = await res.json();
-      setResults(data);
-      setShowDropdown(true);
-      setNoResults(data.length === 0);
-    } catch {
-      setResults([]);
-      setNoResults(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  }, [clearSuggestions]);
 
   const handleInput = (val: string) => {
-    setQuery(val);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => search(val), 400);
+    setValue(val);
   };
 
-  const handleSelect = async (result: NominatimResult) => {
-    const lat = parseFloat(result.lat);
-    const lng = parseFloat(result.lon);
-    const addr = result.address;
-    const city = addr?.city || addr?.town || addr?.village || "";
-    const country = addr?.country || "";
-    const name = city ? `${city}, ${country}` : result.display_name.split(",").slice(0, 2).join(",").trim();
+  const handleSelect = async (description: string, placeId: string) => {
+    setValue(description, false);
+    clearSuggestions();
 
-    let tz = "UTC";
     try {
-      const lookup = await getTzLookup();
-      tz = lookup(lat, lng);
-    } catch {
-      tz = "UTC";
+      const results = await getGeocode({ placeId });
+      const { lat, lng } = getLatLng(results[0]);
+
+      // Extract city + country from address components
+      const components = results[0].address_components;
+      const city =
+        components.find((c) => c.types.includes("locality"))?.long_name ||
+        components.find((c) => c.types.includes("administrative_area_level_1"))?.long_name ||
+        description.split(",")[0];
+      const country =
+        components.find((c) => c.types.includes("country"))?.long_name || "";
+      const name = country ? `${city}, ${country}` : city;
+
+      const timezone = await fetchTimezone(lat, lng);
+
+      setValue(name, false);
+      onChange({ name, lat, lng, timezone });
+    } catch (err) {
+      console.error("Geocoding error:", err);
     }
-
-    setQuery(name);
-    setShowDropdown(false);
-    onChange({ name, lat, lng, timezone: tz });
-  };
-
-  const formatResult = (r: NominatimResult) => {
-    const addr = r.address;
-    const city = addr?.city || addr?.town || addr?.village || r.display_name.split(",")[0];
-    const country = addr?.country || "";
-    return { city, country };
   };
 
   const inputClass =
     "w-full h-12 px-4 pl-10 rounded-sm bg-card text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300";
 
+  const hasSuggestions = status === "OK" && data.length > 0;
+
   return (
     <div ref={containerRef} className={cn("relative", className)}>
       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
-      {loading && (
+      {!mapsReady && (
         <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin z-10" />
       )}
       <input
         type="text"
-        value={query}
+        value={inputValue}
         onChange={(e) => handleInput(e.target.value)}
-        onFocus={() => results.length > 0 && setShowDropdown(true)}
-        placeholder={t("birth_place_placeholder") || "City, Country"}
+        disabled={!mapsReady}
+        placeholder={
+          mapsReady
+            ? t("birth_place_placeholder") || "City, Country"
+            : "Loading places..."
+        }
         className={inputClass}
       />
 
-      {showDropdown && (
+      {hasSuggestions && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-sm shadow-lg z-50 overflow-hidden">
-          {noResults ? (
-            <p className="px-4 py-3 font-body text-[13px] text-muted-foreground">
-              {t("birth_place_no_results") || "Can't find that location — try the nearest large city"}
-            </p>
-          ) : (
-            results.map((r, i) => {
-              const { city, country } = formatResult(r);
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => handleSelect(r)}
-                  className="w-full px-4 py-3 text-left hover:bg-muted/30 transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
-                >
-                  <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-                  <span className="font-body text-[14px] text-foreground font-medium">{city}</span>
-                  {country && (
-                    <span className="font-body text-[12px] text-muted-foreground">{country}</span>
-                  )}
-                </button>
-              );
-            })
-          )}
+          {data.map((suggestion) => {
+            const {
+              place_id,
+              structured_formatting: { main_text, secondary_text },
+            } = suggestion;
+            return (
+              <button
+                key={place_id}
+                type="button"
+                onClick={() => handleSelect(suggestion.description, place_id)}
+                className="w-full px-4 py-3 text-left hover:bg-muted/30 transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
+              >
+                <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                <span className="font-body text-[14px] text-foreground font-medium">
+                  {main_text}
+                </span>
+                {secondary_text && (
+                  <span className="font-body text-[12px] text-muted-foreground">
+                    {secondary_text}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+          <div className="px-4 py-1.5 bg-muted/20">
+            <img
+              src="https://developers.google.com/static/maps/documentation/images/powered_by_google_on_non_white.png"
+              alt="Powered by Google"
+              className="h-3 opacity-50"
+            />
+          </div>
         </div>
       )}
     </div>
