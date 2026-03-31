@@ -132,13 +132,86 @@ serve(async (req) => {
       ? `\n\nSPECIAL INSTRUCTION FOR 'EVERYTHING AT ONCE' DOMAIN:\nThe user is overwhelmed and cannot identify a single decision to focus on. Your most important job here is to find THE ONE thread that, if pulled, would create the most movement across all areas. Do not try to address everything — pick the single highest leverage decision point and make the Third Way about that one thing only. Start the astrology reading with: 'Of everything you're carrying, the one thread worth pulling first is...'`
       : "";
 
+    // ─── Call Chart API for real astronomical data ───
+    let chartData: any = null;
+    const CHART_API_URL = Deno.env.get("CHART_API_URL");
+    if (CHART_API_URL && birthDate && birthDate !== "unknown" && birthLat != null && birthLng != null) {
+      try {
+        // Parse birth date (dd/mm/yyyy format)
+        const dateParts = birthDate.split("/");
+        let bDay: number, bMonth: number, bYear: number;
+        if (dateParts.length === 3) {
+          bDay = parseInt(dateParts[0], 10);
+          bMonth = parseInt(dateParts[1], 10);
+          bYear = parseInt(dateParts[2], 10);
+        } else {
+          // Try ISO format
+          const d = new Date(birthDate);
+          bDay = d.getDate();
+          bMonth = d.getMonth() + 1;
+          bYear = d.getFullYear();
+        }
+
+        let bHour = 12, bMinute = 0;
+        if (birthTime && birthTime !== "unknown") {
+          const timeParts = birthTime.split(":");
+          bHour = parseInt(timeParts[0], 10);
+          bMinute = parseInt(timeParts[1], 10);
+        }
+
+        const chartUrl = `${CHART_API_URL}/chart?year=${bYear}&month=${bMonth}&day=${bDay}&hour=${bHour}&minute=${bMinute}&lat=${birthLat}&lng=${birthLng}`;
+        const chartController = new AbortController();
+        const chartTimeout = setTimeout(() => chartController.abort(), 5000);
+
+        const chartResponse = await fetch(chartUrl, { signal: chartController.signal });
+        clearTimeout(chartTimeout);
+
+        if (chartResponse.ok) {
+          chartData = await chartResponse.json();
+          console.log("Chart API response received:", JSON.stringify(chartData).slice(0, 200));
+        }
+      } catch (chartErr) {
+        console.error("Chart API call failed, continuing without chart data:", chartErr);
+      }
+    }
+
+    // Build chart context for the AI prompt
+    let chartContext = "";
+    if (chartData) {
+      const nc = chartData.natal_chart;
+      const hd = chartData.human_design;
+      const num = chartData.numerology;
+
+      const planetPositions = Object.entries(nc.planets || {})
+        .map(([name, data]: [string, any]) =>
+          `${name}: ${data.sign} ${data.degrees}° (${data.house} house)${data.retrograde ? " ℞" : ""}`)
+        .join("\n  ");
+
+      chartContext = `\n\nREAL CALCULATED CHART DATA (use this instead of guessing):
+  Ascendant: ${nc.ascendant?.sign} ${nc.ascendant?.degrees}°
+  Midheaven: ${nc.midheaven?.sign} ${nc.midheaven?.degrees}°
+  Moon Phase: ${nc.moon_phase}
+  Planetary Positions:
+  ${planetPositions}
+
+  Human Design Type: ${hd.type}
+  Profile: ${hd.profile}
+  Active Gates: ${hd.active_gates?.join(", ")}
+  Natal Gates: ${hd.natal_gates?.join(", ")}
+  Design Gates: ${hd.design_gates?.join(", ")}
+
+  Life Path Number: ${num.life_path}
+
+IMPORTANT: Reference these EXACT planetary positions, signs, and houses in your astrology reading. Reference the EXACT Human Design type and profile. Do not guess or fabricate chart data.`;
+    }
+
     const userMessage = `Domain: ${domain}
 Question: ${question}
 Mode: ${mode || "Both"}
 Birth date: ${birthDate || "unknown"}
 Birth place: ${birthPlace || "unknown"}
 Today's date: ${today}
-Birth time: ${birthTime || "unknown"}${langInstruction}${everythingInstruction}`;
+Birth time: ${birthTime || "unknown"}${chartContext}${langInstruction}${everythingInstruction}`;
 
     // Use AbortController for 12s timeout
     const controller = new AbortController();
