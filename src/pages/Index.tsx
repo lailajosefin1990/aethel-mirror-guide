@@ -382,6 +382,7 @@ const Index = () => {
               onSave={() => { setRegenerationCount(0); handleSave(); }}
               onBack={() => setView("birth")}
               regenerationCount={regenerationCount}
+              birthTimeUnknown={birthData?.unknownTime || !profileBirthData?.birth_time}
               onRegenerate={() => {
                 setRegenerationCount((c) => c + 1);
                 setView("loading");
