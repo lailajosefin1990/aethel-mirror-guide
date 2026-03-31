@@ -7,7 +7,7 @@ import { MemoryRouter } from "react-router-dom";
 const { mockUser, mockSupabase, mockInvoke } = vi.hoisted(() => {
   const mockUser = { id: "user-123", email: "test@aethel.com" };
 
-  const mockInvoke = vi.fn(() =>
+  const mockInvoke = vi.fn((..._args: any[]) =>
     Promise.resolve({
       data: {
         astrology_reading: "Test transit reading.",
