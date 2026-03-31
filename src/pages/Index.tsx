@@ -323,6 +323,9 @@ const Index = () => {
                   onStartReading={handleStartReading}
                 />
               )}
+              {activeTab === "calendar" && (
+                <TransitCalendar onRevisitDecision={() => setActiveTab("journey")} />
+              )}
               {activeTab === "settings" && <SettingsScreen />}
             </AppLayout>
           </motion.div>
