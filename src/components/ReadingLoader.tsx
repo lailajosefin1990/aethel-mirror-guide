@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { track } from "@/lib/posthog";
 
 const phrases = [
   "Reading your chart...",
