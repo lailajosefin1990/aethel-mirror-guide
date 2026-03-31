@@ -306,6 +306,22 @@ const Index = () => {
       </AnimatePresence>
 
       <PaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} />
+
+      <PushPermissionSheet
+        open={pushSheetOpen}
+        onAccept={async () => {
+          setPushSheetOpen(false);
+          if (user) {
+            const ok = await subscribeToPush(user.id);
+            if (ok) track("push_permission_granted");
+          }
+        }}
+        onDismiss={() => {
+          setPushSheetOpen(false);
+          dismissPushPrompt();
+          track("push_permission_dismissed");
+        }}
+      />
     </>
   );
 };
