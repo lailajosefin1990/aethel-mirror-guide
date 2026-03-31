@@ -13,6 +13,7 @@ import PaywallModal from "@/components/PaywallModal";
 import SettingsScreen from "@/components/SettingsScreen";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import type { ReadingData } from "@/lib/reading";
 
 type View = "home" | "question" | "auth" | "birth" | "loading" | "reading" | "dashboard";
 
@@ -26,13 +27,24 @@ const Index = () => {
   const [birthData, setBirthData] = useState<BirthData | null>(null);
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [readingData, setReadingData] = useState<ReadingData | null>(null);
+  const [profileBirthData, setProfileBirthData] = useState<{ birth_date: string | null; birth_time: string | null; birth_place: string | null } | null>(null);
 
   const transition = { duration: 0.3, ease: "easeInOut" as const };
 
-  // Load journal entries from Supabase
+  // Load journal entries and profile from Supabase
   useEffect(() => {
     if (!user) return;
-    const loadEntries = async () => {
+    const loadData = async () => {
+      // Load profile birth data
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("birth_date, birth_time, birth_place")
+        .eq("user_id", user.id)
+        .single();
+      if (profile) setProfileBirthData(profile);
+
+      // Load readings
       const { data: readings } = await supabase
         .from("readings")
         .select("*")
@@ -61,10 +73,9 @@ const Index = () => {
 
       setJournalEntries(entries);
     };
-    loadEntries();
+    loadData();
   }, [user]);
 
-  // Auto-redirect to dashboard if user is logged in and has readings
   useEffect(() => {
     if (user && !authLoading && view === "home" && journalEntries.length > 0) {
       setView("dashboard");
@@ -73,7 +84,6 @@ const Index = () => {
 
   const handleQuestionSubmit = (data: QuestionData) => {
     setQuestionData(data);
-    // If not logged in, go to auth screen
     if (!user) {
       setView("auth");
       return;
@@ -82,48 +92,83 @@ const Index = () => {
   };
 
   const proceedAfterAuth = () => {
-    // Check paywall: free users on 2nd+ reading attempt
     if (subscriptionTier === "free" && monthlyReadingCount >= FREE_READING_LIMIT) {
       setPaywallOpen(true);
       return;
     }
-    setView("birth");
+    // If we already have birth data in profile, skip birth screen
+    if (profileBirthData?.birth_date) {
+      setBirthData({
+        date: new Date(profileBirthData.birth_date),
+        time: profileBirthData.birth_time,
+        unknownTime: !profileBirthData.birth_time,
+        birthPlace: profileBirthData.birth_place || "",
+      });
+      setView("loading");
+    } else {
+      setView("birth");
+    }
   };
 
   const handleAuthSuccess = () => {
-    // After auth, check if we need birth coords or paywall
     proceedAfterAuth();
   };
 
   const handleBirthSubmit = async (data: BirthData) => {
     setBirthData(data);
-    // Save birth data to profile
     if (user) {
       await supabase.from("profiles").update({
         birth_date: data.date.toISOString().split("T")[0],
         birth_time: data.unknownTime ? null : data.time,
         birth_place: data.birthPlace,
       }).eq("user_id", user.id);
+      setProfileBirthData({
+        birth_date: data.date.toISOString().split("T")[0],
+        birth_time: data.unknownTime ? null : (data.time || null),
+        birth_place: data.birthPlace,
+      });
     }
     setView("loading");
   };
+
+  const generateReading = useCallback(async () => {
+    const bd = birthData;
+    const qd = questionData;
+    if (!qd) throw new Error("No question data");
+
+    const { data, error } = await supabase.functions.invoke("generate-reading", {
+      body: {
+        domain: qd.domain,
+        question: qd.question,
+        mode: qd.mode,
+        birthDate: bd?.date ? new Date(bd.date).toLocaleDateString("en-GB") : "unknown",
+        birthPlace: bd?.birthPlace || "unknown",
+        birthTime: bd?.unknownTime ? "unknown" : (bd?.time || "unknown"),
+      },
+    });
+
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+
+    setReadingData(data as ReadingData);
+  }, [birthData, questionData]);
 
   const handleLoadingComplete = useCallback(() => {
     setView("reading");
   }, []);
 
   const handleSave = async () => {
-    if (!user || !questionData) return;
+    if (!user || !questionData || !readingData) return;
 
-    // Save reading to Supabase
     const { data: reading, error } = await supabase.from("readings").insert({
       user_id: user.id,
       domain: questionData.domain,
       question: questionData.question,
       mode: questionData.mode,
-      third_way_text: "Send the counter-offer by Friday. Name your non-negotiable and one thing you'll let go of. That's the move.",
-      journal_prompt: "What would you do if you knew the other person was already leaning toward yes?",
-      confidence_level: "strong",
+      reading_text: readingData.astrology_reading,
+      third_way_text: readingData.third_way,
+      journal_prompt: readingData.journal_prompt,
+      confidence_level: readingData.confidence_level,
     }).select().single();
 
     if (!error && reading) {
@@ -131,7 +176,7 @@ const Index = () => {
         id: reading.id,
         domain: questionData.domain,
         date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
-        thirdWay: reading.third_way_text || "",
+        thirdWay: readingData.third_way,
         question: questionData.question,
       };
       setJournalEntries((prev) => [newEntry, ...prev]);
@@ -188,7 +233,11 @@ const Index = () => {
         )}
         {view === "loading" && (
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
-            <ReadingLoader onComplete={handleLoadingComplete} />
+            <ReadingLoader
+              onComplete={handleLoadingComplete}
+              onError={() => {}}
+              generateReading={generateReading}
+            />
           </motion.div>
         )}
         {view === "reading" && (
@@ -196,6 +245,7 @@ const Index = () => {
             <ReadingOutput
               domain={questionData?.domain ?? "General"}
               question={questionData?.question ?? ""}
+              reading={readingData}
               onSave={handleSave}
               onBack={() => setView("birth")}
             />
