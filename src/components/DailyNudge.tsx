@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { type JournalEntry } from "./DecisionJournal";
+import { track } from "@/lib/posthog";
 
 interface DailyNudgeProps {
   journalEntries: JournalEntry[];
