@@ -60,6 +60,20 @@ const Index = () => {
 
   const referralLinked = useRef(false);
 
+  // Restore questionData from sessionStorage (survives OAuth redirect)
+  useEffect(() => {
+    const saved = sessionStorage.getItem("aethel_pending_question");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setQuestionData(parsed);
+        sessionStorage.removeItem("aethel_pending_question");
+      } catch {
+        sessionStorage.removeItem("aethel_pending_question");
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
@@ -188,6 +202,8 @@ const Index = () => {
 
   const handleQuestionSubmit = (data: QuestionData) => {
     setQuestionData(data);
+    // Persist question so it survives OAuth page redirects
+    sessionStorage.setItem("aethel_pending_question", JSON.stringify(data));
     if (!user) {
       setView("auth");
       return;
@@ -216,6 +232,13 @@ const Index = () => {
       setView("birth");
     }
   }, [subscriptionTier, monthlyReadingCount, profileBirthData]);
+
+  // Auto-proceed after OAuth redirect if we have pending question data
+  useEffect(() => {
+    if (user && !authLoading && questionData && view === "home") {
+      proceedAfterAuth();
+    }
+  }, [user, authLoading, questionData, view, proceedAfterAuth]);
 
   const handleAuthSuccess = () => {
     if (profileLoaded && profileBirthData?.birth_date) {
@@ -324,6 +347,9 @@ const Index = () => {
         question: questionData.question,
       };
       setJournalEntries((prev) => [newEntry, ...prev]);
+
+      // Clean up persisted question data
+      sessionStorage.removeItem("aethel_pending_question");
 
       if (!readingData.is_fallback) {
         await refreshReadingCount();
