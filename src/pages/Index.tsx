@@ -40,6 +40,7 @@ const Index = () => {
   const [showConsentGate, setShowConsentGate] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
   const [showCrisis, setShowCrisis] = useState(false);
+  const [regenerationCount, setRegenerationCount] = useState(0);
 
   const transition = { duration: 0.3, ease: "easeInOut" as const };
 
