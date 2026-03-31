@@ -341,6 +341,9 @@ const Index = () => {
       };
       setJournalEntries((prev) => [newEntry, ...prev]);
 
+      // Clean up persisted question data
+      sessionStorage.removeItem("aethel_pending_question");
+
       if (!readingData.is_fallback) {
         await refreshReadingCount();
       }
