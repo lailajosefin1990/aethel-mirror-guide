@@ -89,7 +89,7 @@ const Index = () => {
       // Load profile birth data
       const { data: profile } = await supabase
         .from("profiles")
-        .select("birth_date, birth_time, birth_place, consent_accepted, preferred_language")
+        .select("birth_date, birth_time, birth_place, birth_lat, birth_lng, birth_timezone, consent_accepted, preferred_language")
         .eq("user_id", user.id)
         .single();
       if (profile) {
