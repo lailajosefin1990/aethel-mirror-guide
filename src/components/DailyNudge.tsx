@@ -6,6 +6,9 @@ interface DailyNudgeProps {
   journalEntries: JournalEntry[];
   onNewReading: () => void;
   onRevisitDecision: () => void;
+  subscriptionTier?: string;
+  remainingReadings?: number;
+  onUpgrade?: () => void;
 }
 
 const nudges = [
