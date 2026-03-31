@@ -44,6 +44,42 @@ const Index = () => {
 
   const transition = { duration: 0.3, ease: "easeInOut" as const };
 
+  // Capture referral code from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      localStorage.setItem("aethel_ref", ref);
+    }
+  }, []);
+
+  // Link referral on signup
+  useEffect(() => {
+    if (!user) return;
+    const ref = localStorage.getItem("aethel_ref");
+    if (!ref) return;
+    
+    const linkReferral = async () => {
+      // Find the referrer by code
+      const { data: referrerProfile } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("referral_code", ref)
+        .maybeSingle();
+      
+      if (referrerProfile && referrerProfile.user_id !== user.id) {
+        await supabase.from("referrals").insert({
+          referrer_user_id: referrerProfile.user_id,
+          referred_email: user.email,
+          referred_user_id: user.id,
+          status: "signed_up",
+        });
+        localStorage.removeItem("aethel_ref");
+      }
+    };
+    linkReferral().catch(console.error);
+  }, [user]);
+
   // Load journal entries and profile from Supabase
   useEffect(() => {
     if (!user) return;
