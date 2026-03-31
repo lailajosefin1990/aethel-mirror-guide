@@ -15,6 +15,8 @@ interface ReadingOutputProps {
   reading: ReadingData | null;
   onSave: () => void;
   onBack: () => void;
+  onRegenerate?: () => void;
+  regenerationCount?: number;
 }
 
 const ExpandableText = ({ text }: { text: string }) => (
