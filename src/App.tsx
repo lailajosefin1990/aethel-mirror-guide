@@ -37,7 +37,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
-  </SentryErrorBoundary>
+  </Sentry.ErrorBoundary>
 );
 
 export default App;
