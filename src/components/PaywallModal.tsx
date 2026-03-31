@@ -116,7 +116,7 @@ const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
             </div>
 
             <button
-              onClick={onClose}
+              onClick={() => { track("paywall_dismissed"); onClose(); }}
               className="w-full font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors mb-3"
             >
               Maybe later

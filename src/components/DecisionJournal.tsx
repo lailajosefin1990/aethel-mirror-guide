@@ -89,6 +89,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
 
   const handleLogSubmit = () => {
     if (!sheetEntryId || !followedChoice) return;
+    track("outcome_submitted", { followed: followedChoice, has_text: outcomeNote.length > 0 });
     onUpdateEntry(sheetEntryId, { followed: followedChoice, note: outcomeNote });
     setSheetEntryId(null);
     setFollowedChoice(null);
