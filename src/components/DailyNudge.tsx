@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { type JournalEntry } from "./DecisionJournal";
 import { track } from "@/lib/posthog";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DailyNudgeProps {
   journalEntries: JournalEntry[];
@@ -50,10 +52,37 @@ const weeklyOptions = [
 ];
 
 const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscriptionTier = "free", remainingReadings = 1, onUpgrade }: DailyNudgeProps) => {
+  const { user } = useAuth();
   const today = new Date();
   const isSunday = today.getDay() === 0;
   const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
-  const todayNudge = nudges[dayOfYear % nudges.length];
+  const fallbackNudge = nudges[dayOfYear % nudges.length];
+
+  const [transitNudge, setTransitNudge] = useState<{ transit: string; nudge: string } | null>(null);
+
+  // Try to load today's transit from cache
+  useEffect(() => {
+    if (!user) return;
+    const loadTransit = async () => {
+      const todayStr = new Date().toISOString().split("T")[0];
+      const { data } = await supabase
+        .from("transit_cache")
+        .select("transit_headline, transit_detail")
+        .eq("user_id", user.id)
+        .eq("date", todayStr)
+        .gt("expires_at", new Date().toISOString())
+        .maybeSingle();
+      if (data) {
+        setTransitNudge({
+          transit: data.transit_headline,
+          nudge: data.transit_detail,
+        });
+      }
+    };
+    loadTransit();
+  }, [user]);
+
+  const todayNudge = transitNudge || fallbackNudge;
 
   useEffect(() => {
     track("nudge_viewed");

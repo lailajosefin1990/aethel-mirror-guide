@@ -9,6 +9,7 @@ import ReadingOutput from "@/components/ReadingOutput";
 import AppLayout from "@/components/AppLayout";
 import DecisionJournal, { type JournalEntry } from "@/components/DecisionJournal";
 import DailyNudge from "@/components/DailyNudge";
+import TransitCalendar from "@/components/TransitCalendar";
 import AuthScreen from "@/components/AuthScreen";
 import PaywallModal from "@/components/PaywallModal";
 import SettingsScreen from "@/components/SettingsScreen";
@@ -304,7 +305,7 @@ const Index = () => {
         )}
         {view === "dashboard" && (
           <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
-            <AppLayout showNav activeTab={activeTab} onTabChange={setActiveTab}>
+            <AppLayout showNav activeTab={activeTab} onTabChange={setActiveTab} subscriptionTier={subscriptionTier}>
               {activeTab === "mirror" && (
                 <DailyNudge
                   journalEntries={journalEntries}
@@ -321,6 +322,9 @@ const Index = () => {
                   onUpdateEntry={handleUpdateEntry}
                   onStartReading={handleStartReading}
                 />
+              )}
+              {activeTab === "calendar" && (
+                <TransitCalendar onRevisitDecision={() => setActiveTab("journey")} />
               )}
               {activeTab === "settings" && <SettingsScreen />}
             </AppLayout>

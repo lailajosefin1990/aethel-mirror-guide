@@ -326,6 +326,45 @@ export type Database = {
         }
         Relationships: []
       }
+      transit_cache: {
+        Row: {
+          date: string
+          expires_at: string
+          generated_at: string
+          id: string
+          linked_domain: string | null
+          moon_phase: string
+          traffic_light: string
+          transit_detail: string
+          transit_headline: string
+          user_id: string
+        }
+        Insert: {
+          date: string
+          expires_at?: string
+          generated_at?: string
+          id?: string
+          linked_domain?: string | null
+          moon_phase: string
+          traffic_light: string
+          transit_detail: string
+          transit_headline: string
+          user_id: string
+        }
+        Update: {
+          date?: string
+          expires_at?: string
+          generated_at?: string
+          id?: string
+          linked_domain?: string | null
+          moon_phase?: string
+          traffic_light?: string
+          transit_detail?: string
+          transit_headline?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_memory: {
         Row: {
           created_at: string
