@@ -124,6 +124,17 @@ const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
               Maybe later
             </button>
 
+            <button
+              onClick={() => {
+                track("paywall_practitioner_clicked");
+                onClose();
+                navigate("/practitioner");
+              }}
+              className="w-full font-body text-[13px] text-primary hover:text-primary/80 transition-colors mb-3"
+            >
+              For practitioners →
+            </button>
+
             <p className="font-body text-[11px] text-foreground/40 text-center">
               Cancel anytime. No hidden fees.
             </p>
