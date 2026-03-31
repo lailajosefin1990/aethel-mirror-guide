@@ -132,6 +132,11 @@ serve(async (req) => {
       ? `\n\nSPECIAL INSTRUCTION FOR 'EVERYTHING AT ONCE' DOMAIN:\nThe user is overwhelmed and cannot identify a single decision to focus on. Your most important job here is to find THE ONE thread that, if pulled, would create the most movement across all areas. Do not try to address everything — pick the single highest leverage decision point and make the Third Way about that one thing only. Start the astrology reading with: 'Of everything you're carrying, the one thread worth pulling first is...'`
       : "";
 
+    // Build regeneration feedback instruction
+    const regenerationInstruction = regenerationFeedback
+      ? `\n\nREGENERATION CONTEXT: The user received a previous reading and felt it didn't fit. Their feedback: "${regenerationFeedback}"\nYou MUST take this feedback seriously. Generate a substantially different reading that addresses what they flagged. Do NOT repeat the same Third Way or similar phrasing. Shift your angle, explore a different transit emphasis, and offer a fresh perspective that directly responds to their concern.`
+      : "";
+
     // ─── Call Chart API for real astronomical data ───
     let chartData: any = null;
     let transitData: any = null;
