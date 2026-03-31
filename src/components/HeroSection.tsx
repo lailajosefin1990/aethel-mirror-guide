@@ -21,6 +21,7 @@ const howItems = [
 
 const HeroSection = ({ onStart }: HeroSectionProps) => {
   const howRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     track("landing_viewed");
