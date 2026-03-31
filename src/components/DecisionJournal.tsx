@@ -194,7 +194,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
                   </div>
                 ) : (
                   <button
-                    onClick={() => setSheetEntryId(entry.id)}
+                    onClick={() => { track("outcome_log_opened", { reading_id: entry.id }); setSheetEntryId(entry.id); }}
                     className="mt-3 font-body text-[13px] text-primary hover:text-primary/80 transition-colors duration-300"
                   >
                     Log what happened →

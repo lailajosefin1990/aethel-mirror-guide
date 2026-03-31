@@ -75,7 +75,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
   const handleWeeklyRating = (label: string) => {
     setWeeklyRating(label);
     setWeeklyLogged(true);
-    console.log("Weekly check-in logged:", { date: today.toISOString(), rating: label });
+    track("weekly_checkin_completed", { rating: label });
   };
 
   const sectionLabel = "font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3";
