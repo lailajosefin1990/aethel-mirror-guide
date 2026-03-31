@@ -337,8 +337,13 @@ const Index = () => {
               domain={questionData?.domain ?? "General"}
               question={questionData?.question ?? ""}
               reading={readingData}
-              onSave={handleSave}
+              onSave={() => { setRegenerationCount(0); handleSave(); }}
               onBack={() => setView("birth")}
+              regenerationCount={regenerationCount}
+              onRegenerate={() => {
+                setRegenerationCount((c) => c + 1);
+                setView("loading");
+              }}
             />
           </motion.div>
         )}
