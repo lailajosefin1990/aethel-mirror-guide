@@ -37,6 +37,11 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid || !selectedDomain) return;
+    track("question_submitted", {
+      domain: selectedDomain,
+      mode: selectedMode,
+      question_length: question.length,
+    });
     onSubmit({ domain: selectedDomain, question, mode: selectedMode });
   };
 
