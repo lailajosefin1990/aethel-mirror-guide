@@ -37,6 +37,9 @@ const Index = () => {
   const [profileBirthData, setProfileBirthData] = useState<{ birth_date: string | null; birth_time: string | null; birth_place: string | null } | null>(null);
   const [pushSheetOpen, setPushSheetOpen] = useState(false);
   const [hasShownPushPrompt, setHasShownPushPrompt] = useState(false);
+  const [showConsentGate, setShowConsentGate] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [showCrisis, setShowCrisis] = useState(false);
 
   const transition = { duration: 0.3, ease: "easeInOut" as const };
 
