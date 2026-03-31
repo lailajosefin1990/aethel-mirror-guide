@@ -7,6 +7,7 @@ import ReadingLoader from "@/components/ReadingLoader";
 import ReadingOutput from "@/components/ReadingOutput";
 import AppLayout from "@/components/AppLayout";
 import DecisionJournal, { type JournalEntry } from "@/components/DecisionJournal";
+import DailyNudge from "@/components/DailyNudge";
 
 type View = "home" | "question" | "birth" | "loading" | "reading" | "dashboard";
 
