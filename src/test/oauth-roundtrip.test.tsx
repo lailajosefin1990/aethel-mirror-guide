@@ -5,11 +5,91 @@ import { MemoryRouter } from "react-router-dom";
 
 // ─── Mocks ──────────────────────────────────────────────────────────
 
-// Mock Supabase client
-const mockUser = {
-  id: "user-123",
-  email: "test@example.com",
-};
+// Hoist mock variables so they're available in vi.mock factories
+const { mockUser, mockSupabaseRef, mockOAuthRedirect, mockAuthStateRef } = vi.hoisted(() => {
+  const mockUser = {
+    id: "user-123",
+    email: "test@example.com",
+  };
+
+  const mockOAuthRedirect = vi.fn(() => Promise.resolve({ error: null }));
+
+  const mockSupabase = {
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(() => ({
+            data: {
+              birth_date: "1990-06-15",
+              birth_time: "14:30",
+              birth_place: "London",
+              birth_lat: 51.5,
+              birth_lng: -0.1,
+              birth_timezone: "Europe/London",
+              consent_accepted: true,
+              preferred_language: "en",
+            },
+          })),
+          order: vi.fn(() => ({
+            data: [],
+          })),
+          maybeSingle: vi.fn(() => ({ data: null })),
+          gt: vi.fn(() => ({
+            maybeSingle: vi.fn(() => ({ data: null })),
+          })),
+        })),
+      })),
+      insert: vi.fn(() => ({
+        select: vi.fn(() => ({
+          single: vi.fn(() => ({
+            data: { id: "reading-1" },
+            error: null,
+          })),
+        })),
+      })),
+      update: vi.fn(() => ({
+        eq: vi.fn(() => ({ data: null, error: null })),
+      })),
+    })),
+    functions: {
+      invoke: vi.fn(() =>
+        Promise.resolve({
+          data: {
+            astrology_reading: "Test reading",
+            design_insights: ["Insight 1"],
+            third_way: "Take the leap",
+            journal_prompt: "Reflect on this",
+            confidence_level: "high",
+            is_crisis: false,
+            is_fallback: false,
+          },
+          error: null,
+        })
+      ),
+    },
+    auth: {
+      signUp: vi.fn(),
+      signInWithPassword: vi.fn(),
+      getSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
+      onAuthStateChange: vi.fn(() => ({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      })),
+    },
+  };
+
+  const mockAuthStateRef = {
+    current: {
+      user: null as typeof mockUser | null,
+      loading: false,
+      subscriptionTier: "free",
+      monthlyReadingCount: 0,
+      refreshReadingCount: vi.fn(),
+      signOut: vi.fn(),
+    },
+  };
+
+  return { mockUser, mockSupabaseRef: { current: mockSupabase }, mockOAuthRedirect, mockAuthStateRef };
+});
 
 const mockSupabase = {
   from: vi.fn(() => ({
