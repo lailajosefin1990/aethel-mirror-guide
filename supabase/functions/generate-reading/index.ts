@@ -294,7 +294,7 @@ Mode: ${mode || "Both"}
 Birth date: ${birthDate || "unknown"}
 Birth place: ${birthPlace || "unknown"}
 Today's date: ${today}
-Birth time: ${birthTime || "unknown"}${chartContext}${langInstruction}${everythingInstruction}`;
+Birth time: ${birthTime || "unknown"}${chartContext}${langInstruction}${everythingInstruction}${regenerationInstruction}`;
 
     // Use AbortController for 12s timeout
     const controller = new AbortController();
