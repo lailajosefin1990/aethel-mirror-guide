@@ -155,11 +155,27 @@ const SettingsScreen = () => {
         </motion.div>
       )}
 
+      {/* About */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.28 }}
+        className="bg-card border border-border rounded-md p-5 mb-5"
+      >
+        <p className={sectionLabel}>A B O U T</p>
+        <button
+          onClick={() => navigate("/evidence")}
+          className="font-body text-[14px] text-primary hover:text-primary/80 transition-colors"
+        >
+          Evidence →
+        </button>
+      </motion.div>
+
       {/* Sign out */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.5, delay: 0.35 }}
       >
         <button
           onClick={signOut}
