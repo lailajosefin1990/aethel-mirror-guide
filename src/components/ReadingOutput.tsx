@@ -301,7 +301,12 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
               <textarea value={feedbackText} onChange={(e) => setFeedbackText(e.target.value)}
                 placeholder="What felt off?" rows={3}
                 className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-4" />
-              <button onClick={() => { track("reading_regenerated"); setFeedbackOpen(false); setFeedbackText(""); }}
+              <button onClick={() => { 
+                  track("reading_regenerated", { regeneration_number: (regenerationCount || 0) + 1 }); 
+                  setFeedbackOpen(false); 
+                  setFeedbackText(""); 
+                  onRegenerate?.(); 
+                }}
                 className="w-full h-[48px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] hover:brightness-110 transition-all duration-300">
                 Regenerate
               </button>
