@@ -27,6 +27,7 @@ type View = "home" | "question" | "auth" | "birth" | "loading" | "reading" | "da
 const FREE_READING_LIMIT = 3;
 
 const Index = () => {
+  const { i18n } = useTranslation();
   const { user, loading: authLoading, subscriptionTier, monthlyReadingCount, refreshReadingCount } = useAuth();
   const [view, setView] = useState<View>("home");
   const [activeTab, setActiveTab] = useState("mirror");
