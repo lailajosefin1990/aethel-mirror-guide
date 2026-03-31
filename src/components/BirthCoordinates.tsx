@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, CalendarIcon, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, CalendarIcon, Clock, ChevronDown, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
@@ -10,6 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { track } from "@/lib/posthog";
+import { useTranslation } from "react-i18next";
 
 export interface BirthData {
   date: Date;
@@ -24,10 +25,12 @@ interface BirthCoordinatesProps {
 }
 
 const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
+  const { t } = useTranslation();
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState("");
   const [unknownTime, setUnknownTime] = useState(false);
   const [birthPlace, setBirthPlace] = useState("");
+  const [warningExpanded, setWarningExpanded] = useState(false);
 
   const isValid = date !== undefined && birthPlace.trim().length > 0;
 
@@ -49,7 +52,6 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
   return (
     <section className="min-h-screen px-5 py-8">
       <div className="w-full max-w-app mx-auto">
-        {/* Back */}
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -60,26 +62,22 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
           <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
         </motion.button>
 
-        {/* Label */}
         <motion.p
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
           className="font-display text-[14px] tracking-[0.4em] text-primary mb-4"
         >
-          Y O U R &nbsp; C O O R D I N A T E S
+          {t("birth_heading")}
         </motion.p>
 
-        {/* Subtext */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="font-body text-[14px] text-muted-foreground leading-relaxed mb-10"
         >
-          We anchor your mirror in the moment you arrived. This is how we
-          personalise your reading — not a general horoscope. We only ask this
-          once.
+          {t("birth_subtitle")}
         </motion.p>
 
         <motion.form
@@ -92,7 +90,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
           {/* Date of birth */}
           <div className="space-y-2">
             <label className="font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
-              Date of birth
+              {t("birth_date_label")}
             </label>
             <Popover>
               <PopoverTrigger asChild>
@@ -124,7 +122,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
           {/* Time of birth */}
           <div className="space-y-2">
             <label className="font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
-              Time of birth
+              {t("birth_time_label")}
             </label>
             <div className="relative">
               <input
@@ -169,20 +167,77 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
                 )}
               </div>
               <span className="font-body text-[13px] text-foreground/60">
-                I don't know exactly
+                {t("birth_unknown_time")}
               </span>
             </button>
-            {unknownTime && (
-              <p className="font-body text-[12px] text-muted-foreground ml-6.5 italic">
-                We'll use solar noon
-              </p>
-            )}
+
+            {/* Warning card when unknown time toggled */}
+            <AnimatePresence>
+              {unknownTime && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <p className="font-body text-[12px] text-muted-foreground ml-6.5 italic mb-2">
+                    {t("birth_solar_noon")}
+                  </p>
+
+                  {/* Expandable warning card */}
+                  <div className="border border-amber-500/40 bg-amber-500/5 rounded-md p-4 ml-0">
+                    <button
+                      type="button"
+                      onClick={() => setWarningExpanded(!warningExpanded)}
+                      className="flex items-center justify-between w-full text-left"
+                    >
+                      <span className="font-body text-[13px] text-amber-400/90 font-medium">
+                        ⚠ Why birth time matters
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          "w-4 h-4 text-amber-400/70 transition-transform duration-200",
+                          warningExpanded && "rotate-180"
+                        )}
+                        strokeWidth={1.5}
+                      />
+                    </button>
+                    <AnimatePresence>
+                      {warningExpanded && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <p className="font-body text-[12px] text-foreground/60 leading-relaxed mt-3 whitespace-pre-line">
+                            {t("birth_time_warning")}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Find birth time link */}
+                  <a
+                    href="https://www.gov.uk/order-copy-birth-certificate"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 mt-3 ml-0 font-body text-[13px] text-primary hover:text-primary/80 transition-colors"
+                  >
+                    {t("birth_find_time")}
+                    <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
+                  </a>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Birth place */}
           <div className="space-y-2">
             <label className="font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
-              Birth place
+              {t("birth_place_label")}
             </label>
             <input
               type="text"
@@ -200,13 +255,13 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
               disabled={!isValid}
               className="w-full h-[52px] rounded-sm font-body font-medium text-[14px] tracking-wide transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110"
             >
-              Generate my mirror →
+              {t("birth_cta")}
             </button>
           </div>
 
           {/* Privacy note */}
           <p className="font-body text-[12px] text-foreground/50 text-center pt-2">
-            Your birth data is stored securely and never shared.
+            {t("birth_privacy")}
           </p>
         </motion.form>
       </div>
