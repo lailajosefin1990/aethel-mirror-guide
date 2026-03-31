@@ -308,7 +308,7 @@ const Index = () => {
 
     setReadingData(data as ReadingData);
     return data;
-  }, [birthData, questionData, i18n.language]);
+  }, [birthData, questionData, i18n.language, regenerationFeedback]);
 
   const handleLoadingComplete = useCallback(() => {
     setView("reading");
