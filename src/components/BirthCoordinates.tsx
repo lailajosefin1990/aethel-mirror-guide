@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { track } from "@/lib/posthog";
 
 export interface BirthData {
   date: Date;
