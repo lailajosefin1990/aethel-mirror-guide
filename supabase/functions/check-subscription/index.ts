@@ -62,6 +62,7 @@ serve(async (req) => {
     let tier = "free";
     if (productId === "prod_UFbBUJGbugwqq0") tier = "mirror";
     if (productId === "prod_UFbCYrbFvm1RKJ") tier = "mirror_pro";
+    if (productId === "prod_UFc5n43D1PnJ3Z") tier = "practitioner";
 
     // Update profile subscription tier
     await supabaseClient.from("profiles").update({
