@@ -202,6 +202,8 @@ const Index = () => {
 
   const handleQuestionSubmit = (data: QuestionData) => {
     setQuestionData(data);
+    // Persist question so it survives OAuth page redirects
+    sessionStorage.setItem("aethel_pending_question", JSON.stringify(data));
     if (!user) {
       setView("auth");
       return;
