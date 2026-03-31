@@ -13,6 +13,10 @@ interface PaywallModalProps {
 const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
   const [loading, setLoading] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (open) track("paywall_shown", { trigger: "second_reading" });
+  }, [open]);
+
   const handleCheckout = async (priceId: string, tierName: string) => {
     setLoading(tierName);
     try {
