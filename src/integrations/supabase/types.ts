@@ -207,6 +207,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_memory: {
+        Row: {
+          created_at: string
+          frequency: number
+          id: string
+          last_seen_at: string
+          memory_type: string
+          memory_value: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          frequency?: number
+          id?: string
+          last_seen_at?: string
+          memory_type: string
+          memory_value: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          frequency?: number
+          id?: string
+          last_seen_at?: string
+          memory_type?: string
+          memory_value?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
