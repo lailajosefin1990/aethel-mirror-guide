@@ -1,0 +1,155 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
+
+interface AuthScreenProps {
+  onSuccess: () => void;
+  onBack: () => void;
+}
+
+const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
+  const [isSignUp, setIsSignUp] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: window.location.origin },
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      }
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    setError("");
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        setError(result.error.message || "Google sign-in failed");
+      }
+    } catch (err: any) {
+      setError(err.message || "Google sign-in failed");
+    }
+  };
+
+  const inputClass =
+    "w-full h-12 px-4 rounded-sm bg-card text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300";
+
+  return (
+    <section className="min-h-screen px-5 py-8 flex items-center justify-center">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-app"
+      >
+        <p className="font-display text-[14px] tracking-[0.4em] text-primary mb-4 text-center">
+          A E T H E L &nbsp; M I R R O R
+        </p>
+
+        <h2 className="font-display text-[24px] leading-[1.3] text-foreground text-center mb-2">
+          Save your mirror
+        </h2>
+        <p className="font-body text-[14px] text-muted-foreground text-center mb-8">
+          Create a free account to keep your readings
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            required
+            className={inputClass}
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            required
+            minLength={6}
+            className={inputClass}
+          />
+
+          {error && (
+            <p className="font-body text-[13px] text-destructive">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300 disabled:opacity-50"
+          >
+            {loading ? "..." : "Continue"}
+          </button>
+        </form>
+
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="px-3 bg-background font-body text-[12px] text-muted-foreground">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
+        <button
+          onClick={handleGoogle}
+          className="w-full h-[48px] rounded-sm border border-border bg-card text-foreground font-body text-[14px] hover:border-foreground/30 transition-all duration-300 flex items-center justify-center gap-2"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18">
+            <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" />
+            <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" />
+            <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" />
+            <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 2.58 9 2.58Z" />
+          </svg>
+          Google
+        </button>
+
+        <p className="font-body text-[13px] text-muted-foreground text-center mt-6">
+          {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+          <button
+            onClick={() => { setIsSignUp(!isSignUp); setError(""); }}
+            className="text-primary hover:text-primary/80 transition-colors"
+          >
+            {isSignUp ? "Sign in" : "Sign up"}
+          </button>
+        </p>
+
+        <button
+          onClick={onBack}
+          className="w-full mt-4 font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors"
+        >
+          ← Back
+        </button>
+      </motion.div>
+    </section>
+  );
+};
+
+export default AuthScreen;
