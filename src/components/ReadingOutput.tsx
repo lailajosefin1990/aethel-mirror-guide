@@ -33,7 +33,7 @@ const ExpandableBullet = ({ text }: { text: string }) => (
   </div>
 );
 
-const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate, regenerationCount = 0 }: ReadingOutputProps) => {
+const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate, regenerationCount = 0, birthTimeUnknown = false }: ReadingOutputProps) => {
   const { subscriptionTier } = useAuth();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
