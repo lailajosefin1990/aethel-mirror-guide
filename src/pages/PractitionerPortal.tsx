@@ -182,7 +182,7 @@ const PractitionerPortal = () => {
       .eq("client_id", client.id)
       .eq("practitioner_id", practitioner.id)
       .order("created_at", { ascending: false });
-    setClientReadings((data || []) as PractitionerReading[]);
+    setClientReadings((data || []) as unknown as PractitionerReading[]);
     setView("client_detail");
   };
 
