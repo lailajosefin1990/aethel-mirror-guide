@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, createContext, useContext, ReactNode 
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { SubscriptionTier } from "@/lib/stripe";
+import { identifyUser, resetUser } from "@/lib/posthog";
 
 interface AuthContextType {
   user: User | null;
