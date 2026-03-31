@@ -19,6 +19,7 @@ const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
 
   const handleCheckout = async (priceId: string, tierName: string) => {
     setLoading(tierName);
+    track("paywall_upgrade_clicked", { tier: tierName });
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: { priceId },
