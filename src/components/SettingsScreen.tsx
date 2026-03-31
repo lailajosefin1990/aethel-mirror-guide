@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { isPushActive, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
 import { track } from "@/lib/posthog";
+import { useNavigate } from "react-router-dom";
 
 const tierLabels: Record<string, string> = {
   free: "Free",
