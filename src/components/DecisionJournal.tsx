@@ -275,8 +275,20 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
                 onChange={(e) => setOutcomeNote(e.target.value)}
                 placeholder="What happened?"
                 rows={3}
-                className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-4"
+                className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-3"
               />
+
+              <label className="flex items-start gap-2.5 cursor-pointer mb-4">
+                <input
+                  type="checkbox"
+                  checked={consentToShare}
+                  onChange={(e) => setConsentToShare(e.target.checked)}
+                  className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary shrink-0"
+                />
+                <span className="font-body text-[12px] text-muted-foreground leading-relaxed">
+                  Share this anonymously to help others trust their mirror
+                </span>
+              </label>
 
               <button
                 onClick={handleLogSubmit}
