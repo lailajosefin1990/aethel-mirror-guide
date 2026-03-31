@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   Accordion,
   AccordionContent,
@@ -20,6 +21,7 @@ const howItems = [
 
 const HeroSection = ({ onStart }: HeroSectionProps) => {
   const howRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     track("landing_viewed");
@@ -139,6 +141,18 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
                       </p>
                     </div>
                   ))}
+
+                  <button
+                    onClick={() => { track("evidence_link_clicked"); navigate("/evidence"); }}
+                    className="flex gap-3 items-start group mt-2"
+                  >
+                    <span className="font-body text-[12px] text-primary/60 mt-0.5 shrink-0">
+                      04
+                    </span>
+                    <p className="font-display text-[15px] leading-[1.6] text-primary group-hover:text-primary/80 transition-colors">
+                      See real outcomes →
+                    </p>
+                  </button>
                 </div>
               </AccordionContent>
             </AccordionItem>

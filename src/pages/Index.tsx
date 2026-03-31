@@ -237,7 +237,7 @@ const Index = () => {
     }
   };
 
-  const handleUpdateEntry = async (id: string, outcome: JournalEntry["outcome"]) => {
+  const handleUpdateEntry = async (id: string, outcome: JournalEntry["outcome"], consentToShare?: boolean) => {
     if (!user || !outcome) return;
 
     await supabase.from("outcomes").insert({
@@ -245,6 +245,7 @@ const Index = () => {
       user_id: user.id,
       followed: outcome.followed,
       outcome_text: outcome.note,
+      consent_to_share: consentToShare ?? false,
     });
 
     setJournalEntries((prev) =>

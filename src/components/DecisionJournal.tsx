@@ -17,7 +17,7 @@ export interface JournalEntry {
 
 interface DecisionJournalProps {
   entries: JournalEntry[];
-  onUpdateEntry: (id: string, outcome: JournalEntry["outcome"]) => void;
+  onUpdateEntry: (id: string, outcome: JournalEntry["outcome"], consentToShare?: boolean) => void;
   onStartReading: () => void;
 }
 
@@ -78,6 +78,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
   const [sheetEntryId, setSheetEntryId] = useState<string | null>(null);
   const [followedChoice, setFollowedChoice] = useState<"yes" | "no" | "partially" | null>(null);
   const [outcomeNote, setOutcomeNote] = useState("");
+  const [consentToShare, setConsentToShare] = useState(false);
 
   useEffect(() => {
     track("journal_viewed");
@@ -89,11 +90,12 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
 
   const handleLogSubmit = () => {
     if (!sheetEntryId || !followedChoice) return;
-    track("outcome_submitted", { followed: followedChoice, has_text: outcomeNote.length > 0 });
-    onUpdateEntry(sheetEntryId, { followed: followedChoice, note: outcomeNote });
+    track("outcome_submitted", { followed: followedChoice, has_text: outcomeNote.length > 0, consent_to_share: consentToShare });
+    onUpdateEntry(sheetEntryId, { followed: followedChoice, note: outcomeNote }, consentToShare);
     setSheetEntryId(null);
     setFollowedChoice(null);
     setOutcomeNote("");
+    setConsentToShare(false);
   };
 
   return (
@@ -273,8 +275,20 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
                 onChange={(e) => setOutcomeNote(e.target.value)}
                 placeholder="What happened?"
                 rows={3}
-                className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-4"
+                className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-3"
               />
+
+              <label className="flex items-start gap-2.5 cursor-pointer mb-4">
+                <input
+                  type="checkbox"
+                  checked={consentToShare}
+                  onChange={(e) => setConsentToShare(e.target.checked)}
+                  className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary shrink-0"
+                />
+                <span className="font-body text-[12px] text-muted-foreground leading-relaxed">
+                  Share this anonymously to help others trust their mirror
+                </span>
+              </label>
 
               <button
                 onClick={handleLogSubmit}
