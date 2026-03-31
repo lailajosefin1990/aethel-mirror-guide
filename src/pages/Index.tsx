@@ -209,6 +209,16 @@ const Index = () => {
       if (!readingData.is_fallback) {
         await refreshReadingCount();
       }
+
+      // Extract memory tags in background (fire-and-forget)
+      supabase.functions.invoke("extract-memory", {
+        body: {
+          user_id: user.id,
+          domain: questionData.domain,
+          question: questionData.question,
+          third_way: readingData.third_way,
+        },
+      }).catch((err) => console.error("Memory extraction failed:", err));
     }
 
     setActiveTab("journey");
