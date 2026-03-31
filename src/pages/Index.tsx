@@ -1,22 +1,46 @@
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
+import HeroSection from "@/components/HeroSection";
+
+type View = "home" | "intake";
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState("mirror");
+  const [view, setView] = useState<View>("home");
+
+  const transition = { duration: 0.3, ease: "easeInOut" };
 
   return (
-    <AppLayout showNav={false}>
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <h1 className="font-display text-4xl font-light text-foreground">
-            Aethel Mirror
-          </h1>
-          <p className="font-body text-sm text-muted-foreground">
-            Decision clarity is loading…
-          </p>
-        </div>
-      </div>
-    </AppLayout>
+    <AnimatePresence mode="wait">
+      {view === "home" && (
+        <motion.div
+          key="home"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={transition}
+        >
+          <HeroSection onStart={() => setView("intake")} />
+        </motion.div>
+      )}
+      {view === "intake" && (
+        <motion.div
+          key="intake"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={transition}
+        >
+          <AppLayout>
+            <div className="flex items-center justify-center min-h-screen">
+              <p className="font-body text-sm text-muted-foreground">
+                Question input screen — coming soon
+              </p>
+            </div>
+          </AppLayout>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
