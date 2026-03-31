@@ -226,6 +226,9 @@ const Index = () => {
         birthDate: bd?.date ? new Date(bd.date).toLocaleDateString("en-GB") : "unknown",
         birthPlace: bd?.birthPlace || "unknown",
         birthTime: bd?.unknownTime ? "unknown" : (bd?.time || "unknown"),
+        birthLat: bd?.birthLat ?? null,
+        birthLng: bd?.birthLng ?? null,
+        birthTimezone: bd?.birthTimezone ?? null,
         language: i18n.language,
       },
     });
