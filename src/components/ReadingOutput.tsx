@@ -38,8 +38,33 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
   const [cardBlob, setCardBlob] = useState<Blob | null>(null);
   const [cardUrl, setCardUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const thirdWayRef = useRef<HTMLDivElement>(null);
 
   const isPro = subscriptionTier === "mirror_pro";
+
+  // Track reading loaded
+  useEffect(() => {
+    if (reading) {
+      track("reading_loaded", { confidence_level: reading.confidence_level });
+    }
+  }, [reading]);
+
+  // Track Third Way scroll into view
+  useEffect(() => {
+    const el = thirdWayRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          track("third_way_read");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [reading]);
 
   // Set OG image meta tags for social sharing
   useOgImage({ thirdWay: reading?.third_way || "", domain });
