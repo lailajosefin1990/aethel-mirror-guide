@@ -204,7 +204,7 @@ describe("Google OAuth round-trip: questionData persistence", () => {
     await user.click(domainButton);
 
     const textarea = screen.getByPlaceholderText(/Describe your decision/i);
-    await user.type(textarea, "Should I accept the new job offer?");
+    fireEvent.change(textarea, { target: { value: "Should I accept the new job offer?" } });
 
     const submitButton = screen.getByText(/Find my Third Way/i);
     await user.click(submitButton);
