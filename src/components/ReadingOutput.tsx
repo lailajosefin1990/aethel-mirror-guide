@@ -16,7 +16,7 @@ interface ReadingOutputProps {
   reading: ReadingData | null;
   onSave: () => void;
   onBack: () => void;
-  onRegenerate?: () => void;
+  onRegenerate?: (feedbackText?: string) => void;
   regenerationCount?: number;
   birthTimeUnknown?: boolean;
 }
