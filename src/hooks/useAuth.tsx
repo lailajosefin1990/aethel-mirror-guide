@@ -54,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setSubscriptionTier("free");
     setMonthlyReadingCount(0);
+    resetUser();
   }, []);
 
   useEffect(() => {
