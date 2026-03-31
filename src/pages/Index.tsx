@@ -200,6 +200,13 @@ const Index = () => {
     return () => navigator.serviceWorker?.removeEventListener("message", handler);
   }, []);
 
+  // Auto-proceed after OAuth redirect if we have pending question data
+  useEffect(() => {
+    if (user && !authLoading && questionData && view === "home") {
+      proceedAfterAuth();
+    }
+  }, [user, authLoading, questionData, view, proceedAfterAuth]);
+
   const handleQuestionSubmit = (data: QuestionData) => {
     setQuestionData(data);
     // Persist question so it survives OAuth page redirects
