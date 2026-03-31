@@ -258,6 +258,7 @@ export type Database = {
           consent_prompt_dismissed: boolean
           created_at: string
           id: string
+          referral_code: string
           stripe_customer_id: string | null
           subscription_tier: Database["public"]["Enums"]["subscription_tier"]
           updated_at: string
@@ -272,6 +273,7 @@ export type Database = {
           consent_prompt_dismissed?: boolean
           created_at?: string
           id?: string
+          referral_code?: string
           stripe_customer_id?: string | null
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string
@@ -286,6 +288,7 @@ export type Database = {
           consent_prompt_dismissed?: boolean
           created_at?: string
           id?: string
+          referral_code?: string
           stripe_customer_id?: string | null
           subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string
@@ -359,6 +362,36 @@ export type Database = {
           reading_text?: string | null
           third_way_text?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referred_email: string | null
+          referred_user_id: string | null
+          referrer_user_id: string
+          reward_granted: boolean
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_email?: string | null
+          referred_user_id?: string | null
+          referrer_user_id: string
+          reward_granted?: boolean
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_email?: string | null
+          referred_user_id?: string | null
+          referrer_user_id?: string
+          reward_granted?: boolean
+          status?: string
         }
         Relationships: []
       }
