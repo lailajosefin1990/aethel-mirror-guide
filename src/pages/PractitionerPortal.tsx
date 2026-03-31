@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Plus, X, User, ChevronRight, Sparkles } from "lucide-react";
+import { ArrowLeft, Plus, X, User, ChevronRight, Sparkles, FileText, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import type { ReadingData } from "@/lib/reading";
-import ReadingOutput from "@/components/ReadingOutput";
+import { CONFIDENCE_MESSAGES } from "@/lib/reading";
 import ReadingLoader from "@/components/ReadingLoader";
+import { STRIPE_TIERS } from "@/lib/stripe";
+import { track } from "@/lib/posthog";
 
 interface Client {
   id: string;
@@ -40,6 +42,138 @@ const DOMAINS = [
   "Everything at once",
 ];
 
+// ─── Practitioner Reading Output ───
+const PractitionerReadingOutput = ({
+  reading,
+  domain,
+  clientName,
+  practitionerName,
+  onSave,
+  onBack,
+}: {
+  reading: ReadingData;
+  domain: string;
+  clientName: string;
+  practitionerName: string;
+  onSave: () => void;
+  onBack: () => void;
+}) => {
+  const printRef = useRef<HTMLDivElement>(null);
+  const sectionLabel = "font-body text-[11px] uppercase tracking-[0.35em] text-muted-foreground mb-4";
+  const confidenceText = CONFIDENCE_MESSAGES[reading.confidence_level] || CONFIDENCE_MESSAGES.medium;
+
+  const handlePrint = () => {
+    track("practitioner_pdf_exported");
+    window.print();
+  };
+
+  return (
+    <>
+      {/* Print-specific styles */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          #practitioner-print, #practitioner-print * { visibility: visible; }
+          #practitioner-print {
+            position: absolute; left: 0; top: 0; width: 100%;
+            background: white !important; color: black !important;
+            padding: 40px;
+          }
+          #practitioner-print .no-print { display: none !important; }
+          #practitioner-print .print-header { display: block !important; }
+          #practitioner-print .print-footer { display: block !important; }
+          #practitioner-print p, #practitioner-print span, #practitioner-print h2 {
+            color: black !important;
+          }
+          #practitioner-print .text-primary { color: #666 !important; }
+          #practitioner-print .text-muted-foreground { color: #888 !important; }
+          #practitioner-print .border-primary\\/40 { border-color: #ccc !important; }
+        }
+      `}</style>
+
+      <div id="practitioner-print" ref={printRef}>
+        {/* Print header */}
+        <div className="print-header hidden mb-8">
+          <p style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>{practitionerName}</p>
+          <p style={{ fontSize: 14, fontWeight: 600 }}>Session prep — {clientName}</p>
+          <p style={{ fontSize: 11, color: "#888" }}>{new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+        </div>
+
+        {/* Back */}
+        <button onClick={onBack} className="mb-4 text-foreground/50 hover:text-foreground/70 transition-colors no-print">
+          <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+        </button>
+
+        {/* Session prep banner */}
+        <div className="bg-primary/10 border border-primary/20 rounded-md px-4 py-3 mb-6">
+          <p className="font-body text-[11px] uppercase tracking-[0.3em] text-primary mb-1">S E S S I O N &nbsp; P R E P</p>
+          <p className="font-display text-[16px] text-foreground">{clientName}</p>
+        </div>
+
+        {/* Domain */}
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-body text-[11px] uppercase tracking-[0.2em] text-primary mb-10">
+          {domain}
+        </motion.p>
+
+        {/* Stars */}
+        <div className="mb-10">
+          <p className={sectionLabel}>W H A T &nbsp; Y O U R &nbsp; S T A R S &nbsp; S A Y</p>
+          <p className="font-display text-[16px] leading-[1.6] text-foreground">{reading.astrology_reading}</p>
+        </div>
+
+        {/* Design */}
+        <div className="mb-10">
+          <p className={sectionLabel}>W H A T &nbsp; Y O U R &nbsp; D E S I G N &nbsp; S A Y S</p>
+          <div className="space-y-4">
+            {reading.design_insights.map((item, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <span className="text-primary mt-1 shrink-0">—</span>
+                <span className="font-display text-[16px] leading-[1.6] text-foreground">{item.replace(/^—\s*/, "")}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Confidence */}
+        <p className="font-body text-[13px] italic text-primary/80 mb-10">{confidenceText}</p>
+
+        {/* Third Way */}
+        <div className="border-t-2 border-primary/40 pt-8 mb-10">
+          <p className={`${sectionLabel} text-center`}>Y O U R &nbsp; T H I R D &nbsp; W A Y</p>
+          <p className="font-display text-[22px] sm:text-[24px] leading-[1.4] text-foreground text-center font-medium">
+            {reading.third_way}
+          </p>
+        </div>
+
+        {/* Journal */}
+        <div className="bg-card border border-border rounded-md p-5 mb-8">
+          <p className="font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3">J O U R N A L</p>
+          <p className="font-display text-[16px] leading-[1.6] text-card-foreground">{reading.journal_prompt}</p>
+        </div>
+
+        {/* Print footer */}
+        <div className="print-footer hidden mt-12 pt-4 border-t border-gray-200">
+          <p style={{ fontSize: 10, color: "#aaa", textAlign: "center" }}>Prepared with Aethel Mirror</p>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col gap-3 pb-10 no-print">
+          <button onClick={onSave}
+            className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300">
+            Save to client file
+          </button>
+          <button onClick={handlePrint}
+            className="w-full h-[48px] rounded-sm border border-primary text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300 flex items-center justify-center gap-2">
+            <FileText className="w-4 h-4" strokeWidth={1.5} />
+            Export as PDF
+          </button>
+        </div>
+      </div>
+    </>
+  );
+};
+
+// ─── Main Portal ───
 const PractitionerPortal = () => {
   const { user, subscriptionTier } = useAuth();
   const navigate = useNavigate();
@@ -49,12 +183,15 @@ const PractitionerPortal = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [clientReadings, setClientReadings] = useState<PractitionerReading[]>([]);
   const [loading, setLoading] = useState(true);
+  const [limitModalOpen, setLimitModalOpen] = useState(false);
+  const [expandedReadingId, setExpandedReadingId] = useState<string | null>(null);
 
   // Form state
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formBirthDate, setFormBirthDate] = useState("");
   const [formBirthTime, setFormBirthTime] = useState("");
+  const [formBirthTimeUnknown, setFormBirthTimeUnknown] = useState(false);
   const [formBirthPlace, setFormBirthPlace] = useState("");
   const [formNotes, setFormNotes] = useState("");
 
@@ -70,7 +207,6 @@ const PractitionerPortal = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      // Check/create practitioner record
       let { data: prac } = await supabase
         .from("practitioners")
         .select("id, display_name")
@@ -105,6 +241,7 @@ const PractitionerPortal = () => {
     setFormEmail("");
     setFormBirthDate("");
     setFormBirthTime("");
+    setFormBirthTimeUnknown(false);
     setFormBirthPlace("");
     setFormNotes("");
   };
@@ -112,7 +249,7 @@ const PractitionerPortal = () => {
   const handleAddClient = async () => {
     if (!practitioner || !formName.trim()) return;
     if (clients.length >= MAX_CLIENTS) {
-      toast.error(`Maximum ${MAX_CLIENTS} clients reached`);
+      setLimitModalOpen(true);
       return;
     }
 
@@ -123,7 +260,7 @@ const PractitionerPortal = () => {
         client_name: formName.trim(),
         client_email: formEmail.trim() || null,
         birth_date: formBirthDate || null,
-        birth_time: formBirthTime || null,
+        birth_time: formBirthTimeUnknown ? null : (formBirthTime || null),
         birth_place: formBirthPlace.trim() || null,
         notes: formNotes.trim() || null,
       })
@@ -147,7 +284,7 @@ const PractitionerPortal = () => {
         client_name: formName.trim(),
         client_email: formEmail.trim() || null,
         birth_date: formBirthDate || null,
-        birth_time: formBirthTime || null,
+        birth_time: formBirthTimeUnknown ? null : (formBirthTime || null),
         birth_place: formBirthPlace.trim() || null,
         notes: formNotes.trim() || null,
       })
@@ -157,7 +294,7 @@ const PractitionerPortal = () => {
       setClients((prev) =>
         prev.map((c) =>
           c.id === selectedClient.id
-            ? { ...c, client_name: formName.trim(), client_email: formEmail.trim() || null, birth_date: formBirthDate || null, birth_time: formBirthTime || null, birth_place: formBirthPlace.trim() || null, notes: formNotes.trim() || null }
+            ? { ...c, client_name: formName.trim(), client_email: formEmail.trim() || null, birth_date: formBirthDate || null, birth_time: formBirthTimeUnknown ? null : (formBirthTime || null), birth_place: formBirthPlace.trim() || null, notes: formNotes.trim() || null }
             : c
         )
       );
@@ -183,6 +320,7 @@ const PractitionerPortal = () => {
       .eq("practitioner_id", practitioner.id)
       .order("created_at", { ascending: false });
     setClientReadings((data || []) as unknown as PractitionerReading[]);
+    setExpandedReadingId(null);
     setView("client_detail");
   };
 
@@ -192,6 +330,7 @@ const PractitionerPortal = () => {
     setFormEmail(client.client_email || "");
     setFormBirthDate(client.birth_date || "");
     setFormBirthTime(client.birth_time || "");
+    setFormBirthTimeUnknown(!client.birth_time);
     setFormBirthPlace(client.birth_place || "");
     setFormNotes(client.notes || "");
     setView("edit_client");
@@ -239,6 +378,20 @@ const PractitionerPortal = () => {
     openClientDetail(selectedClient);
   };
 
+  // Practitioner checkout
+  const handlePractitionerCheckout = async () => {
+    track("practitioner_checkout_clicked");
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: STRIPE_TIERS.practitioner.price_id },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err) {
+      console.error("Checkout error:", err);
+    }
+  };
+
   if (!user) {
     navigate("/");
     return null;
@@ -247,21 +400,45 @@ const PractitionerPortal = () => {
   if (subscriptionTier !== "practitioner" && subscriptionTier !== "mirror_pro") {
     return (
       <section className="min-h-screen px-5 py-8">
-        <div className="w-full max-w-app mx-auto text-center pt-20">
+        <div className="w-full max-w-app mx-auto text-center pt-16">
+          <button onClick={() => navigate("/")} className="absolute left-5 top-8 text-foreground/50 hover:text-foreground/70 transition-colors">
+            <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+          </button>
+
           <p className="font-display text-[14px] tracking-[0.35em] text-primary mb-6">
-            P R A C T I T I O N E R &nbsp; P O R T A L
+            P R A C T I T I O N E R
           </p>
-          <h2 className="font-display text-[22px] text-foreground mb-4">
-            Built for coaches, astrologers, and therapists.
+          <h2 className="font-display text-[24px] leading-[1.3] text-foreground mb-4">
+            Run readings for your clients.
           </h2>
-          <p className="font-body text-[14px] text-muted-foreground mb-8 leading-relaxed">
-            Run readings for your clients, manage their profiles, and build a deeper practice — all in one place.
+          <p className="font-body text-[14px] text-muted-foreground mb-2 leading-relaxed">
+            Prepare deeper sessions.
           </p>
+          <p className="font-body text-[14px] text-muted-foreground mb-10 leading-relaxed">
+            Let the mirror do the groundwork.
+          </p>
+
+          <ul className="text-left space-y-3 mb-10 px-4">
+            {STRIPE_TIERS.practitioner.features.map((f) => (
+              <li key={f} className="flex items-start gap-3">
+                <span className="text-primary mt-0.5 shrink-0">✓</span>
+                <span className="font-body text-[14px] text-foreground/80">{f}</span>
+              </li>
+            ))}
+          </ul>
+
+          <button
+            onClick={handlePractitionerCheckout}
+            className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300"
+          >
+            Start Practitioner — £49/month
+          </button>
+
           <button
             onClick={() => navigate("/")}
-            className="h-[48px] px-8 rounded-sm border border-border text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300"
+            className="w-full font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors mt-4"
           >
-            ← Back to mirror
+            Maybe later
           </button>
         </div>
       </section>
@@ -288,7 +465,7 @@ const PractitionerPortal = () => {
                   <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
                 </button>
                 <p className="font-display text-[14px] tracking-[0.35em] text-primary">
-                  C L I E N T S
+                  Y O U R &nbsp; C L I E N T S
                 </p>
                 <span className="font-body text-[12px] text-muted-foreground">
                   {clients.length}/{MAX_CLIENTS}
@@ -302,28 +479,37 @@ const PractitionerPortal = () => {
                 </div>
               ) : (
                 <div className="space-y-3 mb-6">
-                  {clients.map((client) => (
-                    <button
-                      key={client.id}
-                      onClick={() => openClientDetail(client)}
-                      className="w-full bg-card border border-border rounded-md p-4 flex items-center justify-between hover:border-foreground/20 transition-colors"
-                    >
-                      <div className="text-left">
-                        <p className="font-body text-[14px] text-card-foreground">{client.client_name}</p>
-                        {client.birth_place && (
-                          <p className="font-body text-[12px] text-muted-foreground">{client.birth_place}</p>
-                        )}
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
-                    </button>
-                  ))}
+                  {clients.map((client) => {
+                    // Find latest reading for this client from the cached data
+                    return (
+                      <button
+                        key={client.id}
+                        onClick={() => openClientDetail(client)}
+                        className="w-full bg-card border border-border rounded-md p-4 flex items-center justify-between hover:border-foreground/20 transition-colors"
+                      >
+                        <div className="text-left">
+                          <p className="font-body text-[14px] text-card-foreground">{client.client_name}</p>
+                          {client.birth_place && (
+                            <p className="font-body text-[12px] text-muted-foreground">{client.birth_place}</p>
+                          )}
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
               <button
-                onClick={() => { resetForm(); setView("add_client"); }}
-                disabled={clients.length >= MAX_CLIENTS}
-                className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+                onClick={() => {
+                  if (clients.length >= MAX_CLIENTS) {
+                    setLimitModalOpen(true);
+                    return;
+                  }
+                  resetForm();
+                  setView("add_client");
+                }}
+                className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" strokeWidth={2} />
                 Add client
@@ -342,7 +528,7 @@ const PractitionerPortal = () => {
               </button>
 
               <p className="font-display text-[14px] tracking-[0.35em] text-primary mb-8">
-                {view === "add_client" ? "N E W  C L I E N T" : "E D I T  C L I E N T"}
+                {view === "add_client" ? "N E W &nbsp; C L I E N T" : "E D I T &nbsp; C L I E N T"}
               </p>
 
               <div className="space-y-4 mb-8">
@@ -360,7 +546,21 @@ const PractitionerPortal = () => {
                 </div>
                 <div>
                   <p className={sectionLabel}>B I R T H &nbsp; T I M E</p>
-                  <input type="time" value={formBirthTime} onChange={(e) => setFormBirthTime(e.target.value)} className={inputClass} />
+                  {!formBirthTimeUnknown && (
+                    <input type="time" value={formBirthTime} onChange={(e) => setFormBirthTime(e.target.value)} className={`${inputClass} mb-2`} />
+                  )}
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formBirthTimeUnknown}
+                      onChange={(e) => {
+                        setFormBirthTimeUnknown(e.target.checked);
+                        if (e.target.checked) setFormBirthTime("");
+                      }}
+                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    <span className="font-body text-[13px] text-muted-foreground">Unknown</span>
+                  </label>
                 </div>
                 <div>
                   <p className={sectionLabel}>B I R T H &nbsp; P L A C E</p>
@@ -419,7 +619,7 @@ const PractitionerPortal = () => {
                   <p className={sectionLabel}>B I R T H &nbsp; D A T A</p>
                   <p className="font-body text-[13px] text-card-foreground">
                     {new Date(selectedClient.birth_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-                    {selectedClient.birth_time && ` at ${selectedClient.birth_time}`}
+                    {selectedClient.birth_time ? ` at ${selectedClient.birth_time}` : " — time unknown"}
                     {selectedClient.birth_place && ` — ${selectedClient.birth_place}`}
                   </p>
                 </div>
@@ -437,20 +637,55 @@ const PractitionerPortal = () => {
               <p className={`${sectionLabel} mb-4`}>R E A D I N G S &nbsp; ({clientReadings.length})</p>
               {clientReadings.length > 0 ? (
                 <div className="space-y-3 mb-6">
-                  {clientReadings.map((r) => (
-                    <div key={r.id} className="bg-card border border-border rounded-md p-4">
-                      <div className="flex items-baseline justify-between mb-2">
-                        <span className="font-body text-[11px] uppercase tracking-wider text-primary">{r.domain}</span>
-                        <span className="font-body text-[11px] text-muted-foreground">
-                          {new Date(r.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
-                        </span>
+                  {clientReadings.map((r) => {
+                    const isExpanded = expandedReadingId === r.id;
+                    const rd = r.reading_json as any;
+                    return (
+                      <div key={r.id} className="bg-card border border-border rounded-md p-4">
+                        <button
+                          onClick={() => setExpandedReadingId(isExpanded ? null : r.id)}
+                          className="w-full text-left"
+                        >
+                          <div className="flex items-baseline justify-between mb-2">
+                            <span className="font-body text-[11px] uppercase tracking-wider text-primary">{r.domain}</span>
+                            <span className="font-body text-[11px] text-muted-foreground">
+                              {new Date(r.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                            </span>
+                          </div>
+                          <p className="font-body text-[13px] text-card-foreground mb-1">{r.question}</p>
+                          {!isExpanded && (
+                            <p className="font-body text-[12px] text-muted-foreground italic">
+                              {rd?.third_way?.slice(0, 80)}...
+                            </p>
+                          )}
+                          <ChevronDown className={`w-4 h-4 text-muted-foreground mx-auto mt-2 transition-transform ${isExpanded ? "rotate-180" : ""}`} strokeWidth={1.5} />
+                        </button>
+
+                        {isExpanded && rd && (
+                          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-4 pt-4 border-t border-border space-y-4">
+                            <div>
+                              <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Stars</p>
+                              <p className="font-body text-[13px] text-card-foreground">{rd.astrology_reading}</p>
+                            </div>
+                            {rd.design_insights?.map((insight: string, i: number) => (
+                              <div key={i} className="flex items-start gap-2">
+                                <span className="text-primary shrink-0">—</span>
+                                <span className="font-body text-[13px] text-card-foreground">{insight.replace(/^—\s*/, "")}</span>
+                              </div>
+                            ))}
+                            <div className="border-t border-primary/20 pt-3">
+                              <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Third Way</p>
+                              <p className="font-display text-[15px] text-card-foreground font-medium">{rd.third_way}</p>
+                            </div>
+                            <div>
+                              <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Journal</p>
+                              <p className="font-body text-[13px] text-card-foreground italic">{rd.journal_prompt}</p>
+                            </div>
+                          </motion.div>
+                        )}
                       </div>
-                      <p className="font-body text-[13px] text-card-foreground mb-1">{r.question}</p>
-                      <p className="font-body text-[12px] text-muted-foreground italic">
-                        {(r.reading_json as any)?.third_way?.slice(0, 80)}...
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="font-body text-[13px] text-muted-foreground mb-6">No readings yet for this client.</p>
@@ -473,10 +708,10 @@ const PractitionerPortal = () => {
                 <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
               </button>
 
-              <p className="font-display text-[14px] tracking-[0.35em] text-primary mb-2">
-                R E A D I N G &nbsp; F O R
-              </p>
-              <p className="font-display text-[18px] text-foreground mb-8">{selectedClient.client_name}</p>
+              <div className="bg-primary/10 border border-primary/20 rounded-md px-4 py-3 mb-6">
+                <p className="font-body text-[11px] uppercase tracking-[0.2em] text-primary">Reading for</p>
+                <p className="font-display text-[16px] text-foreground">{selectedClient.client_name}</p>
+              </div>
 
               <div className="space-y-4 mb-8">
                 <div>
@@ -514,7 +749,7 @@ const PractitionerPortal = () => {
                 disabled={!readingQuestion.trim()}
                 className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300 disabled:opacity-50"
               >
-                Generate reading
+                Find my Third Way →
               </button>
             </motion.div>
           )}
@@ -531,12 +766,13 @@ const PractitionerPortal = () => {
           )}
 
           {/* ─── Reading Result ─── */}
-          {view === "reading_result" && readingData && (
+          {view === "reading_result" && readingData && selectedClient && practitioner && (
             <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <ReadingOutput
-                domain={readingDomain}
-                question={readingQuestion}
+              <PractitionerReadingOutput
                 reading={readingData}
+                domain={readingDomain}
+                clientName={selectedClient.client_name}
+                practitionerName={practitioner.display_name}
                 onSave={handleSaveReading}
                 onBack={() => setView("new_reading")}
               />
@@ -544,6 +780,43 @@ const PractitionerPortal = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* ─── Client Limit Modal ─── */}
+      <AnimatePresence>
+        {limitModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm px-5"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-app bg-card border border-border rounded-md p-6 relative"
+            >
+              <button onClick={() => setLimitModalOpen(false)} className="absolute top-4 right-4 text-foreground/50 hover:text-foreground/70 transition-colors">
+                <X className="w-4 h-4" strokeWidth={1.5} />
+              </button>
+              <p className="font-display text-[18px] text-card-foreground mb-3">Client limit reached</p>
+              <p className="font-body text-[14px] text-muted-foreground leading-relaxed mb-6">
+                You've reached the 20 client limit. Reply to{" "}
+                <a href="mailto:hello@aethelmirror.com" className="text-primary hover:underline">
+                  hello@aethelmirror.com
+                </a>{" "}
+                to discuss an expanded plan.
+              </p>
+              <button
+                onClick={() => setLimitModalOpen(false)}
+                className="w-full h-[44px] rounded-sm border border-border text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300"
+              >
+                Got it
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
