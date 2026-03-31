@@ -36,6 +36,9 @@ const resources = {
       birth_find_time: "Find my birth time →",
       birth_time_warning: "Your Human Design type depends on your exact birth time. Without it, we'll use solar noon as an estimate — this gives you a strong reading but your design type may not be precise.\n\nTo find your birth time: check your birth certificate, hospital records, or ask a parent.",
       birth_time_disclaimer: "*Human Design insights are estimated — for full accuracy, add your birth time in Settings.",
+      birth_time_why: "Why birth time matters",
+      birth_place_placeholder: "City, Country",
+      birth_place_no_results: "Can't find that location — try the nearest large city",
       // Reading output
       reading_stars_label: "W H A T   Y O U R   S T A R S   S A Y   ( W H E N )",
       reading_design_label: "W H A T   Y O U R   D E S I G N   S A Y S   ( H O W )",

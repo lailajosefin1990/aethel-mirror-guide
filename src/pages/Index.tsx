@@ -36,7 +36,7 @@ const Index = () => {
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [readingData, setReadingData] = useState<ReadingData | null>(null);
-  const [profileBirthData, setProfileBirthData] = useState<{ birth_date: string | null; birth_time: string | null; birth_place: string | null } | null>(null);
+  const [profileBirthData, setProfileBirthData] = useState<{ birth_date: string | null; birth_time: string | null; birth_place: string | null; birth_lat: number | null; birth_lng: number | null; birth_timezone: string | null } | null>(null);
   const [pushSheetOpen, setPushSheetOpen] = useState(false);
   const [hasShownPushPrompt, setHasShownPushPrompt] = useState(false);
   const [showConsentGate, setShowConsentGate] = useState(false);
@@ -89,7 +89,7 @@ const Index = () => {
       // Load profile birth data
       const { data: profile } = await supabase
         .from("profiles")
-        .select("birth_date, birth_time, birth_place, consent_accepted, preferred_language")
+        .select("birth_date, birth_time, birth_place, birth_lat, birth_lng, birth_timezone, consent_accepted, preferred_language")
         .eq("user_id", user.id)
         .single();
       if (profile) {
@@ -175,6 +175,9 @@ const Index = () => {
         time: profileBirthData.birth_time,
         unknownTime: !profileBirthData.birth_time,
         birthPlace: profileBirthData.birth_place || "",
+        birthLat: profileBirthData.birth_lat ?? undefined,
+        birthLng: profileBirthData.birth_lng ?? undefined,
+        birthTimezone: profileBirthData.birth_timezone ?? undefined,
       });
       setView("loading");
     } else {
@@ -193,11 +196,18 @@ const Index = () => {
         birth_date: data.date.toISOString().split("T")[0],
         birth_time: data.unknownTime ? null : data.time,
         birth_place: data.birthPlace,
+        birth_lat: data.birthLat ?? null,
+        birth_lng: data.birthLng ?? null,
+        birth_timezone: data.birthTimezone ?? null,
+        birth_place_name: data.birthPlace,
       }).eq("user_id", user.id);
       setProfileBirthData({
         birth_date: data.date.toISOString().split("T")[0],
         birth_time: data.unknownTime ? null : (data.time || null),
         birth_place: data.birthPlace,
+        birth_lat: data.birthLat ?? null,
+        birth_lng: data.birthLng ?? null,
+        birth_timezone: data.birthTimezone ?? null,
       });
     }
     setView("loading");
@@ -216,6 +226,9 @@ const Index = () => {
         birthDate: bd?.date ? new Date(bd.date).toLocaleDateString("en-GB") : "unknown",
         birthPlace: bd?.birthPlace || "unknown",
         birthTime: bd?.unknownTime ? "unknown" : (bd?.time || "unknown"),
+        birthLat: bd?.birthLat ?? null,
+        birthLng: bd?.birthLng ?? null,
+        birthTimezone: bd?.birthTimezone ?? null,
         language: i18n.language,
       },
     });

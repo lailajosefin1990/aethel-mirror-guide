@@ -1,22 +1,20 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, CalendarIcon, Clock, ChevronDown, ExternalLink } from "lucide-react";
-import { format } from "date-fns";
+import { ArrowLeft, ChevronDown, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { track } from "@/lib/posthog";
 import { useTranslation } from "react-i18next";
+import DrumRoller from "@/components/DrumRoller";
+import LocationAutocomplete, { type LocationResult } from "@/components/LocationAutocomplete";
 
 export interface BirthData {
   date: Date;
   time: string | null;
   unknownTime: boolean;
   birthPlace: string;
+  birthLat?: number;
+  birthLng?: number;
+  birthTimezone?: string;
 }
 
 interface BirthCoordinatesProps {
@@ -24,30 +22,102 @@ interface BirthCoordinatesProps {
   onBack: () => void;
 }
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+function daysInMonth(month: number, year: number) {
+  return new Date(year, month, 0).getDate();
+}
+
 const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
   const { t } = useTranslation();
-  const [date, setDate] = useState<Date | undefined>();
-  const [time, setTime] = useState("");
-  const [unknownTime, setUnknownTime] = useState(false);
-  const [birthPlace, setBirthPlace] = useState("");
-  const [warningExpanded, setWarningExpanded] = useState(false);
+  const currentYear = new Date().getFullYear();
 
-  const isValid = date !== undefined && birthPlace.trim().length > 0;
+  const [day, setDay] = useState<number>(15);
+  const [month, setMonth] = useState<number>(6);
+  const [year, setYear] = useState<number>(1990);
+  const [hour, setHour] = useState<number>(12);
+  const [minute, setMinute] = useState<number>(0);
+  const [unknownTime, setUnknownTime] = useState(false);
+  const [warningExpanded, setWarningExpanded] = useState(false);
+  const [location, setLocation] = useState<LocationResult | null>(null);
+  const [locationName, setLocationName] = useState("");
+
+  const maxDay = daysInMonth(month, year);
+
+  // Day items
+  const dayItems = useMemo(() => {
+    return Array.from({ length: 31 }, (_, i) => ({
+      value: i + 1,
+      label: String(i + 1).padStart(2, "0"),
+      disabled: i + 1 > maxDay,
+    }));
+  }, [maxDay]);
+
+  // Month items
+  const monthItems = useMemo(() => {
+    return MONTHS.map((name, i) => ({
+      value: i + 1,
+      label: name,
+    }));
+  }, []);
+
+  // Year items
+  const yearItems = useMemo(() => {
+    const items = [];
+    for (let y = 1920; y <= currentYear; y++) {
+      items.push({ value: y, label: String(y) });
+    }
+    return items;
+  }, [currentYear]);
+
+  // Hour items
+  const hourItems = useMemo(() => {
+    return Array.from({ length: 24 }, (_, i) => ({
+      value: i,
+      label: String(i).padStart(2, "0"),
+    }));
+  }, []);
+
+  // Minute items (5-min intervals)
+  const minuteItems = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => ({
+      value: i * 5,
+      label: String(i * 5).padStart(2, "0"),
+    }));
+  }, []);
+
+  // Clamp day if month/year changes
+  const effectiveDay = Math.min(day, maxDay);
+
+  const isValid = location !== null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValid || !date) return;
+    if (!isValid || !location) return;
+
+    const date = new Date(year, month - 1, effectiveDay);
+    const timeStr = unknownTime ? null : `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+
     track("birth_data_submitted", { has_birth_time: !unknownTime });
+
     onSubmit({
       date,
-      time: unknownTime ? null : time || null,
+      time: timeStr,
       unknownTime,
-      birthPlace,
+      birthPlace: location.name,
+      birthLat: location.lat,
+      birthLng: location.lng,
+      birthTimezone: location.timezone,
     });
   };
 
-  const inputClass =
-    "w-full h-12 px-4 rounded-sm bg-card text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300";
+  const handleLocationChange = (loc: LocationResult) => {
+    setLocation(loc);
+    setLocationName(loc.name);
+  };
 
   return (
     <section className="min-h-screen px-5 py-8">
@@ -87,57 +157,57 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
           onSubmit={handleSubmit}
           className="space-y-6"
         >
-          {/* Date of birth */}
+          {/* Date of birth — Drum Roller */}
           <div className="space-y-2">
             <label className="font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
               {t("birth_date_label")}
             </label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className={cn(
-                    inputClass,
-                    "flex items-center justify-between text-left",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <span>{date ? format(date, "dd/MM/yyyy") : "dd/mm/yyyy"}</span>
-                  <CalendarIcon className="w-4 h-4 text-muted-foreground" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  disabled={(d) => d > new Date() || d < new Date("1900-01-01")}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
+            <div className="bg-card border border-border rounded-md overflow-hidden">
+              <div className="grid grid-cols-3 divide-x divide-border">
+                <DrumRoller
+                  items={dayItems}
+                  value={effectiveDay}
+                  onChange={(v) => setDay(v as number)}
                 />
-              </PopoverContent>
-            </Popover>
+                <DrumRoller
+                  items={monthItems}
+                  value={month}
+                  onChange={(v) => setMonth(v as number)}
+                />
+                <DrumRoller
+                  items={yearItems}
+                  value={year}
+                  onChange={(v) => setYear(v as number)}
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Time of birth */}
+          {/* Time of birth — Drum Roller */}
           <div className="space-y-2">
             <label className="font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
               {t("birth_time_label")}
             </label>
-            <div className="relative">
-              <input
-                type="time"
-                value={unknownTime ? "" : time}
-                onChange={(e) => setTime(e.target.value)}
-                disabled={unknownTime}
-                placeholder="HH:MM"
-                className={cn(
-                  inputClass,
-                  "pr-10",
-                  unknownTime && "opacity-40 cursor-not-allowed"
-                )}
-              />
-              <Clock className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <div
+              className={cn(
+                "bg-card border border-border rounded-md overflow-hidden transition-opacity duration-300",
+                unknownTime && "opacity-30 pointer-events-none"
+              )}
+            >
+              <div className="grid grid-cols-2 divide-x divide-border">
+                <DrumRoller
+                  items={hourItems}
+                  value={hour}
+                  onChange={(v) => setHour(v as number)}
+                  height={160}
+                />
+                <DrumRoller
+                  items={minuteItems}
+                  value={minute}
+                  onChange={(v) => setMinute(v as number)}
+                  height={160}
+                />
+              </div>
             </div>
 
             {/* Unknown time toggle */}
@@ -171,7 +241,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
               </span>
             </button>
 
-            {/* Warning card when unknown time toggled */}
+            {/* Warning when unknown time */}
             <AnimatePresence>
               {unknownTime && (
                 <motion.div
@@ -185,7 +255,6 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
                     {t("birth_solar_noon")}
                   </p>
 
-                  {/* Expandable warning card */}
                   <div className="border border-amber-500/40 bg-amber-500/5 rounded-md p-4 ml-0">
                     <button
                       type="button"
@@ -193,7 +262,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
                       className="flex items-center justify-between w-full text-left"
                     >
                       <span className="font-body text-[13px] text-amber-400/90 font-medium">
-                        ⚠ Why birth time matters
+                        ⚠ {t("birth_time_why") || "Why birth time matters"}
                       </span>
                       <ChevronDown
                         className={cn(
@@ -219,7 +288,6 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
                     </AnimatePresence>
                   </div>
 
-                  {/* Find birth time link */}
                   <a
                     href="https://www.gov.uk/order-copy-birth-certificate"
                     target="_blank"
@@ -234,17 +302,14 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
             </AnimatePresence>
           </div>
 
-          {/* Birth place */}
+          {/* Birth place — Smart Autocomplete */}
           <div className="space-y-2">
             <label className="font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
               {t("birth_place_label")}
             </label>
-            <input
-              type="text"
-              value={birthPlace}
-              onChange={(e) => setBirthPlace(e.target.value)}
-              placeholder="City, Country"
-              className={inputClass}
+            <LocationAutocomplete
+              value={locationName}
+              onChange={handleLocationChange}
             />
           </div>
 
@@ -259,7 +324,6 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
             </button>
           </div>
 
-          {/* Privacy note */}
           <p className="font-body text-[12px] text-foreground/50 text-center pt-2">
             {t("birth_privacy")}
           </p>

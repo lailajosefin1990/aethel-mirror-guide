@@ -251,8 +251,12 @@ export type Database = {
       profiles: {
         Row: {
           birth_date: string | null
+          birth_lat: number | null
+          birth_lng: number | null
           birth_place: string | null
+          birth_place_name: string | null
           birth_time: string | null
+          birth_timezone: string | null
           consent_accepted: boolean
           consent_date: string | null
           consent_prompt_dismissed: boolean
@@ -267,8 +271,12 @@ export type Database = {
         }
         Insert: {
           birth_date?: string | null
+          birth_lat?: number | null
+          birth_lng?: number | null
           birth_place?: string | null
+          birth_place_name?: string | null
           birth_time?: string | null
+          birth_timezone?: string | null
           consent_accepted?: boolean
           consent_date?: string | null
           consent_prompt_dismissed?: boolean
@@ -283,8 +291,12 @@ export type Database = {
         }
         Update: {
           birth_date?: string | null
+          birth_lat?: number | null
+          birth_lng?: number | null
           birth_place?: string | null
+          birth_place_name?: string | null
           birth_time?: string | null
+          birth_timezone?: string | null
           consent_accepted?: boolean
           consent_date?: string | null
           consent_prompt_dismissed?: boolean
