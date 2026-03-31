@@ -480,7 +480,8 @@ const Index = () => {
               onBack={() => setView(readingBackTarget as View)}
               regenerationCount={regenerationCount}
               birthTimeUnknown={birthTimeUnknown}
-              onRegenerate={regenerationCount < MAX_REGENERATIONS ? () => {
+              onRegenerate={regenerationCount < MAX_REGENERATIONS ? (feedback?: string) => {
+                setRegenerationFeedback(feedback || null);
                 setRegenerationCount((c) => c + 1);
                 setLoadingError(null);
                 setView("loading");
