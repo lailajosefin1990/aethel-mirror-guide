@@ -12,6 +12,8 @@ import DailyNudge from "@/components/DailyNudge";
 import AuthScreen from "@/components/AuthScreen";
 import PaywallModal from "@/components/PaywallModal";
 import SettingsScreen from "@/components/SettingsScreen";
+import PushPermissionSheet from "@/components/PushPermissionSheet";
+import { subscribeToPush, wasPushDismissedRecently, dismissPushPrompt } from "@/lib/push";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { ReadingData } from "@/lib/reading";
@@ -30,6 +32,8 @@ const Index = () => {
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [readingData, setReadingData] = useState<ReadingData | null>(null);
   const [profileBirthData, setProfileBirthData] = useState<{ birth_date: string | null; birth_time: string | null; birth_place: string | null } | null>(null);
+  const [pushSheetOpen, setPushSheetOpen] = useState(false);
+  const [hasShownPushPrompt, setHasShownPushPrompt] = useState(false);
 
   const transition = { duration: 0.3, ease: "easeInOut" as const };
 
@@ -82,6 +86,18 @@ const Index = () => {
       setView("dashboard");
     }
   }, [user, authLoading, journalEntries.length]);
+
+  // Handle push notification click (service worker message)
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type === "PUSH_CLICK") {
+        setActiveTab("journey");
+        setView("dashboard");
+      }
+    };
+    navigator.serviceWorker?.addEventListener("message", handler);
+    return () => navigator.serviceWorker?.removeEventListener("message", handler);
+  }, []);
 
   const handleQuestionSubmit = (data: QuestionData) => {
     setQuestionData(data);
@@ -197,6 +213,18 @@ const Index = () => {
 
     setActiveTab("journey");
     setView("dashboard");
+
+    // Show push permission sheet after first save (if not dismissed recently)
+    if (
+      !hasShownPushPrompt &&
+      "PushManager" in window &&
+      Notification.permission === "default" &&
+      !wasPushDismissedRecently()
+    ) {
+      setHasShownPushPrompt(true);
+      // Small delay to let dashboard render first
+      setTimeout(() => setPushSheetOpen(true), 800);
+    }
   };
 
   const handleUpdateEntry = async (id: string, outcome: JournalEntry["outcome"]) => {
@@ -290,6 +318,22 @@ const Index = () => {
       </AnimatePresence>
 
       <PaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} />
+
+      <PushPermissionSheet
+        open={pushSheetOpen}
+        onAccept={async () => {
+          setPushSheetOpen(false);
+          if (user) {
+            const ok = await subscribeToPush(user.id);
+            if (ok) track("push_permission_granted");
+          }
+        }}
+        onDismiss={() => {
+          setPushSheetOpen(false);
+          dismissPushPrompt();
+          track("push_permission_dismissed");
+        }}
+      />
     </>
   );
 };

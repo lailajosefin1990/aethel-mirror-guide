@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { isPushActive, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
+import { track } from "@/lib/posthog";
 
 const tierLabels: Record<string, string> = {
   free: "Free",
@@ -13,6 +16,31 @@ const tierLabels: Record<string, string> = {
 const SettingsScreen = () => {
   const { user, subscriptionTier, signOut } = useAuth();
   const [portalLoading, setPortalLoading] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    isPushActive(user.id).then((active) => {
+      setPushEnabled(active);
+      setPushLoading(false);
+    });
+  }, [user]);
+
+  const handlePushToggle = async (checked: boolean) => {
+    if (!user) return;
+    setPushLoading(true);
+    if (checked) {
+      const ok = await subscribeToPush(user.id);
+      setPushEnabled(ok);
+      if (ok) track("push_enabled_settings");
+    } else {
+      await unsubscribeFromPush(user.id);
+      setPushEnabled(false);
+      track("push_disabled_settings");
+    }
+    setPushLoading(false);
+  };
 
   const handleManageSubscription = async () => {
     setPortalLoading(true);
@@ -66,6 +94,27 @@ const SettingsScreen = () => {
         <p className="font-body text-[12px] text-muted-foreground">
           {tierLabels[subscriptionTier]} plan
         </p>
+      </motion.div>
+
+      {/* Push notifications toggle */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+        className="bg-card border border-border rounded-md p-5 mb-5"
+      >
+        <p className={sectionLabel}>N O T I F I C A T I O N S</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-body text-[14px] text-card-foreground">Push notifications</p>
+            <p className="font-body text-[12px] text-muted-foreground">48-hour check-ins & daily nudges</p>
+          </div>
+          <Switch
+            checked={pushEnabled}
+            onCheckedChange={handlePushToggle}
+            disabled={pushLoading}
+          />
+        </div>
       </motion.div>
 
       {/* Subscription management */}
