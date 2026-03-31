@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { track } from "@/lib/posthog";
 import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
@@ -24,7 +24,19 @@ import type { ReadingData } from "@/lib/reading";
 
 type View = "home" | "question" | "auth" | "birth" | "loading" | "reading" | "dashboard";
 
+type ProfileBirthData = {
+  birth_date: string | null;
+  birth_time: string | null;
+  birth_place: string | null;
+  birth_lat: number | null;
+  birth_lng: number | null;
+  birth_timezone: string | null;
+};
+
 const FREE_READING_LIMIT = 3;
+const MAX_REGENERATIONS = 3;
+
+const transition = { duration: 0.3, ease: "easeInOut" as const };
 
 const Index = () => {
   const { i18n } = useTranslation();
@@ -36,17 +48,18 @@ const Index = () => {
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [readingData, setReadingData] = useState<ReadingData | null>(null);
-  const [profileBirthData, setProfileBirthData] = useState<{ birth_date: string | null; birth_time: string | null; birth_place: string | null; birth_lat: number | null; birth_lng: number | null; birth_timezone: string | null } | null>(null);
+  const [profileBirthData, setProfileBirthData] = useState<ProfileBirthData | null>(null);
   const [pushSheetOpen, setPushSheetOpen] = useState(false);
   const [hasShownPushPrompt, setHasShownPushPrompt] = useState(false);
   const [showConsentGate, setShowConsentGate] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
   const [showCrisis, setShowCrisis] = useState(false);
   const [regenerationCount, setRegenerationCount] = useState(0);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
-  const transition = { duration: 0.3, ease: "easeInOut" as const };
+  const referralLinked = useRef(false);
 
-  // Capture referral code from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
@@ -55,20 +68,32 @@ const Index = () => {
     }
   }, []);
 
-  // Link referral on signup
   useEffect(() => {
     if (!user) return;
+    if (referralLinked.current) return;
     const ref = localStorage.getItem("aethel_ref");
     if (!ref) return;
-    
+
+    referralLinked.current = true;
+
     const linkReferral = async () => {
-      // Find the referrer by code
+      const { data: existing } = await supabase
+        .from("referrals")
+        .select("id")
+        .eq("referred_user_id", user.id)
+        .maybeSingle();
+
+      if (existing) {
+        localStorage.removeItem("aethel_ref");
+        return;
+      }
+
       const { data: referrerProfile } = await supabase
         .from("profiles")
         .select("user_id")
         .eq("referral_code", ref)
         .maybeSingle();
-      
+
       if (referrerProfile && referrerProfile.user_id !== user.id) {
         await supabase.from("referrals").insert({
           referrer_user_id: referrerProfile.user_id,
@@ -82,16 +107,19 @@ const Index = () => {
     linkReferral().catch(console.error);
   }, [user]);
 
-  // Load journal entries and profile from Supabase
   useEffect(() => {
     if (!user) return;
+    let cancelled = false;
+
     const loadData = async () => {
-      // Load profile birth data
       const { data: profile } = await supabase
         .from("profiles")
         .select("birth_date, birth_time, birth_place, birth_lat, birth_lng, birth_timezone, consent_accepted, preferred_language")
         .eq("user_id", user.id)
         .single();
+
+      if (cancelled) return;
+
       if (profile) {
         setProfileBirthData(profile);
         if (profile.preferred_language && profile.preferred_language !== i18n.language) {
@@ -103,20 +131,23 @@ const Index = () => {
           setConsentChecked(true);
         }
       }
+      setProfileLoaded(true);
 
-      // Load readings
       const { data: readings } = await supabase
         .from("readings")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
+      if (cancelled) return;
       if (!readings) return;
 
       const { data: outcomes } = await supabase
         .from("outcomes")
         .select("*")
         .eq("user_id", user.id);
+
+      if (cancelled) return;
 
       const outcomeMap = new Map(
         (outcomes ?? []).map((o: any) => [o.reading_id, { followed: o.followed, note: o.outcome_text }])
@@ -133,16 +164,17 @@ const Index = () => {
 
       setJournalEntries(entries);
     };
+
     loadData();
+    return () => { cancelled = true; };
   }, [user]);
 
   useEffect(() => {
-    if (user && !authLoading && view === "home" && journalEntries.length > 0) {
+    if (user && !authLoading && profileLoaded && view === "home" && journalEntries.length > 0) {
       setView("dashboard");
     }
-  }, [user, authLoading, journalEntries.length]);
+  }, [user, authLoading, profileLoaded, journalEntries.length]);
 
-  // Handle push notification click (service worker message)
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.type === "PUSH_CLICK") {
@@ -163,12 +195,11 @@ const Index = () => {
     proceedAfterAuth();
   };
 
-  const proceedAfterAuth = () => {
+  const proceedAfterAuth = useCallback(() => {
     if (subscriptionTier === "free" && monthlyReadingCount >= FREE_READING_LIMIT) {
       setPaywallOpen(true);
       return;
     }
-    // If we already have birth data in profile, skip birth screen
     if (profileBirthData?.birth_date) {
       setBirthData({
         date: new Date(profileBirthData.birth_date),
@@ -179,14 +210,19 @@ const Index = () => {
         birthLng: profileBirthData.birth_lng ?? undefined,
         birthTimezone: profileBirthData.birth_timezone ?? undefined,
       });
+      setLoadingError(null);
       setView("loading");
     } else {
       setView("birth");
     }
-  };
+  }, [subscriptionTier, monthlyReadingCount, profileBirthData]);
 
   const handleAuthSuccess = () => {
-    proceedAfterAuth();
+    if (profileLoaded && profileBirthData?.birth_date) {
+      proceedAfterAuth();
+    } else {
+      setView("birth");
+    }
   };
 
   const handleBirthSubmit = async (data: BirthData) => {
@@ -210,6 +246,7 @@ const Index = () => {
         birth_timezone: data.birthTimezone ?? null,
       });
     }
+    setLoadingError(null);
     setView("loading");
   };
 
@@ -236,24 +273,29 @@ const Index = () => {
     if (error) throw error;
     if (data?.error) throw new Error(data.error);
 
-    // Crisis detection response
     if (data?.is_crisis) {
       track("crisis_signal_detected", { domain: data.domain, confidence: data.confidence });
       setShowCrisis(true);
-      throw new Error("__crisis__");
+      return null;
     }
 
     setReadingData(data as ReadingData);
-  }, [birthData, questionData]);
+    return data;
+  }, [birthData, questionData, i18n.language]);
 
   const handleLoadingComplete = useCallback(() => {
     setView("reading");
   }, []);
 
+  const handleLoadingError = useCallback((error: Error) => {
+    if (error.message === "__crisis__") return;
+    setLoadingError(error.message || "Something went wrong. Please try again.");
+    setView("question");
+  }, []);
+
   const handleSave = async () => {
     if (!user || !questionData || !readingData) return;
 
-    // Track fallback readings via PostHog
     if (readingData.is_fallback) {
       track("fallback_reading_served", {
         domain: questionData.domain,
@@ -261,18 +303,20 @@ const Index = () => {
       });
     }
 
-    const { data: reading, error } = await supabase.from("readings").insert({
-      user_id: user.id,
-      domain: questionData.domain,
-      question: questionData.question,
-      mode: questionData.mode,
-      reading_text: readingData.astrology_reading,
-      third_way_text: readingData.third_way,
-      journal_prompt: readingData.journal_prompt,
-      confidence_level: readingData.confidence_level,
-    }).select().single();
+    try {
+      const { data: reading, error } = await supabase.from("readings").insert({
+        user_id: user.id,
+        domain: questionData.domain,
+        question: questionData.question,
+        mode: questionData.mode,
+        reading_text: readingData.astrology_reading,
+        third_way_text: readingData.third_way,
+        journal_prompt: readingData.journal_prompt,
+        confidence_level: readingData.confidence_level,
+      }).select().single();
 
-    if (!error && reading) {
+      if (error) throw error;
+
       const newEntry: JournalEntry = {
         id: reading.id,
         domain: questionData.domain,
@@ -281,12 +325,11 @@ const Index = () => {
         question: questionData.question,
       };
       setJournalEntries((prev) => [newEntry, ...prev]);
-      // Don't count fallback readings toward the monthly limit
+
       if (!readingData.is_fallback) {
         await refreshReadingCount();
       }
 
-      // Extract memory tags in background (fire-and-forget)
       supabase.functions.invoke("extract-memory", {
         body: {
           user_id: user.id,
@@ -295,21 +338,23 @@ const Index = () => {
           third_way: readingData.third_way,
         },
       }).catch((err) => console.error("Memory extraction failed:", err));
-    }
 
-    setActiveTab("journey");
-    setView("dashboard");
+      setActiveTab("journey");
+      setView("dashboard");
 
-    // Show push permission sheet after first save (if not dismissed recently)
-    if (
-      !hasShownPushPrompt &&
-      "PushManager" in window &&
-      Notification.permission === "default" &&
-      !wasPushDismissedRecently()
-    ) {
-      setHasShownPushPrompt(true);
-      // Small delay to let dashboard render first
-      setTimeout(() => setPushSheetOpen(true), 800);
+      if (
+        !hasShownPushPrompt &&
+        "PushManager" in window &&
+        Notification.permission === "default" &&
+        !wasPushDismissedRecently()
+      ) {
+        setHasShownPushPrompt(true);
+        setTimeout(() => setPushSheetOpen(true), 800);
+      }
+    } catch (err) {
+      console.error("Failed to save reading:", err);
+      setActiveTab("journey");
+      setView("dashboard");
     }
   };
 
@@ -352,6 +397,16 @@ const Index = () => {
     setView("question");
   };
 
+  const readingBackTarget = useMemo(() => {
+    return profileBirthData?.birth_date ? "question" : "birth";
+  }, [profileBirthData]);
+
+  const birthTimeUnknown = useMemo(() => {
+    if (birthData) return !!birthData.unknownTime;
+    if (profileBirthData) return !profileBirthData.birth_time;
+    return true;
+  }, [birthData, profileBirthData]);
+
   return (
     <>
       {showConsentGate && <ConsentGate onAccept={handleConsentAccept} />}
@@ -381,7 +436,7 @@ const Index = () => {
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
             <ReadingLoader
               onComplete={handleLoadingComplete}
-              onError={() => {}}
+              onError={handleLoadingError}
               generateReading={generateReading}
             />
           </motion.div>
@@ -393,13 +448,14 @@ const Index = () => {
               question={questionData?.question ?? ""}
               reading={readingData}
               onSave={() => { setRegenerationCount(0); handleSave(); }}
-              onBack={() => setView("birth")}
+              onBack={() => setView(readingBackTarget as View)}
               regenerationCount={regenerationCount}
-              birthTimeUnknown={birthData?.unknownTime || !profileBirthData?.birth_time}
-              onRegenerate={() => {
+              birthTimeUnknown={birthTimeUnknown}
+              onRegenerate={regenerationCount < MAX_REGENERATIONS ? () => {
                 setRegenerationCount((c) => c + 1);
+                setLoadingError(null);
                 setView("loading");
-              }}
+              } : undefined}
             />
           </motion.div>
         )}
