@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { type JournalEntry } from "./DecisionJournal";
+import { track } from "@/lib/posthog";
 
 interface DailyNudgeProps {
   journalEntries: JournalEntry[];
@@ -54,6 +55,10 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
   const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000);
   const todayNudge = nudges[dayOfYear % nudges.length];
 
+  useEffect(() => {
+    track("nudge_viewed");
+  }, []);
+
   const dateStr = today.toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -70,7 +75,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
   const handleWeeklyRating = (label: string) => {
     setWeeklyRating(label);
     setWeeklyLogged(true);
-    console.log("Weekly check-in logged:", { date: today.toISOString(), rating: label });
+    track("weekly_checkin_completed", { rating: label });
   };
 
   const sectionLabel = "font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3";
@@ -205,7 +210,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         className="pt-2"
       >
         <button
-          onClick={onNewReading}
+          onClick={() => { track("new_reading_from_nudge"); onNewReading(); }}
           className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300"
         >
           New reading →

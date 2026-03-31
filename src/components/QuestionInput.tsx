@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
+import { track } from "@/lib/posthog";
 
 export interface QuestionData {
   domain: string;
@@ -36,6 +37,11 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid || !selectedDomain) return;
+    track("question_submitted", {
+      domain: selectedDomain,
+      mode: selectedMode,
+      question_length: question.length,
+    });
     onSubmit({ domain: selectedDomain, question, mode: selectedMode });
   };
 
@@ -92,10 +98,10 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
             {domains.map((domain) => {
               const isSelected = selectedDomain === domain;
               return (
-                <button
-                  key={domain}
-                  type="button"
-                  onClick={() => setSelectedDomain(domain)}
+                 <button
+                   key={domain}
+                   type="button"
+                   onClick={() => { setSelectedDomain(domain); track("question_domain_selected", { domain }); }}
                   className={`px-4 py-3.5 rounded-sm font-body text-[13px] border transition-all duration-300 text-left ${
                     isSelected
                       ? "border-primary text-primary bg-primary/5"

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { track } from "@/lib/posthog";
 
 export interface JournalEntry {
   id: string;
@@ -78,12 +79,17 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
   const [followedChoice, setFollowedChoice] = useState<"yes" | "no" | "partially" | null>(null);
   const [outcomeNote, setOutcomeNote] = useState("");
 
+  useEffect(() => {
+    track("journal_viewed");
+  }, []);
+
   const openEntries = entries.filter((e) => !e.outcome);
   const closedEntries = entries.filter((e) => e.outcome);
   const displayedEntries = tab === "open" ? openEntries : closedEntries;
 
   const handleLogSubmit = () => {
     if (!sheetEntryId || !followedChoice) return;
+    track("outcome_submitted", { followed: followedChoice, has_text: outcomeNote.length > 0 });
     onUpdateEntry(sheetEntryId, { followed: followedChoice, note: outcomeNote });
     setSheetEntryId(null);
     setFollowedChoice(null);
@@ -188,7 +194,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
                   </div>
                 ) : (
                   <button
-                    onClick={() => setSheetEntryId(entry.id)}
+                    onClick={() => { track("outcome_log_opened", { reading_id: entry.id }); setSheetEntryId(entry.id); }}
                     className="mt-3 font-body text-[13px] text-primary hover:text-primary/80 transition-colors duration-300"
                   >
                     Log what happened →

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, createContext, useContext, ReactNode 
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { SubscriptionTier } from "@/lib/stripe";
+import { identifyUser, resetUser } from "@/lib/posthog";
 
 interface AuthContextType {
   user: User | null;
@@ -53,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setSubscriptionTier("free");
     setMonthlyReadingCount(0);
+    resetUser();
   }, []);
 
   useEffect(() => {
@@ -60,6 +62,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) {
+        identifyUser(session.user.id, session.user.email);
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {

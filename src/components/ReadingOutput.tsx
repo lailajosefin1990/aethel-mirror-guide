@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown, Lock, Download, Link2, Share2, X } from "lucide-react";
 import type { ReadingData } from "@/lib/reading";
@@ -7,6 +7,7 @@ import { generateThirdWayCard } from "@/lib/cardGenerator";
 import { useAuth } from "@/hooks/useAuth";
 import useOgImage from "@/hooks/useOgImage";
 import { toast } from "sonner";
+import { track } from "@/lib/posthog";
 
 interface ReadingOutputProps {
   domain: string;
@@ -37,8 +38,33 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
   const [cardBlob, setCardBlob] = useState<Blob | null>(null);
   const [cardUrl, setCardUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const thirdWayRef = useRef<HTMLDivElement>(null);
 
   const isPro = subscriptionTier === "mirror_pro";
+
+  // Track reading loaded
+  useEffect(() => {
+    if (reading) {
+      track("reading_loaded", { confidence_level: reading.confidence_level });
+    }
+  }, [reading]);
+
+  // Track Third Way scroll into view
+  useEffect(() => {
+    const el = thirdWayRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          track("third_way_read");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [reading]);
 
   // Set OG image meta tags for social sharing
   useOgImage({ thirdWay: reading?.third_way || "", domain });
@@ -48,6 +74,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
   const handleShare = useCallback(async () => {
     if (!reading || !isPro) return;
     setGenerating(true);
+    track("share_card_opened");
     try {
       const blob = await generateThirdWayCard(reading.third_way, domain);
       setCardBlob(blob);
@@ -64,6 +91,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
 
   const handleDownload = useCallback(() => {
     if (!cardUrl || !cardBlob) return;
+    track("share_card_downloaded");
     const a = document.createElement("a");
     a.href = cardUrl;
     a.download = "aethel-third-way.png";
@@ -137,7 +165,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
         </motion.p>
 
         {/* Divider + Third Way */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}
+        <motion.div ref={thirdWayRef} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}
           className="border-t-2 border-primary/40 pt-8 mb-10">
           <p className={`${sectionLabel} text-center`}>Y O U R &nbsp; T H I R D &nbsp; W A Y</p>
           <p className="font-display text-[22px] sm:text-[24px] leading-[1.4] text-foreground text-center font-medium">
@@ -161,7 +189,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
         {/* Buttons */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }}
           className="flex flex-col gap-3 pb-10">
-          <button onClick={onSave}
+          <button onClick={() => { track("reading_saved"); onSave(); }}
             className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300">
             Save to my mirror
           </button>
@@ -255,7 +283,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
               <textarea value={feedbackText} onChange={(e) => setFeedbackText(e.target.value)}
                 placeholder="What felt off?" rows={3}
                 className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-4" />
-              <button onClick={() => { setFeedbackOpen(false); setFeedbackText(""); }}
+              <button onClick={() => { track("reading_regenerated"); setFeedbackOpen(false); setFeedbackText(""); }}
                 className="w-full h-[48px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] hover:brightness-110 transition-all duration-300">
                 Regenerate
               </button>

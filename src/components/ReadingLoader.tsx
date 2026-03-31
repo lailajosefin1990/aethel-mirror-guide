@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { track } from "@/lib/posthog";
 
 const phrases = [
   "Reading your chart...",
@@ -25,6 +26,7 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
   useEffect(() => {
     if (started.current) return;
     started.current = true;
+    track("reading_generating");
     generateReading()
       .then(() => setApiDone(true))
       .catch(() => {

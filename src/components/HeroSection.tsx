@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Accordion,
@@ -6,6 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { track } from "@/lib/posthog";
 
 interface HeroSectionProps {
   onStart: () => void;
@@ -19,6 +20,10 @@ const howItems = [
 
 const HeroSection = ({ onStart }: HeroSectionProps) => {
   const howRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    track("landing_viewed");
+  }, []);
 
   const scrollToHow = () => {
     howRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -89,7 +94,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             className="w-full flex flex-col items-center gap-4"
           >
             <button
-              onClick={onStart}
+              onClick={() => { track("cta_get_third_way_clicked"); onStart(); }}
               className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-sm tracking-wide hover:brightness-110 transition-all duration-300"
             >
               Get my Third Way →
@@ -110,7 +115,9 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
         <div className="w-full max-w-app mx-auto">
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="how" className="border-border">
-              <AccordionTrigger className="font-body text-[13px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground hover:no-underline py-4">
+              <AccordionTrigger
+                onClick={() => track("how_it_works_opened")}
+                className="font-body text-[13px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground hover:no-underline py-4">
                 How it works
               </AccordionTrigger>
               <AccordionContent className="pb-6">

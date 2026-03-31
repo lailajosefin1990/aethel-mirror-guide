@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { track } from "@/lib/posthog";
 
 export interface BirthData {
   date: Date;
@@ -33,6 +34,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid || !date) return;
+    track("birth_data_submitted", { has_birth_time: !unknownTime });
     onSubmit({
       date,
       time: unknownTime ? null : time || null,
