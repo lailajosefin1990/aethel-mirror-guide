@@ -23,7 +23,7 @@ import type { ReadingData } from "@/lib/reading";
 
 type View = "home" | "question" | "auth" | "birth" | "loading" | "reading" | "dashboard";
 
-const FREE_READING_LIMIT = 1;
+const FREE_READING_LIMIT = 3;
 
 const Index = () => {
   const { user, loading: authLoading, subscriptionTier, monthlyReadingCount, refreshReadingCount } = useAuth();
