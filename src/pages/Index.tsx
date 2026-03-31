@@ -36,7 +36,7 @@ const Index = () => {
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [readingData, setReadingData] = useState<ReadingData | null>(null);
-  const [profileBirthData, setProfileBirthData] = useState<{ birth_date: string | null; birth_time: string | null; birth_place: string | null } | null>(null);
+  const [profileBirthData, setProfileBirthData] = useState<{ birth_date: string | null; birth_time: string | null; birth_place: string | null; birth_lat: number | null; birth_lng: number | null; birth_timezone: string | null } | null>(null);
   const [pushSheetOpen, setPushSheetOpen] = useState(false);
   const [hasShownPushPrompt, setHasShownPushPrompt] = useState(false);
   const [showConsentGate, setShowConsentGate] = useState(false);
