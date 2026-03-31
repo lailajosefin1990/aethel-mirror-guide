@@ -94,7 +94,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             className="w-full flex flex-col items-center gap-4"
           >
             <button
-              onClick={onStart}
+              onClick={() => { track("cta_get_third_way_clicked"); onStart(); }}
               className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-sm tracking-wide hover:brightness-110 transition-all duration-300"
             >
               Get my Third Way →
