@@ -87,6 +87,18 @@ const Index = () => {
     }
   }, [user, authLoading, journalEntries.length]);
 
+  // Handle push notification click (service worker message)
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.type === "PUSH_CLICK") {
+        setActiveTab("journey");
+        setView("dashboard");
+      }
+    };
+    navigator.serviceWorker?.addEventListener("message", handler);
+    return () => navigator.serviceWorker?.removeEventListener("message", handler);
+  }, []);
+
   const handleQuestionSubmit = (data: QuestionData) => {
     setQuestionData(data);
     if (!user) {
