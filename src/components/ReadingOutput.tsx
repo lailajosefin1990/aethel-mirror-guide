@@ -1,126 +1,45 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown, X } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
+import type { ReadingData } from "@/lib/reading";
+import { CONFIDENCE_MESSAGES } from "@/lib/reading";
 
 interface ReadingOutputProps {
   domain: string;
   question: string;
+  reading: ReadingData | null;
   onSave: () => void;
   onBack: () => void;
 }
 
-interface ExpandableTextProps {
-  text: string;
-  source: string;
-}
-
-const ExpandableText = ({ text, source }: ExpandableTextProps) => {
-  const [open, setOpen] = useState(false);
+const ExpandableText = ({ text }: { text: string }) => {
   return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="text-left group flex items-start gap-1 w-full"
-      >
-        <span className="font-display text-[16px] leading-[1.6] text-foreground">
-          {text}
-        </span>
-        <ChevronDown
-          className={`w-3.5 h-3.5 mt-1.5 shrink-0 text-muted-foreground transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-          strokeWidth={1.5}
-        />
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.span
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="inline-block mt-1.5 px-2.5 py-1 rounded-sm bg-primary/10 font-body text-[11px] text-primary tracking-wide"
-          >
-            {source}
-          </motion.span>
-        )}
-      </AnimatePresence>
+    <p className="font-display text-[16px] leading-[1.6] text-foreground">
+      {text}
+    </p>
+  );
+};
+
+const ExpandableBullet = ({ text }: { text: string }) => {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="text-primary mt-1 shrink-0">—</span>
+      <span className="font-display text-[16px] leading-[1.6] text-foreground">
+        {text.replace(/^—\s*/, "")}
+      </span>
     </div>
   );
 };
 
-const ExpandableBullet = ({ text, source }: ExpandableTextProps) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="text-left group flex items-start gap-3 w-full"
-      >
-        <span className="text-primary mt-1 shrink-0">—</span>
-        <span className="font-display text-[16px] leading-[1.6] text-foreground">
-          {text}
-        </span>
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.span
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="inline-block mt-1.5 ml-7 px-2.5 py-1 rounded-sm bg-primary/10 font-body text-[11px] text-primary tracking-wide"
-          >
-            {source}
-          </motion.span>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-const sampleReading = {
-  stars: [
-    {
-      text: "Mercury stationing direct this week clears the communication fog that's been hovering over your career decisions since mid-February.",
-      source: "Mercury direct · Astrology",
-    },
-    {
-      text: "Mars in your 10th house is pushing you toward visible action — the energy to earn is high, but it wants a focused channel, not a scatter.",
-      source: "Mars in 10th · Astrology",
-    },
-    {
-      text: "Venus trine Jupiter suggests that partnerships formed now carry an unusual generosity. Someone is ready to say yes.",
-      source: "Venus trine Jupiter · Astrology",
-    },
-  ],
-  design: [
-    {
-      text: "Your Manifesting Generator design thrives on responding, not initiating. Wait for the invitation before you pitch — it will come this week.",
-      source: "Type: Manifesting Generator · Human Design",
-    },
-    {
-      text: "Gate 21 in your chart speaks to control of resources. Your instinct to hold tight is valid, but the Gene Key shadow here is 'control'. Let the grip loosen by one degree.",
-      source: "Gate 21 · Gene Keys",
-    },
-    {
-      text: "Your life path 7 asks you to trust the pattern even when the data is incomplete. Not everything can be spreadsheet-ed into clarity.",
-      source: "Life Path 7 · Numerology",
-    },
-  ],
-  thirdWay:
-    "Send the counter-offer by Friday. Name your non-negotiable and one thing you'll let go of. That's the move.",
-  journal:
-    "What would you do if you knew the other person was already leaning toward yes?",
-  confidence:
-    "This reading has strong alignment across your six systems.",
-};
-
-const ReadingOutput = ({ domain, question, onSave, onBack }: ReadingOutputProps) => {
+const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOutputProps) => {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
 
   const sectionLabel = "font-body text-[11px] uppercase tracking-[0.35em] text-muted-foreground mb-4";
+
+  if (!reading) return null;
+
+  const confidenceText = CONFIDENCE_MESSAGES[reading.confidence_level] || CONFIDENCE_MESSAGES.medium;
 
   return (
     <section className="min-h-screen px-5 py-8">
@@ -153,11 +72,7 @@ const ReadingOutput = ({ domain, question, onSave, onBack }: ReadingOutputProps)
           <p className={sectionLabel}>
             W H A T &nbsp; Y O U R &nbsp; S T A R S &nbsp; S A Y &nbsp; ( W H E N )
           </p>
-          <div className="space-y-4">
-            {sampleReading.stars.map((item, i) => (
-              <ExpandableText key={i} text={item.text} source={item.source} />
-            ))}
-          </div>
+          <ExpandableText text={reading.astrology_reading} />
         </motion.div>
 
         {/* Design section */}
@@ -171,8 +86,8 @@ const ReadingOutput = ({ domain, question, onSave, onBack }: ReadingOutputProps)
             W H A T &nbsp; Y O U R &nbsp; D E S I G N &nbsp; S A Y S &nbsp; ( H O W )
           </p>
           <div className="space-y-4">
-            {sampleReading.design.map((item, i) => (
-              <ExpandableBullet key={i} text={item.text} source={item.source} />
+            {reading.design_insights.map((item, i) => (
+              <ExpandableBullet key={i} text={item} />
             ))}
           </div>
         </motion.div>
@@ -184,7 +99,7 @@ const ReadingOutput = ({ domain, question, onSave, onBack }: ReadingOutputProps)
           transition={{ duration: 0.5, delay: 0.3 }}
           className="font-body text-[13px] italic text-primary/80 mb-10"
         >
-          {sampleReading.confidence}
+          {confidenceText}
         </motion.p>
 
         {/* Divider + Third Way */}
@@ -198,7 +113,7 @@ const ReadingOutput = ({ domain, question, onSave, onBack }: ReadingOutputProps)
             Y O U R &nbsp; T H I R D &nbsp; W A Y
           </p>
           <p className="font-display text-[22px] sm:text-[24px] leading-[1.4] text-foreground text-center font-medium">
-            {sampleReading.thirdWay}
+            {reading.third_way}
           </p>
         </motion.div>
 
@@ -213,7 +128,7 @@ const ReadingOutput = ({ domain, question, onSave, onBack }: ReadingOutputProps)
             J O U R N A L
           </p>
           <p className="font-display text-[16px] leading-[1.6] text-card-foreground">
-            {sampleReading.journal}
+            {reading.journal_prompt}
           </p>
         </motion.div>
 
@@ -270,7 +185,7 @@ const ReadingOutput = ({ domain, question, onSave, onBack }: ReadingOutputProps)
                 onClick={() => setFeedbackOpen(false)}
                 className="absolute top-4 right-4 text-foreground/50 hover:text-foreground/70 transition-colors"
               >
-                <X className="w-4 h-4" strokeWidth={1.5} />
+                <ChevronDown className="w-4 h-4 rotate-45" strokeWidth={1.5} />
               </button>
               <p className="font-display text-[18px] text-card-foreground mb-2">
                 Tell us what missed the mark
