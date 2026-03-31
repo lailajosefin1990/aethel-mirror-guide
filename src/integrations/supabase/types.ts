@@ -14,16 +14,128 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      outcomes: {
+        Row: {
+          created_at: string
+          followed: string
+          id: string
+          outcome_text: string | null
+          reading_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          followed: string
+          id?: string
+          outcome_text?: string | null
+          reading_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          followed?: string
+          id?: string
+          outcome_text?: string | null
+          reading_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outcomes_reading_id_fkey"
+            columns: ["reading_id"]
+            isOneToOne: false
+            referencedRelation: "readings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          birth_date: string | null
+          birth_place: string | null
+          birth_time: string | null
+          created_at: string
+          id: string
+          stripe_customer_id: string | null
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          birth_date?: string | null
+          birth_place?: string | null
+          birth_time?: string | null
+          created_at?: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          birth_date?: string | null
+          birth_place?: string | null
+          birth_time?: string | null
+          created_at?: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      readings: {
+        Row: {
+          confidence_level: string | null
+          created_at: string
+          domain: string
+          id: string
+          journal_prompt: string | null
+          mode: string | null
+          question: string
+          reading_text: string | null
+          third_way_text: string | null
+          user_id: string
+        }
+        Insert: {
+          confidence_level?: string | null
+          created_at?: string
+          domain: string
+          id?: string
+          journal_prompt?: string | null
+          mode?: string | null
+          question: string
+          reading_text?: string | null
+          third_way_text?: string | null
+          user_id: string
+        }
+        Update: {
+          confidence_level?: string | null
+          created_at?: string
+          domain?: string
+          id?: string
+          journal_prompt?: string | null
+          mode?: string | null
+          question?: string
+          reading_text?: string | null
+          third_way_text?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_monthly_reading_count: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
     }
     Enums: {
-      [_ in never]: never
+      subscription_tier: "free" | "mirror" | "mirror_pro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +262,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_tier: ["free", "mirror", "mirror_pro"],
+    },
   },
 } as const
