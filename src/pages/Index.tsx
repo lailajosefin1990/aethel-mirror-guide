@@ -175,6 +175,9 @@ const Index = () => {
         time: profileBirthData.birth_time,
         unknownTime: !profileBirthData.birth_time,
         birthPlace: profileBirthData.birth_place || "",
+        birthLat: profileBirthData.birth_lat ?? undefined,
+        birthLng: profileBirthData.birth_lng ?? undefined,
+        birthTimezone: profileBirthData.birth_timezone ?? undefined,
       });
       setView("loading");
     } else {
