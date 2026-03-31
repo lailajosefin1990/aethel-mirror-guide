@@ -60,6 +60,20 @@ const Index = () => {
 
   const referralLinked = useRef(false);
 
+  // Restore questionData from sessionStorage (survives OAuth redirect)
+  useEffect(() => {
+    const saved = sessionStorage.getItem("aethel_pending_question");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setQuestionData(parsed);
+        sessionStorage.removeItem("aethel_pending_question");
+      } catch {
+        sessionStorage.removeItem("aethel_pending_question");
+      }
+    }
+  }, []);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const ref = params.get("ref");
