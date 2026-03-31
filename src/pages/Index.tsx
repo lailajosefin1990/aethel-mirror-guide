@@ -89,11 +89,14 @@ const Index = () => {
       // Load profile birth data
       const { data: profile } = await supabase
         .from("profiles")
-        .select("birth_date, birth_time, birth_place, consent_accepted")
+        .select("birth_date, birth_time, birth_place, consent_accepted, preferred_language")
         .eq("user_id", user.id)
         .single();
       if (profile) {
         setProfileBirthData(profile);
+        if (profile.preferred_language && profile.preferred_language !== i18n.language) {
+          i18n.changeLanguage(profile.preferred_language);
+        }
         if (!profile.consent_accepted) {
           setShowConsentGate(true);
         } else {
