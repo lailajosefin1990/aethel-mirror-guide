@@ -40,6 +40,9 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
 
   const isPro = subscriptionTier === "mirror_pro";
 
+  // Set OG image meta tags for social sharing
+  useOgImage({ thirdWay: reading?.third_way || "", domain });
+
   const sectionLabel = "font-body text-[11px] uppercase tracking-[0.35em] text-muted-foreground mb-4";
 
   const handleShare = useCallback(async () => {
