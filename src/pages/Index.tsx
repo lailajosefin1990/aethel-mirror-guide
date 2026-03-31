@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { track } from "@/lib/posthog";
 import { AnimatePresence, motion } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
 import QuestionInput, { type QuestionData } from "@/components/QuestionInput";
@@ -160,6 +161,14 @@ const Index = () => {
   const handleSave = async () => {
     if (!user || !questionData || !readingData) return;
 
+    // Track fallback readings via PostHog
+    if (readingData.is_fallback) {
+      track("fallback_reading_served", {
+        domain: questionData.domain,
+        reason: readingData.fallback_reason || "api_error",
+      });
+    }
+
     const { data: reading, error } = await supabase.from("readings").insert({
       user_id: user.id,
       domain: questionData.domain,
@@ -180,7 +189,10 @@ const Index = () => {
         question: questionData.question,
       };
       setJournalEntries((prev) => [newEntry, ...prev]);
-      await refreshReadingCount();
+      // Don't count fallback readings toward the monthly limit
+      if (!readingData.is_fallback) {
+        await refreshReadingCount();
+      }
     }
 
     setActiveTab("journey");

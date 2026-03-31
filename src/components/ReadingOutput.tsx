@@ -182,9 +182,19 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack }: ReadingOut
 
         {/* Mirror disclaimer */}
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.45 }}
-          className="font-body text-[12px] italic text-foreground/50 text-center mb-8">
+          className="font-body text-[12px] italic text-foreground/50 text-center mb-4">
           I'm a mirror, not a master.
         </motion.p>
+
+        {/* Fallback banner */}
+        {reading.is_fallback && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.48 }}
+            className="font-body text-[11px] text-muted-foreground text-center mb-8">
+            This reading is from our curated library — your personalised mirror will be ready on your next session.
+          </motion.p>
+        )}
+
+        {!reading.is_fallback && <div className="mb-8" />}
 
         {/* Buttons */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }}
