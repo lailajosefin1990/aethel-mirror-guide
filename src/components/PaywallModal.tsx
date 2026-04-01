@@ -29,7 +29,12 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
       });
       if (error) throw error;
       if (data?.url) {
-        window.open(data.url, "_blank");
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+          window.location.href = data.url;
+        } else {
+          window.open(data.url, "_blank");
+        }
       }
     } catch (err) {
       console.error("Checkout error:", err);
