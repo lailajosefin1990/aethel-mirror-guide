@@ -31,6 +31,13 @@ function daysInMonth(month: number, year: number) {
   return new Date(year, month, 0).getDate();
 }
 
+const BIRTH_TIME_HELP: Record<string, { text: string; url: string }> = {
+  GB: { text: "Order your birth certificate (UK)", url: "https://www.gov.uk/order-copy-birth-death-marriage-certificate" },
+  US: { text: "Request your birth record (US)", url: "https://www.cdc.gov/nchs/w2w/index.htm" },
+  ES: { text: "Solicitar certificado de nacimiento", url: "https://www.mjusticia.gob.es/es/ciudadania/tramites/certificado-nacimiento" },
+  DEFAULT: { text: "How to find your birth time", url: "https://astro.com/faq/fq_faq_birthtimee.htm" },
+};
+
 const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
