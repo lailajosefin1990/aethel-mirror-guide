@@ -92,6 +92,7 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current || !containerRef.current) return;
+    e.preventDefault();
     const dy = startY.current - e.clientY;
     containerRef.current.scrollTop = startScroll.current + dy;
 
