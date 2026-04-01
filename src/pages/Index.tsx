@@ -407,7 +407,7 @@ const Index = () => {
           question: questionData.question,
           third_way: readingData.third_way,
         },
-      }).catch((err) => console.error("Memory extraction failed:", err));
+      }).catch(() => {});
 
       setActiveTab("journey");
       setView("dashboard");
