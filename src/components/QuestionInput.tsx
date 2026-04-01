@@ -230,6 +230,20 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
             })}
           </div>
 
+          {/* Mode description */}
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={selectedMode}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="font-body text-[12px] text-muted-foreground text-center -mt-4"
+            >
+              {MODE_DESCRIPTIONS[selectedMode]}
+            </motion.p>
+          </AnimatePresence>
+
           {/* CTA */}
           <button
             type="submit"
