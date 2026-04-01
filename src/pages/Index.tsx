@@ -58,6 +58,7 @@ const Index = () => {
   const [regenerationFeedback, setRegenerationFeedback] = useState<string | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [pendingSave, setPendingSave] = useState(false);
 
   const referralLinked = useRef(false);
 
@@ -206,7 +207,10 @@ const Index = () => {
     // Persist question so it survives OAuth page redirects
     sessionStorage.setItem("aethel_pending_question", JSON.stringify(data));
     if (!user) {
-      setView("auth");
+      // Anonymous flow: skip auth, go straight to loading with no birth data
+      track("anonymous_reading_started");
+      setLoadingError(null);
+      setView("loading");
       return;
     }
     proceedAfterAuth();
@@ -242,6 +246,17 @@ const Index = () => {
   }, [user, authLoading, questionData, view, proceedAfterAuth]);
 
   const handleAuthSuccess = () => {
+    if (pendingSave && profileLoaded && profileBirthData?.birth_date) {
+      // User already has birth data — auto-save the pending reading
+      setPendingSave(false);
+      handleSave();
+      return;
+    }
+    if (pendingSave) {
+      // Need birth data first, then save
+      setView("birth");
+      return;
+    }
     if (profileLoaded && profileBirthData?.birth_date) {
       proceedAfterAuth();
     } else {
@@ -270,6 +285,16 @@ const Index = () => {
         birth_timezone: data.birthTimezone ?? null,
       });
     }
+
+    // If we have a pending save (anonymous reading → auth → birth), auto-save now
+    if (pendingSave && readingData) {
+      setPendingSave(false);
+      // handleSave will run with the now-authenticated user
+      // We need a small delay for state to settle
+      setTimeout(() => handleSave(), 0);
+      return;
+    }
+
     setLoadingError(null);
     setView("loading");
   };
@@ -307,8 +332,11 @@ const Index = () => {
     }
 
     setReadingData(data as ReadingData);
+    if (!user) {
+      track("anonymous_reading_generated", { domain: qd.domain });
+    }
     return data;
-  }, [birthData, questionData, i18n.language, regenerationFeedback]);
+  }, [birthData, questionData, i18n.language, regenerationFeedback, user]);
 
   const handleLoadingComplete = useCallback(() => {
     setView("reading");
@@ -320,7 +348,15 @@ const Index = () => {
   }, []);
 
   const handleSave = async () => {
-    if (!user || !questionData || !readingData) return;
+    if (!questionData || !readingData) return;
+
+    // If user is not authenticated, redirect to auth with pending save
+    if (!user) {
+      track("anonymous_save_prompted");
+      setPendingSave(true);
+      setView("auth");
+      return;
+    }
 
     if (readingData.is_fallback) {
       track("fallback_reading_served", {
