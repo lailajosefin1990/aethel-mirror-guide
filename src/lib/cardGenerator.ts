@@ -3,7 +3,8 @@
  */
 export async function generateThirdWayCard(
   thirdWay: string,
-  domain: string
+  domain: string,
+  isPro: boolean = true
 ): Promise<Blob> {
   const size = 1080;
   const canvas = document.createElement("canvas");
