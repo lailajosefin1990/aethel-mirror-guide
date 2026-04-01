@@ -544,7 +544,7 @@ const Index = () => {
           </motion.div>
         )}
         {view === "dashboard" && (
-          <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
+          <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={slideTransition}>
             <AppLayout showNav activeTab={activeTab} onTabChange={setActiveTab} subscriptionTier={subscriptionTier}>
               {activeTab === "mirror" && (
                 <DailyNudge
