@@ -96,15 +96,31 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             </p>
           </motion.div>
 
-          {/* Testimonial */}
-          <motion.p
+          {/* Testimonials */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="font-body text-[13px] text-foreground/70 text-center mb-10"
+            className="w-full min-h-[80px] flex items-center justify-center mb-10"
           >
-            "I'd been stuck for 3 months. I had clarity in 20 minutes." — S.K.
-          </motion.p>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={testimonialIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="flex flex-col items-center text-center"
+              >
+                <p className="font-display text-[13px] leading-[1.6] text-foreground/70 mb-2">
+                  "{TESTIMONIALS[testimonialIndex].text}"
+                </p>
+                <p className="font-body text-[12px] text-muted-foreground">
+                  — {TESTIMONIALS[testimonialIndex].author} · <span className="inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-body">{TESTIMONIALS[testimonialIndex].domain}</span>
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
 
           {/* CTA */}
           <motion.div
