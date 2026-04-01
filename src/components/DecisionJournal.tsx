@@ -75,6 +75,34 @@ const FollowedBadge = ({ followed }: { followed: string }) => {
 const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }: DecisionJournalProps) => {
   const entries = propEntries.length > 0 ? propEntries : SAMPLE_ENTRIES;
   const [tab, setTab] = useState<"open" | "closed">("open");
+
+  const openEntries = entries.filter((e) => !e.outcome);
+  const closedEntries = entries.filter((e) => e.outcome);
+
+  const patternInsight = useMemo(() => {
+    if (closedEntries.length < 3) {
+      return "Keep logging outcomes — after a few more, your patterns will emerge here.";
+    }
+
+    const closedByDomain: Record<string, number> = {};
+    const openByDomain: Record<string, number> = {};
+
+    closedEntries.forEach((e) => {
+      closedByDomain[e.domain] = (closedByDomain[e.domain] || 0) + 1;
+    });
+    openEntries.forEach((e) => {
+      openByDomain[e.domain] = (openByDomain[e.domain] || 0) + 1;
+    });
+
+    const topClosedDomain = Object.entries(closedByDomain).sort((a, b) => b[1] - a[1])[0]?.[0];
+    const topOpenDomain = Object.entries(openByDomain).sort((a, b) => b[1] - a[1])[0]?.[0];
+
+    if (!topOpenDomain || topClosedDomain === topOpenDomain) {
+      return `Your mirror sees a strong focus on ${topClosedDomain}. Patterns across domains will emerge as you explore more areas.`;
+    }
+
+    return `You tend to act quickly on ${topClosedDomain} readings and sit longer with ${topOpenDomain} ones.`;
+  }, [closedEntries, openEntries]);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [sheetEntryId, setSheetEntryId] = useState<string | null>(null);
   const [followedChoice, setFollowedChoice] = useState<"yes" | "no" | "partially" | null>(null);
