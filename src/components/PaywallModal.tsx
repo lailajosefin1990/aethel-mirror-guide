@@ -12,7 +12,7 @@ interface PaywallModalProps {
   onRestorePurchase?: () => void;
 }
 
-const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
+const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) => {
   const [loading, setLoading] = useState<string | null>(null);
   const navigate = useNavigate();
 
