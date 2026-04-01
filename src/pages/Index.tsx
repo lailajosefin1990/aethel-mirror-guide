@@ -207,7 +207,10 @@ const Index = () => {
     // Persist question so it survives OAuth page redirects
     sessionStorage.setItem("aethel_pending_question", JSON.stringify(data));
     if (!user) {
-      setView("auth");
+      // Anonymous flow: skip auth, go straight to loading with no birth data
+      track("anonymous_reading_started");
+      setLoadingError(null);
+      setView("loading");
       return;
     }
     proceedAfterAuth();
