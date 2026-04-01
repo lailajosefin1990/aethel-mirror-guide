@@ -28,6 +28,7 @@ const TESTIMONIALS = [
 const HeroSection = ({ onStart }: HeroSectionProps) => {
   const howRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
 
   useEffect(() => {
     track("landing_viewed");
