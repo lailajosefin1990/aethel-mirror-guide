@@ -477,6 +477,13 @@ const Index = () => {
     <>
       {showConsentGate && <ConsentGate onAccept={handleConsentAccept} />}
       {showCrisis && <CrisisInterstitial onReturn={handleCrisisReturn} />}
+      {["question", "auth", "birth", "loading", "reading"].includes(view) && (
+        <ProgressStepper currentStep={
+          view === "question" ? 1 :
+          view === "auth" || view === "birth" ? 2 :
+          view === "loading" ? 3 : 4
+        } />
+      )}
       <AnimatePresence mode="wait">
         {view === "home" && (
           <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
