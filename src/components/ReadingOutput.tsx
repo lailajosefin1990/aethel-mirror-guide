@@ -78,11 +78,11 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   const sectionLabel = "font-body text-[11px] uppercase tracking-[0.35em] text-muted-foreground mb-4";
 
   const handleShare = useCallback(async () => {
-    if (!reading || !isPro) return;
+    if (!reading) return;
     setGenerating(true);
-    track("share_card_opened");
+    track("share_card_opened", { is_pro: isPro });
     try {
-      const blob = await generateThirdWayCard(reading.third_way, domain);
+      const blob = await generateThirdWayCard(reading.third_way, domain, isPro);
       setCardBlob(blob);
       const url = URL.createObjectURL(blob);
       setCardUrl(url);
