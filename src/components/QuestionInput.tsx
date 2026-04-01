@@ -26,6 +26,12 @@ const domains = [
 
 const modes = ["Reflect with me", "Coach me", "Both"];
 
+const MODE_DESCRIPTIONS: Record<string, string> = {
+  "Reflect with me": "Gentle and exploratory — helps you sit with the question",
+  "Coach me": "Direct and action-focused — gives you a clear next move",
+  "Both": "Starts with reflection, ends with a concrete step",
+};
+
 const MAX_CHARS = 300;
 
 const EXAMPLE_PROMPTS = [
@@ -40,11 +46,22 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
   const [selectedMode, setSelectedMode] = useState("Both");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const [validationHint, setValidationHint] = useState(false);
+  const [domainShake, setDomainShake] = useState(false);
+
   const isValid = selectedDomain !== null && question.trim().length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValid || !selectedDomain) return;
+    if (!isValid) {
+      if (!selectedDomain) {
+        setValidationHint(true);
+        setDomainShake(true);
+        setTimeout(() => setDomainShake(false), 350);
+        setTimeout(() => setValidationHint(false), 3000);
+      }
+      return;
+    }
     track("question_submitted", {
       domain: selectedDomain,
       mode: selectedMode,
@@ -102,14 +119,18 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
           className="space-y-8"
         >
           {/* Domain tiles — 2-column grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <motion.div
+            className="grid grid-cols-2 gap-3"
+            animate={domainShake ? { x: [0, -4, 4, -4, 4, 0] } : {}}
+            transition={{ duration: 0.3 }}
+          >
             {domains.map((domain) => {
               const isSelected = selectedDomain === domain;
               return (
                  <button
                    key={domain}
                    type="button"
-                   onClick={() => { setSelectedDomain(domain); track("question_domain_selected", { domain }); }}
+                   onClick={() => { setSelectedDomain(domain); setValidationHint(false); track("question_domain_selected", { domain }); }}
                   className={`px-4 py-3.5 rounded-sm font-body text-[13px] border transition-all duration-300 text-left ${
                     isSelected
                       ? "border-primary text-primary bg-primary/5"
@@ -120,7 +141,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
                 </button>
               );
             })}
-          </div>
+          </motion.div>
 
           {/* Life direction helper */}
           <AnimatePresence>
@@ -209,14 +230,42 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
             })}
           </div>
 
+          {/* Mode description */}
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={selectedMode}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="font-body text-[12px] text-muted-foreground text-center -mt-4"
+            >
+              {MODE_DESCRIPTIONS[selectedMode]}
+            </motion.p>
+          </AnimatePresence>
+
           {/* CTA */}
           <button
             type="submit"
-            disabled={!isValid}
-            className="w-full h-[52px] rounded-sm font-body font-medium text-[14px] tracking-wide transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110"
+            className={`w-full h-[52px] rounded-sm font-body font-medium text-[14px] tracking-wide transition-all duration-300 bg-primary text-primary-foreground hover:brightness-110 ${
+              !isValid ? "opacity-30 cursor-not-allowed" : ""
+            }`}
           >
             Find my Third Way →
           </button>
+
+          <AnimatePresence>
+            {validationHint && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="font-body text-[12px] text-primary text-center -mt-4"
+              >
+                Pick a domain first
+              </motion.p>
+            )}
+          </AnimatePresence>
         </motion.form>
       </div>
     </section>
