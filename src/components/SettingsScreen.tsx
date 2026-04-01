@@ -350,7 +350,6 @@ const SettingsScreen = () => {
               </p>
             );
           })()}
-          )}
         </div>
       </motion.div>
 
