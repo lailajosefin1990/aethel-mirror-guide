@@ -80,19 +80,27 @@ const VoiceRecorder = ({ onTranscription, disabled }: VoiceRecorderProps) => {
       type="button"
       disabled={disabled || transcribing}
       onClick={recording ? stopRecording : startRecording}
-      className={`shrink-0 w-10 h-10 rounded-sm flex items-center justify-center border transition-all duration-300 ${
+      className={`w-full py-3 rounded-sm border border-dashed font-body text-[13px] flex items-center justify-center gap-2 transition-all duration-200 ${
         recording
           ? "bg-destructive/10 border-destructive text-destructive animate-pulse"
           : transcribing
           ? "bg-muted border-border text-muted-foreground opacity-50"
-          : "bg-card border-border text-foreground/60 hover:border-primary hover:text-primary"
+          : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
       }`}
       title={recording ? "Stop recording" : transcribing ? "Transcribing..." : "Speak your question"}
     >
       {recording ? (
-        <Square className="w-4 h-4" strokeWidth={1.5} />
+        <>
+          <Square className="w-4 h-4" strokeWidth={1.5} />
+          Tap to stop
+        </>
+      ) : transcribing ? (
+        "Transcribing..."
       ) : (
-        <Mic className="w-4 h-4" strokeWidth={1.5} />
+        <>
+          <Mic className="w-4 h-4" strokeWidth={1.5} />
+          Or speak your question
+        </>
       )}
     </button>
   );

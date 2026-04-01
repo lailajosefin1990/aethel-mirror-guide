@@ -72,7 +72,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             className="w-full rounded-md border border-border bg-card p-6 mb-6"
           >
             <p className="font-body text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-4">
-              Work &amp; Money · Sample Reading
+              Work & Money · Sample Reading
             </p>
 
             <p className="font-display text-[16px] leading-[1.6] text-card-foreground mb-5">

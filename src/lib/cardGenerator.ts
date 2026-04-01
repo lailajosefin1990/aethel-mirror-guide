@@ -68,6 +68,15 @@ export async function generateThirdWayCard(
   ctx.letterSpacing = "0px";
   ctx.fillText("aethelmirror.com", size - 60, size - 60);
 
+  // Watermark for free users
+  if (!isPro) {
+    ctx.fillStyle = "rgba(245, 240, 232, 0.15)";
+    ctx.font = `400 36px ${fontBody}`;
+    ctx.textAlign = "center";
+    ctx.letterSpacing = "6px";
+    ctx.fillText("aethelmirror.com", size / 2, size - 120);
+  }
+
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {
       resolve(blob!);
