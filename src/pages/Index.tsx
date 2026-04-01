@@ -188,6 +188,8 @@ const Index = () => {
     return () => { cancelled = true; };
   }, [user]);
 
+  const dashboardLoading = user && !authLoading && (!profileLoaded || (profileLoaded && view === "home" && journalEntries.length === 0 && !profileBirthData));
+
   useEffect(() => {
     if (user && !authLoading && profileLoaded && view === "home" && journalEntries.length > 0) {
       setView("dashboard");
