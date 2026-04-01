@@ -564,6 +564,7 @@ const Index = () => {
                 <DecisionJournal
                   entries={journalEntries}
                   onUpdateEntry={handleUpdateEntry}
+                  onDeleteEntry={(id) => setJournalEntries((prev) => prev.filter((e) => e.id !== id))}
                   onStartReading={handleStartReading}
                 />
               )}
