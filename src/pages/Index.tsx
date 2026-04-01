@@ -23,6 +23,7 @@ import { subscribeToPush, wasPushDismissedRecently, dismissPushPrompt } from "@/
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { ReadingData } from "@/lib/reading";
+import { toast } from "sonner";
 
 type View = "home" | "question" | "auth" | "birth" | "loading" | "reading" | "dashboard";
 
