@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, MoreHorizontal } from "lucide-react";
 import { track } from "@/lib/posthog";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface JournalEntry {
   id: string;
@@ -10,6 +11,7 @@ export interface JournalEntry {
   date: string;
   thirdWay: string;
   question: string;
+  createdAt?: string;
   outcome?: {
     followed: "yes" | "no" | "partially";
     note: string;
@@ -19,6 +21,7 @@ export interface JournalEntry {
 interface DecisionJournalProps {
   entries: JournalEntry[];
   onUpdateEntry: (id: string, outcome: JournalEntry["outcome"], consentToShare?: boolean) => void;
+  onDeleteEntry?: (id: string) => void;
   onStartReading: () => void;
 }
 
