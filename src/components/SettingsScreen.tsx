@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { isPushActive, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
 import { track } from "@/lib/posthog";
 import { useNavigate } from "react-router-dom";
-import { Copy, Check, Clock } from "lucide-react";
+import { Copy, Check, Clock, MapPin, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "@/components/LanguageSelector";
@@ -30,9 +30,13 @@ const SettingsScreen = () => {
   const [referralCount, setReferralCount] = useState(0);
   const [rewardsEarned, setRewardsEarned] = useState(0);
   const [copied, setCopied] = useState(false);
-  const [editingBirthTime, setEditingBirthTime] = useState(false);
+  const [editingBirth, setEditingBirth] = useState(false);
   const [birthTimeValue, setBirthTimeValue] = useState("");
+  const [birthDateValue, setBirthDateValue] = useState("");
+  const [birthPlaceValue, setBirthPlaceValue] = useState("");
   const [currentBirthTime, setCurrentBirthTime] = useState<string | null>(null);
+  const [currentBirthDate, setCurrentBirthDate] = useState<string | null>(null);
+  const [currentBirthPlace, setCurrentBirthPlace] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -47,13 +51,21 @@ const SettingsScreen = () => {
     const loadData = async () => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("referral_code, birth_time")
+        .select("referral_code, birth_time, birth_date, birth_place_name")
         .eq("user_id", user.id)
         .single();
       if (profile?.referral_code) setReferralCode(profile.referral_code);
       if (profile?.birth_time) {
         setCurrentBirthTime(profile.birth_time);
         setBirthTimeValue(profile.birth_time);
+      }
+      if (profile?.birth_date) {
+        setCurrentBirthDate(profile.birth_date);
+        setBirthDateValue(profile.birth_date);
+      }
+      if (profile?.birth_place_name) {
+        setCurrentBirthPlace(profile.birth_place_name);
+        setBirthPlaceValue(profile.birth_place_name);
       }
 
       const { data: referrals } = await supabase
