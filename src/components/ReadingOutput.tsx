@@ -42,6 +42,8 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   const [cardBlob, setCardBlob] = useState<Blob | null>(null);
   const [cardUrl, setCardUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [reaction, setReaction] = useState<"positive" | "negative" | null>(null);
+  const [saved, setSaved] = useState(false);
   const thirdWayRef = useRef<HTMLDivElement>(null);
 
   const isPro = subscriptionTier === "mirror_pro";
@@ -203,15 +205,56 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
           </motion.p>
         )}
 
+        {/* Thumbs reaction */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.47 }}
+          className="flex items-center justify-center gap-4 mb-6">
+          <button
+            onClick={() => { track("reading_reaction", { reaction: "positive" }); setReaction("positive"); }}
+            className={`p-2 rounded-full border transition-all duration-200 ${
+              reaction === "positive" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
+            }`}>
+            <span className="text-[16px]">👍</span>
+          </button>
+          <button
+            onClick={() => { track("reading_reaction", { reaction: "negative" }); setReaction("negative"); }}
+            className={`p-2 rounded-full border transition-all duration-200 ${
+              reaction === "negative" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
+            }`}>
+            <span className="text-[16px]">👎</span>
+          </button>
+        </motion.div>
+
         {!reading.is_fallback && <div className="mb-8" />}
 
         {/* Buttons */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }}
           className="flex flex-col gap-3 pb-10">
-          <button onClick={() => { track("reading_saved"); onSave(); }}
-            className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300">
-            Save to my mirror
+          <button
+            onClick={() => {
+              if (saved) return;
+              setSaved(true);
+              toast.success("Saved to your mirror ✓");
+              track("reading_saved");
+              onSave();
+            }}
+            disabled={saved}
+            className={`w-full h-[52px] rounded-sm font-body font-medium text-[14px] tracking-wide transition-all duration-300 ${
+              saved
+                ? "bg-primary/60 text-primary-foreground cursor-default"
+                : "bg-primary text-primary-foreground hover:brightness-110"
+            }`}>
+            {saved ? "Saved ✓" : "Save to my mirror"}
           </button>
+
+          {saved && (
+            <motion.button
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={onBack}
+              className="w-full h-[48px] rounded-sm border border-primary text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300">
+              Go to my mirror →
+            </motion.button>
+          )}
 
           <VoicePlayer
             text={`${reading.astrology_reading}\n\n${reading.design_insights.join("\n")}\n\nYour Third Way: ${reading.third_way}\n\nJournal prompt: ${reading.journal_prompt}`}

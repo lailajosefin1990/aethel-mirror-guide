@@ -107,6 +107,21 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
           </motion.p>
         </AnimatePresence>
       </div>
+
+      <div className="flex items-center justify-center gap-2 mt-6">
+        {phrases.map((_, i) => (
+          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+            i <= phraseIndex ? "bg-primary" : "bg-border"
+          }`} />
+        ))}
+      </div>
+
+      <button
+        onClick={() => { track("reading_wait_cancelled"); onError?.(); }}
+        className="font-body text-[12px] text-muted-foreground/50 hover:text-muted-foreground mt-8 transition-colors"
+      >
+        Cancel
+      </button>
     </section>
   );
 };
