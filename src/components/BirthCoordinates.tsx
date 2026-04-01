@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronDown, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { track } from "@/lib/posthog";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import DrumRoller from "@/components/DrumRoller";
 import LocationAutocomplete, { type LocationResult } from "@/components/LocationAutocomplete";
 
