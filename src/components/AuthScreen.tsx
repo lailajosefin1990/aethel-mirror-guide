@@ -105,7 +105,12 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
             disabled={loading}
             className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300 disabled:opacity-50"
           >
-            {loading ? "..." : "Continue"}
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                <span>Signing in...</span>
+              </div>
+            ) : "Continue"}
           </button>
         </form>
 

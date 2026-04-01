@@ -295,15 +295,21 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
                     </AnimatePresence>
                   </div>
 
-                  <a
-                    href="https://www.gov.uk/order-copy-birth-certificate"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 mt-3 ml-0 font-body text-[13px] text-primary hover:text-primary/80 transition-colors"
-                  >
-                    {t("birth_find_time")}
-                    <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
-                  </a>
+                  {(() => {
+                    const locale = navigator.language?.split("-")[1]?.toUpperCase() || "DEFAULT";
+                    const helpLink = BIRTH_TIME_HELP[locale] || BIRTH_TIME_HELP.DEFAULT;
+                    return (
+                      <a
+                        href={helpLink.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 mt-3 ml-0 font-body text-[13px] text-primary hover:text-primary/80 transition-colors"
+                      >
+                        {helpLink.text}
+                        <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
+                      </a>
+                    );
+                  })()}
                 </motion.div>
               )}
             </AnimatePresence>
