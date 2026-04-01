@@ -22,7 +22,7 @@ const resources = {
       domain_visibility: "Visibility",
       domain_body: "Body & health",
       domain_spiritual: "Spiritual path",
-      domain_everything: "Everything at once",
+      domain_everything: "Life direction",
       // Birth coordinates
       birth_heading: "Y O U R   C O O R D I N A T E S",
       birth_subtitle: "We anchor your mirror in the moment you arrived. This is how we personalise your reading — not a general horoscope. We only ask this once.",

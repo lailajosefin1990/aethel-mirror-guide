@@ -341,9 +341,9 @@ export const FALLBACK_READINGS: FallbackReading[] = [
     confidence_level: "high"
   },
 
-  // ─── Everything at once / Both (5) ───
+  // ─── Life direction / Both (5) ───
   {
-    domain: "Everything at once",
+    domain: "Life direction",
     mode: "Both",
     astrology_reading: "At this moment, there's a grand cross forming that touches every major life area simultaneously — work, relationships, health, and identity. This is not chaos; it's a restructuring. Saturn demands you choose one priority while Jupiter insists everything is possible. The truth, right now, is somewhere between those two.",
     design_insights: [
@@ -356,7 +356,7 @@ export const FALLBACK_READINGS: FallbackReading[] = [
     confidence_level: "medium"
   },
   {
-    domain: "Everything at once",
+    domain: "Life direction",
     mode: "Both",
     astrology_reading: "Right now, the eclipses are activating your axis of self and other, making every area of life feel like it's in dialogue with every other area. Pluto is adding depth pressure — surface-level fixes won't hold. Mercury is asking you to name the one feeling underneath all the noise, because right now it's the same feeling wearing different costumes.",
     design_insights: [
@@ -369,7 +369,7 @@ export const FALLBACK_READINGS: FallbackReading[] = [
     confidence_level: "low"
   },
   {
-    domain: "Everything at once",
+    domain: "Life direction",
     mode: "Both",
     astrology_reading: "At this moment, Jupiter is expanding your vision while Saturn is contracting your resources, creating a tension that demands creative problem-solving. The current Venus-Mars conjunction is adding passion to whatever you focus on — but it punishes divided attention. The lunar nodes are asking: what season of life are you actually in?",
     design_insights: [
@@ -382,7 +382,7 @@ export const FALLBACK_READINGS: FallbackReading[] = [
     confidence_level: "medium"
   },
   {
-    domain: "Everything at once",
+    domain: "Life direction",
     mode: "Both",
     astrology_reading: "Right now, the stellium in your foundational sector is rebuilding your sense of home — internally and externally. This reorganisation is rippling into work, relationships, and health because the foundation affects everything. Mars is giving you the energy to act, but only on what's truly yours to handle. The rest needs to be released.",
     design_insights: [
@@ -395,7 +395,7 @@ export const FALLBACK_READINGS: FallbackReading[] = [
     confidence_level: "high"
   },
   {
-    domain: "Everything at once",
+    domain: "Life direction",
     mode: "Both",
     astrology_reading: "At this moment, Uranus is disrupting your comfort zone while Neptune is dissolving your clarity about why it matters. This double transit is disorienting by design — it's creating space for something genuinely new. The sun's current position says: you don't need to see the whole path, just the next three steps.",
     design_insights: [
@@ -426,9 +426,9 @@ export function selectFallbackReading(domain: string, mode: string): FallbackRea
     return domainMatches[Math.floor(Math.random() * domainMatches.length)];
   }
 
-  // Fallback to "Everything at once"
+  // Fallback to "Life direction"
   const catchAll = FALLBACK_READINGS.filter(
-    (r) => r.domain === "Everything at once"
+    (r) => r.domain === "Life direction" || r.domain === "Life direction"
   );
   return catchAll[Math.floor(Math.random() * catchAll.length)];
 }
