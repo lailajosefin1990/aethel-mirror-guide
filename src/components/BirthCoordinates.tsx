@@ -37,7 +37,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
 
   const [day, setDay] = useState<number>(15);
   const [month, setMonth] = useState<number>(6);
-  const [year, setYear] = useState<number>(1990);
+  const [year, setYear] = useState<number>(1995);
   const [hour, setHour] = useState<number>(12);
   const [minute, setMinute] = useState<number>(0);
   const [unknownTime, setUnknownTime] = useState(false);
