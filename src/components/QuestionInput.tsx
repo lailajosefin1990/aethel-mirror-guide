@@ -21,7 +21,7 @@ const domains = [
   "Visibility",
   "Body & health",
   "Spiritual path",
-  "Everything at once",
+  "Life direction",
 ];
 
 const modes = ["Reflect with me", "Coach me", "Both"];
