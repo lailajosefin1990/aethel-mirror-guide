@@ -138,6 +138,10 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
             <p className="font-body text-[13px] text-destructive">{error}</p>
           )}
 
+          {isSignUp && (
+            <p className="font-body text-[11px] text-muted-foreground -mt-2">At least 6 characters</p>
+          )}
+
           <button
             type="submit"
             disabled={loading}

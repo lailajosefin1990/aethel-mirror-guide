@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown, Lock, Download, Link2, Share2, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, Download, Link2, Share2, X } from "lucide-react";
 import VoicePlayer from "./VoicePlayer";
 import type { ReadingData } from "@/lib/reading";
 import { CONFIDENCE_MESSAGES } from "@/lib/reading";
@@ -46,7 +46,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   const [saved, setSaved] = useState(false);
   const thirdWayRef = useRef<HTMLDivElement>(null);
 
-  const isPro = subscriptionTier === "mirror_pro";
+  const isPro = subscriptionTier === "mirror_pro" || subscriptionTier === "practitioner";
 
   // Track reading loaded
   useEffect(() => {
@@ -78,11 +78,11 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   const sectionLabel = "font-body text-[11px] uppercase tracking-[0.35em] text-muted-foreground mb-4";
 
   const handleShare = useCallback(async () => {
-    if (!reading || !isPro) return;
+    if (!reading) return;
     setGenerating(true);
-    track("share_card_opened");
+    track("share_card_opened", { is_pro: isPro });
     try {
-      const blob = await generateThirdWayCard(reading.third_way, domain);
+      const blob = await generateThirdWayCard(reading.third_way, domain, isPro);
       setCardBlob(blob);
       const url = URL.createObjectURL(blob);
       setCardUrl(url);
@@ -261,24 +261,11 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
           />
 
           {/* Share Third Way button */}
-          {isPro ? (
-            <button onClick={handleShare} disabled={generating}
-              className="w-full h-[48px] rounded-sm border border-primary text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50">
-              <Share2 className="w-4 h-4" strokeWidth={1.5} />
-              {generating ? "Generating..." : "Share my Third Way ↗"}
-            </button>
-          ) : (
-            <div className="relative group">
-              <button disabled
-                className="w-full h-[48px] rounded-sm border border-border text-foreground/30 font-body text-[14px] cursor-not-allowed flex items-center justify-center gap-2">
-                <Lock className="w-3.5 h-3.5" strokeWidth={1.5} />
-                Share my Third Way ↗
-              </button>
-              <div className="absolute -top-9 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded bg-card border border-border font-body text-[11px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                Unlock with Mirror Pro
-              </div>
-            </div>
-          )}
+          <button onClick={handleShare} disabled={generating}
+            className="w-full h-[48px] rounded-sm border border-primary text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50">
+            <Share2 className="w-4 h-4" strokeWidth={1.5} />
+            {generating ? "Generating..." : "Share my Third Way ↗"}
+          </button>
 
           {regenerationCount >= 3 ? (
             <p className="font-body text-[13px] italic text-primary text-center py-3">

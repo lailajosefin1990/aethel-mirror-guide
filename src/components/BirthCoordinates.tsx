@@ -4,6 +4,7 @@ import { ArrowLeft, ChevronDown, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { track } from "@/lib/posthog";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import DrumRoller from "@/components/DrumRoller";
 import LocationAutocomplete, { type LocationResult } from "@/components/LocationAutocomplete";
 
@@ -133,7 +134,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          onClick={onBack}
+          onClick={() => { toast("Your question is saved", { duration: 2000 }); onBack(); }}
           className="mb-10 text-foreground/50 hover:text-foreground/70 transition-colors duration-300"
         >
           <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
