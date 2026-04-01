@@ -144,6 +144,22 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
         Y O U R &nbsp; M I R R O R &nbsp; J O U R N E Y
       </p>
 
+      {/* Domain filter pills */}
+      {domains.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+          <button onClick={() => setFilterDomain(null)}
+            className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-body border transition-colors ${
+              !filterDomain ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary/40"
+            }`}>All</button>
+          {domains.map((d) => (
+            <button key={d} onClick={() => setFilterDomain(d)}
+              className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-body border transition-colors ${
+                filterDomain === d ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary/40"
+              }`}>{d}</button>
+          ))}
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 mb-8">
         {(["open", "closed"] as const).map((t) => (
