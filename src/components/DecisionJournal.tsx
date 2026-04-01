@@ -113,8 +113,6 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
     track("journal_viewed");
   }, []);
 
-  const openEntries = entries.filter((e) => !e.outcome);
-  const closedEntries = entries.filter((e) => e.outcome);
   const displayedEntries = tab === "open" ? openEntries : closedEntries;
 
   const handleLogSubmit = async () => {
