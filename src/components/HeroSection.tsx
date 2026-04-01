@@ -19,6 +19,12 @@ const howItems = [
   "We give you one Third Way — a clear next move, today.",
 ];
 
+const TESTIMONIALS = [
+  { text: "I was stuck between two job offers for weeks. The Third Way gave me a frame I hadn't considered — I negotiated a hybrid role instead.", author: "Maia R.", domain: "Work & Money" },
+  { text: "Every reading has been eerily specific. I use it before any big conversation with my partner now.", author: "Jordan T.", domain: "Love & People" },
+  { text: "I was about to say yes to a collab that felt off. Aethel helped me see why — and gave me the words to say no gracefully.", author: "Sam K.", domain: "Visibility" },
+];
+
 const HeroSection = ({ onStart }: HeroSectionProps) => {
   const howRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
