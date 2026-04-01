@@ -479,6 +479,30 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_checkins: {
+        Row: {
+          checked_in_at: string
+          created_at: string
+          id: string
+          rating: string
+          user_id: string
+        }
+        Insert: {
+          checked_in_at?: string
+          created_at?: string
+          id?: string
+          rating: string
+          user_id: string
+        }
+        Update: {
+          checked_in_at?: string
+          created_at?: string
+          id?: string
+          rating?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       high_quality_readings: {
