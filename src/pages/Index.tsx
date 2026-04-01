@@ -246,6 +246,17 @@ const Index = () => {
   }, [user, authLoading, questionData, view, proceedAfterAuth]);
 
   const handleAuthSuccess = () => {
+    if (pendingSave && profileLoaded && profileBirthData?.birth_date) {
+      // User already has birth data — auto-save the pending reading
+      setPendingSave(false);
+      handleSave();
+      return;
+    }
+    if (pendingSave) {
+      // Need birth data first, then save
+      setView("birth");
+      return;
+    }
     if (profileLoaded && profileBirthData?.birth_date) {
       proceedAfterAuth();
     } else {
