@@ -9,6 +9,7 @@ import { track } from "@/lib/posthog";
 interface PaywallModalProps {
   open: boolean;
   onClose: () => void;
+  onRestorePurchase?: () => void;
 }
 
 const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
