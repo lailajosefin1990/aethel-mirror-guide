@@ -390,6 +390,7 @@ const Index = () => {
         id: reading.id,
         domain: questionData.domain,
         date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        createdAt: reading.created_at,
         thirdWay: readingData.third_way,
         question: questionData.question,
       };
