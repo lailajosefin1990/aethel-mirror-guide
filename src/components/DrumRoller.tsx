@@ -62,7 +62,21 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
     rafId.current = requestAnimationFrame(decelerate);
   }, [snapToNearest]);
 
+  // Prevent native touch scrolling on the drum container
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const preventScroll = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    el.addEventListener("touchmove", preventScroll, { passive: false });
+    return () => el.removeEventListener("touchmove", preventScroll);
+  }, []);
+
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const el = containerRef.current;
     if (!el) return;
     cancelAnimationFrame(rafId.current);
@@ -78,6 +92,7 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current || !containerRef.current) return;
+    e.preventDefault();
     const dy = startY.current - e.clientY;
     containerRef.current.scrollTop = startScroll.current + dy;
 
@@ -152,7 +167,7 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
 
       <div
         ref={containerRef}
-        className="h-full overflow-hidden touch-none cursor-grab active:cursor-grabbing"
+        className="h-full overflow-hidden touch-none cursor-grab active:cursor-grabbing overscroll-contain"
         style={{ paddingTop: paddingHeight, paddingBottom: paddingHeight }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

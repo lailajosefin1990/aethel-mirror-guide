@@ -89,11 +89,11 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
     }));
   }, []);
 
-  // Minute items (5-min intervals)
+  // Minute items (1-min intervals)
   const minuteItems = useMemo(() => {
-    return Array.from({ length: 12 }, (_, i) => ({
-      value: i * 5,
-      label: String(i * 5).padStart(2, "0"),
+    return Array.from({ length: 60 }, (_, i) => ({
+      value: i,
+      label: String(i).padStart(2, "0"),
     }));
   }, []);
 
