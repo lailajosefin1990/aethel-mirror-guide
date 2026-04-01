@@ -62,7 +62,21 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
     rafId.current = requestAnimationFrame(decelerate);
   }, [snapToNearest]);
 
+  // Prevent native touch scrolling on the drum container
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const preventScroll = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    el.addEventListener("touchmove", preventScroll, { passive: false });
+    return () => el.removeEventListener("touchmove", preventScroll);
+  }, []);
+
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const el = containerRef.current;
     if (!el) return;
     cancelAnimationFrame(rafId.current);
