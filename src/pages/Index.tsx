@@ -573,7 +573,7 @@ const Index = () => {
         )}
       </AnimatePresence>
 
-      <PaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} />
+      <PaywallModal open={paywallOpen} onClose={() => setPaywallOpen(false)} onRestorePurchase={() => setActiveTab("settings")} />
 
       <PushPermissionSheet
         open={pushSheetOpen}
