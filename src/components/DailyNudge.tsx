@@ -150,6 +150,17 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         A E T H E L &nbsp; M I R R O R &nbsp; · &nbsp; T O D A Y
       </motion.p>
 
+      {/* Prominent new reading button */}
+      <motion.button
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.15 }}
+        onClick={() => { track("new_reading_from_top"); onNewReading(); }}
+        className="w-full p-4 rounded-md border-2 border-dashed border-primary/30 hover:border-primary/60 text-primary font-body text-[14px] transition-all duration-200 mb-6"
+      >
+        + New reading
+      </motion.button>
+
       {/* Main nudge card */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -258,6 +269,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
               Upgrade for unlimited readings
             </button>
           </p>
+          <p className="font-body text-[11px] text-muted-foreground mt-0.5 text-center">Resets monthly</p>
         </motion.div>
       )}
 

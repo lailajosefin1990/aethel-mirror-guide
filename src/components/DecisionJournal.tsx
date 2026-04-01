@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, MoreHorizontal } from "lucide-react";
 import { track } from "@/lib/posthog";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface JournalEntry {
   id: string;
@@ -10,6 +11,7 @@ export interface JournalEntry {
   date: string;
   thirdWay: string;
   question: string;
+  createdAt?: string;
   outcome?: {
     followed: "yes" | "no" | "partially";
     note: string;
@@ -19,6 +21,7 @@ export interface JournalEntry {
 interface DecisionJournalProps {
   entries: JournalEntry[];
   onUpdateEntry: (id: string, outcome: JournalEntry["outcome"], consentToShare?: boolean) => void;
+  onDeleteEntry?: (id: string) => void;
   onStartReading: () => void;
 }
 
@@ -72,12 +75,16 @@ const FollowedBadge = ({ followed }: { followed: string }) => {
   );
 };
 
-const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }: DecisionJournalProps) => {
+const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, onStartReading }: DecisionJournalProps) => {
   const entries = propEntries.length > 0 ? propEntries : SAMPLE_ENTRIES;
   const [tab, setTab] = useState<"open" | "closed">("open");
+  const [filterDomain, setFilterDomain] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
-  const openEntries = entries.filter((e) => !e.outcome);
-  const closedEntries = entries.filter((e) => e.outcome);
+  const domains = useMemo(() => [...new Set(entries.map((e) => e.domain))], [entries]);
+  const filtered = filterDomain ? entries.filter((e) => e.domain === filterDomain) : entries;
+  const openEntries = filtered.filter((e) => !e.outcome);
+  const closedEntries = filtered.filter((e) => e.outcome);
 
   const patternInsight = useMemo(() => {
     if (closedEntries.length < 3) {
@@ -136,6 +143,22 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
       <p className="font-display text-[14px] tracking-[0.35em] text-primary mb-8">
         Y O U R &nbsp; M I R R O R &nbsp; J O U R N E Y
       </p>
+
+      {/* Domain filter pills */}
+      {domains.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+          <button onClick={() => setFilterDomain(null)}
+            className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-body border transition-colors ${
+              !filterDomain ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary/40"
+            }`}>All</button>
+          {domains.map((d) => (
+            <button key={d} onClick={() => setFilterDomain(d)}
+              className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-body border transition-colors ${
+                filterDomain === d ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary/40"
+              }`}>{d}</button>
+          ))}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-8">
@@ -201,9 +224,54 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
                   <span className="px-2 py-0.5 rounded-sm bg-primary/15 font-body text-[11px] uppercase tracking-wider text-primary">
                     {entry.domain}
                   </span>
-                  <span className="font-body text-[11px] text-muted-foreground">
-                    {entry.date}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {entry.createdAt && !entry.outcome && (() => {
+                      const daysSince = Math.floor((Date.now() - new Date(entry.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+                      const timeText = daysSince === 0 ? "Today" : daysSince === 1 ? "Yesterday" : `${daysSince}d ago`;
+                      return <span className="font-body text-[11px] text-muted-foreground">{timeText}</span>;
+                    })()}
+                    <span className="font-body text-[11px] text-muted-foreground">
+                      {entry.date}
+                    </span>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === entry.id ? null : entry.id); }}
+                        className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <MoreHorizontal className="w-4 h-4" strokeWidth={1.5} />
+                      </button>
+                      {menuOpen === entry.id && (
+                        <div className="absolute right-0 top-7 z-20 bg-card border border-border rounded-md shadow-lg py-1 min-w-[140px]">
+                          {entry.outcome && (
+                            <button
+                              onClick={() => { setMenuOpen(null); setSheetEntryId(entry.id); setFollowedChoice(entry.outcome!.followed); setOutcomeNote(entry.outcome!.note); }}
+                              className="w-full text-left px-3 py-2 font-body text-[13px] text-foreground hover:bg-muted transition-colors"
+                            >
+                              Edit outcome
+                            </button>
+                          )}
+                          <button
+                            onClick={async () => {
+                              setMenuOpen(null);
+                              if (!confirm("Remove this entry?")) return;
+                              try {
+                                const { error } = await supabase.from("readings").delete().eq("id", entry.id);
+                                if (error) throw error;
+                                onDeleteEntry?.(entry.id);
+                                toast.success("Entry removed");
+                                track("journal_entry_deleted");
+                              } catch {
+                                toast.error("Couldn't delete entry");
+                              }
+                            }}
+                            className="w-full text-left px-3 py-2 font-body text-[13px] text-destructive hover:bg-muted transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <button

@@ -1,0 +1,1 @@
+CREATE POLICY "Users can delete their own readings" ON public.readings FOR DELETE TO public USING (auth.uid() = user_id);

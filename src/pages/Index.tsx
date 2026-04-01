@@ -176,6 +176,7 @@ const Index = () => {
         id: r.id,
         domain: r.domain,
         date: new Date(r.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        createdAt: r.created_at,
         thirdWay: r.third_way_text || "",
         question: r.question,
         outcome: outcomeMap.get(r.id) as JournalEntry["outcome"] | undefined,
@@ -389,6 +390,7 @@ const Index = () => {
         id: reading.id,
         domain: questionData.domain,
         date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        createdAt: reading.created_at,
         thirdWay: readingData.third_way,
         question: questionData.question,
       };
@@ -562,6 +564,7 @@ const Index = () => {
                 <DecisionJournal
                   entries={journalEntries}
                   onUpdateEntry={handleUpdateEntry}
+                  onDeleteEntry={(id) => setJournalEntries((prev) => prev.filter((e) => e.id !== id))}
                   onStartReading={handleStartReading}
                 />
               )}
