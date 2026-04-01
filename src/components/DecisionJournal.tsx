@@ -254,8 +254,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
             P A T T E R N
           </p>
           <p className="font-display text-[15px] leading-[1.6] text-card-foreground">
-            You've logged {closedEntries.length} decisions. You tend to act on
-            readings about work and sit longer on ones about people.
+            {patternInsight}
           </p>
         </motion.div>
       )}

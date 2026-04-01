@@ -141,6 +141,17 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
 
             <button
               onClick={() => {
+                track("restore_purchase_tapped");
+                onClose();
+                onRestorePurchase?.();
+              }}
+              className="font-body text-[12px] text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors mb-3"
+            >
+              Already subscribed? Restore
+            </button>
+
+            <button
+              onClick={() => {
                 track("paywall_practitioner_clicked");
                 onClose();
                 navigate("/practitioner");
