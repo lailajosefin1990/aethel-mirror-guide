@@ -140,9 +140,13 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
               Free · No card needed
             </p>
 
+            <a href="/evidence" onClick={() => track("evidence_link_hero_clicked")} className="block font-body text-[13px] text-primary/70 hover:text-primary underline underline-offset-2 mt-3 text-center transition-colors">
+              See real outcomes →
+            </a>
+
             <button
               onClick={scrollToHow}
-              className="font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors duration-300 bg-transparent border-none cursor-pointer"
+              className="font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors duration-300 bg-transparent border-none cursor-pointer mt-2"
             >
               How it works ↓
             </button>

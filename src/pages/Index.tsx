@@ -491,32 +491,32 @@ const Index = () => {
       )}
       <AnimatePresence mode="wait">
         {view === "home" && !dashboardLoading && (
-          <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
+          <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={slideTransition}>
             <HeroSection onStart={() => setView("question")} />
           </motion.div>
         )}
         {view === "home" && dashboardLoading && (
-          <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
+          <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={slideTransition}>
             <DashboardSkeleton />
           </motion.div>
         )}
         {view === "question" && (
-          <motion.div key="question" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
+          <motion.div key="question" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
             <QuestionInput onSubmit={handleQuestionSubmit} onBack={() => setView("home")} />
           </motion.div>
         )}
         {view === "auth" && (
-          <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
+          <motion.div key="auth" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
             <AuthScreen onSuccess={handleAuthSuccess} onBack={() => setView("question")} />
           </motion.div>
         )}
         {view === "birth" && (
-          <motion.div key="birth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
+          <motion.div key="birth" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
             <BirthCoordinates onSubmit={handleBirthSubmit} onBack={() => setView("question")} />
           </motion.div>
         )}
         {view === "loading" && (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
+          <motion.div key="loading" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
             <ReadingLoader
               onComplete={handleLoadingComplete}
               onError={handleLoadingError}
@@ -525,7 +525,7 @@ const Index = () => {
           </motion.div>
         )}
         {view === "reading" && (
-          <motion.div key="reading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
+          <motion.div key="reading" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
             <ReadingOutput
               domain={questionData?.domain ?? "General"}
               question={questionData?.question ?? ""}

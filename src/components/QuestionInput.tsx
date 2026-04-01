@@ -247,11 +247,25 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
           {/* CTA */}
           <button
             type="submit"
-            disabled={!isValid}
-            className="w-full h-[52px] rounded-sm font-body font-medium text-[14px] tracking-wide transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110"
+            className={`w-full h-[52px] rounded-sm font-body font-medium text-[14px] tracking-wide transition-all duration-300 bg-primary text-primary-foreground hover:brightness-110 ${
+              !isValid ? "opacity-30 cursor-not-allowed" : ""
+            }`}
           >
             Find my Third Way →
           </button>
+
+          <AnimatePresence>
+            {validationHint && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="font-body text-[12px] text-primary text-center -mt-4"
+              >
+                Pick a domain first
+              </motion.p>
+            )}
+          </AnimatePresence>
         </motion.form>
       </div>
     </section>
