@@ -39,7 +39,7 @@ type ProfileBirthData = {
 const FREE_READING_LIMIT = 3;
 const MAX_REGENERATIONS = 3;
 
-const transition = { duration: 0.3, ease: "easeInOut" as const };
+const slideTransition = { duration: 0.35, ease: "easeOut" as const };
 
 const Index = () => {
   const { i18n } = useTranslation();
