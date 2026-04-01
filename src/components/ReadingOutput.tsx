@@ -46,7 +46,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   const [saved, setSaved] = useState(false);
   const thirdWayRef = useRef<HTMLDivElement>(null);
 
-  const isPro = subscriptionTier === "mirror_pro";
+  const isPro = subscriptionTier === "mirror_pro" || subscriptionTier === "practitioner";
 
   // Track reading loaded
   useEffect(() => {
