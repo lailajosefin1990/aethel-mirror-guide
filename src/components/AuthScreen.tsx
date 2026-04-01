@@ -14,6 +14,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +28,10 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
+        // Show confirmation message for sign-up
+        setShowEmailConfirmation(true);
+        setLoading(false);
+        return;
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
