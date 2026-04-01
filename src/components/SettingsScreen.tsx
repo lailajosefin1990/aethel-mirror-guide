@@ -199,7 +199,7 @@ const SettingsScreen = () => {
         <LanguageSelector onLanguageChange={handleLanguageChange} />
       </motion.div>
 
-      {/* Birth time */}
+      {/* Birth details */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -207,41 +207,85 @@ const SettingsScreen = () => {
         className="bg-card border border-border rounded-md p-5 mb-5"
       >
         <p className={sectionLabel}>{t("settings_birth_time")}</p>
-        {editingBirthTime ? (
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1">
-              <input
-                type="time"
-                value={birthTimeValue}
-                onChange={(e) => setBirthTimeValue(e.target.value)}
-                className="w-full h-10 px-3 pr-10 rounded-sm bg-background text-foreground font-body text-[14px] border border-border focus:outline-none focus:border-primary/60 transition-colors"
-              />
-              <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        {editingBirth ? (
+          <div className="space-y-3">
+            <div>
+              <label className="font-body text-[12px] text-muted-foreground mb-1 block">Birth date</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={birthDateValue}
+                  onChange={(e) => setBirthDateValue(e.target.value)}
+                  className="w-full h-10 px-3 pr-10 rounded-sm bg-background text-foreground font-body text-[14px] border border-border focus:outline-none focus:border-primary/60 transition-colors"
+                />
+                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
             </div>
-            <button
-              onClick={handleSaveBirthTime}
-              disabled={!birthTimeValue}
-              className="h-10 px-4 rounded-sm bg-primary text-primary-foreground font-body text-[13px] disabled:opacity-30 hover:brightness-110 transition-all"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => setEditingBirthTime(false)}
-              className="h-10 px-3 rounded-sm border border-border text-foreground/60 font-body text-[13px] hover:border-foreground/30 transition-all"
-            >
-              Cancel
-            </button>
+            <div>
+              <label className="font-body text-[12px] text-muted-foreground mb-1 block">Birth time</label>
+              <div className="relative">
+                <input
+                  type="time"
+                  value={birthTimeValue}
+                  onChange={(e) => setBirthTimeValue(e.target.value)}
+                  className="w-full h-10 px-3 pr-10 rounded-sm bg-background text-foreground font-body text-[14px] border border-border focus:outline-none focus:border-primary/60 transition-colors"
+                />
+                <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+            <div>
+              <label className="font-body text-[12px] text-muted-foreground mb-1 block">Birth place</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={birthPlaceValue}
+                  onChange={(e) => setBirthPlaceValue(e.target.value)}
+                  placeholder="City, Country"
+                  className="w-full h-10 px-3 pr-10 rounded-sm bg-background text-foreground font-body text-[14px] border border-border focus:outline-none focus:border-primary/60 transition-colors placeholder:text-muted-foreground"
+                />
+                <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveBirthDetails}
+                className="flex-1 h-10 rounded-sm bg-primary text-primary-foreground font-body text-[13px] hover:brightness-110 transition-all"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditingBirth(false)}
+                className="h-10 px-4 rounded-sm border border-border text-foreground/60 font-body text-[13px] hover:border-foreground/30 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="flex items-center justify-between">
-            <p className="font-body text-[14px] text-card-foreground">
-              {currentBirthTime || "Not set"}
-            </p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-body text-[12px] text-muted-foreground">Date</p>
+                <p className="font-body text-[14px] text-card-foreground">{currentBirthDate || "Not set"}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-body text-[12px] text-muted-foreground">Time</p>
+                <p className="font-body text-[14px] text-card-foreground">{currentBirthTime || "Not set"}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-body text-[12px] text-muted-foreground">Place</p>
+                <p className="font-body text-[14px] text-card-foreground">{currentBirthPlace || "Not set"}</p>
+              </div>
+            </div>
             <button
-              onClick={() => setEditingBirthTime(true)}
-              className="font-body text-[13px] text-primary hover:text-primary/80 transition-colors"
+              onClick={() => setEditingBirth(true)}
+              className="font-body text-[13px] text-primary hover:text-primary/80 transition-colors mt-1"
             >
-              {t("settings_edit_birth_time")} →
+              Edit birth details →
             </button>
           </div>
         )}
