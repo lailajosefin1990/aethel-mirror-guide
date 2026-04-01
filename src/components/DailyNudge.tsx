@@ -4,6 +4,7 @@ import { type JournalEntry } from "./DecisionJournal";
 import { track } from "@/lib/posthog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface DailyNudgeProps {
   journalEntries: JournalEntry[];
