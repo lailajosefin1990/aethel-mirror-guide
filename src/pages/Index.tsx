@@ -285,6 +285,16 @@ const Index = () => {
         birth_timezone: data.birthTimezone ?? null,
       });
     }
+
+    // If we have a pending save (anonymous reading → auth → birth), auto-save now
+    if (pendingSave && readingData) {
+      setPendingSave(false);
+      // handleSave will run with the now-authenticated user
+      // We need a small delay for state to settle
+      setTimeout(() => handleSave(), 0);
+      return;
+    }
+
     setLoadingError(null);
     setView("loading");
   };
