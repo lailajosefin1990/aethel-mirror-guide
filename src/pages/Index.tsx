@@ -489,9 +489,14 @@ const Index = () => {
         } />
       )}
       <AnimatePresence mode="wait">
-        {view === "home" && (
+        {view === "home" && !dashboardLoading && (
           <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
             <HeroSection onStart={() => setView("question")} />
+          </motion.div>
+        )}
+        {view === "home" && dashboardLoading && (
+          <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
+            <DashboardSkeleton />
           </motion.div>
         )}
         {view === "question" && (
