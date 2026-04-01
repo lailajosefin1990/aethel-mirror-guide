@@ -122,6 +122,49 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
             })}
           </div>
 
+          {/* Life direction helper */}
+          <AnimatePresence>
+            {selectedDomain === "Life direction" && (
+              <motion.p
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="font-body text-[12px] text-muted-foreground -mt-4 mb-4"
+              >
+                Choose this when no single area fits — we'll find the one thread worth pulling.
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          {/* Example prompts */}
+          <AnimatePresence>
+            {question.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <p className="font-body text-[11px] text-muted-foreground mb-2">Try an example:</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {EXAMPLE_PROMPTS.map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => {
+                        setQuestion(prompt);
+                        textareaRef.current?.focus();
+                      }}
+                      className="px-3 py-1.5 rounded-full border border-border text-[13px] font-body text-muted-foreground hover:border-primary/40 hover:text-foreground transition-all duration-200 cursor-pointer text-left"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Textarea + Voice */}
           <div className="relative">
             <div className="flex gap-2 items-start">
