@@ -119,18 +119,25 @@ const SettingsScreen = () => {
     }
   };
 
-  const handleSaveBirthTime = async () => {
-    if (!user || !birthTimeValue) return;
+  const handleSaveBirthDetails = async () => {
+    if (!user) return;
     try {
-      const { error } = await supabase.from("profiles").update({ birth_time: birthTimeValue }).eq("user_id", user.id);
+      const updates: Record<string, any> = {};
+      if (birthTimeValue) updates.birth_time = birthTimeValue;
+      if (birthDateValue) updates.birth_date = birthDateValue;
+      if (birthPlaceValue) updates.birth_place_name = birthPlaceValue;
+      
+      const { error } = await supabase.from("profiles").update(updates).eq("user_id", user.id);
       if (error) throw error;
-      setCurrentBirthTime(birthTimeValue);
-      setEditingBirthTime(false);
-      toast.success("Birth time updated");
-      track("birth_time_updated_settings");
+      if (birthTimeValue) setCurrentBirthTime(birthTimeValue);
+      if (birthDateValue) setCurrentBirthDate(birthDateValue);
+      if (birthPlaceValue) setCurrentBirthPlace(birthPlaceValue);
+      setEditingBirth(false);
+      toast.success("Birth details updated");
+      track("birth_details_updated_settings");
     } catch (err) {
-      console.error("Birth time update failed:", err);
-      toast.error("Couldn't update birth time. Please try again.");
+      console.error("Birth details update failed:", err);
+      toast.error("Couldn't update birth details. Please try again.");
     }
   };
 
