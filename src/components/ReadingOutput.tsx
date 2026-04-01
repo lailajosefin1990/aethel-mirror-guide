@@ -42,6 +42,8 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   const [cardBlob, setCardBlob] = useState<Blob | null>(null);
   const [cardUrl, setCardUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [reaction, setReaction] = useState<"positive" | "negative" | null>(null);
+  const [saved, setSaved] = useState(false);
   const thirdWayRef = useRef<HTMLDivElement>(null);
 
   const isPro = subscriptionTier === "mirror_pro";
