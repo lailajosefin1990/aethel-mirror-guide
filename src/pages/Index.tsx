@@ -554,6 +554,7 @@ const Index = () => {
                   subscriptionTier={subscriptionTier}
                   remainingReadings={remainingReadings}
                   onUpgrade={() => setPaywallOpen(true)}
+                  hasBirthTime={!!profileBirthData?.birth_time}
                 />
               )}
               {activeTab === "journey" && (

@@ -13,6 +13,7 @@ interface DailyNudgeProps {
   subscriptionTier?: string;
   remainingReadings?: number;
   onUpgrade?: () => void;
+  hasBirthTime?: boolean;
 }
 
 const nudges = [
@@ -52,7 +53,7 @@ const weeklyOptions = [
   { emoji: "🌕", label: "Clear" },
 ];
 
-const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscriptionTier = "free", remainingReadings = 1, onUpgrade }: DailyNudgeProps) => {
+const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscriptionTier = "free", remainingReadings = 1, onUpgrade, hasBirthTime = false }: DailyNudgeProps) => {
   const { user } = useAuth();
   const today = new Date();
   const isSunday = today.getDay() === 0;
@@ -85,11 +86,12 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
     });
   }, [user]);
 
+  const isPersonalised = !!transitNudge;
   const todayNudge = transitNudge || fallbackNudge;
 
   useEffect(() => {
-    track("nudge_viewed");
-  }, []);
+    track("nudge_displayed", { type: isPersonalised ? "personalised" : "general" });
+  }, [isPersonalised]);
 
   const dateStr = today.toLocaleDateString("en-GB", {
     weekday: "long",
@@ -104,10 +106,24 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
   const [weeklyRating, setWeeklyRating] = useState<string | null>(null);
   const [weeklyLogged, setWeeklyLogged] = useState(false);
 
-  const handleWeeklyRating = (label: string) => {
+  const handleWeeklyRating = async (label: string) => {
     setWeeklyRating(label);
     setWeeklyLogged(true);
     track("weekly_checkin_completed", { rating: label });
+
+    if (user) {
+      try {
+        await supabase.from("weekly_checkins").insert({
+          user_id: user.id,
+          rating: label,
+          checked_in_at: new Date().toISOString(),
+        });
+        track("weekly_checkin_stored", { rating: label });
+      } catch (err) {
+        console.error("Failed to store check-in:", err);
+        // Don't block UX — the PostHog track already fired
+      }
+    }
   };
 
   const sectionLabel = "font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3";
@@ -141,6 +157,11 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         transition={{ duration: 0.5, delay: 0.2 }}
         className="bg-card border border-border rounded-md p-5 mb-5"
       >
+        <p className={sectionLabel}>
+          {isPersonalised
+            ? "Y O U R &nbsp; T R A N S I T"
+            : "T O D A Y ' S &nbsp; G E N E R A L &nbsp; E N E R G Y"}
+        </p>
         <p className="font-display text-[16px] leading-[1.6] text-card-foreground mb-5">
           {todayNudge.transit}
         </p>
@@ -153,6 +174,12 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
             {todayNudge.nudge}
           </p>
         </div>
+
+        {!isPersonalised && !hasBirthTime && (
+          <p className="font-body text-[11px] text-muted-foreground italic mt-2">
+            Add your birth time in Settings for personalised transits.
+          </p>
+        )}
       </motion.div>
 
       {/* Open decision card */}
