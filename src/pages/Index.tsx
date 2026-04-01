@@ -348,7 +348,15 @@ const Index = () => {
   }, []);
 
   const handleSave = async () => {
-    if (!user || !questionData || !readingData) return;
+    if (!questionData || !readingData) return;
+
+    // If user is not authenticated, redirect to auth with pending save
+    if (!user) {
+      track("anonymous_save_prompted");
+      setPendingSave(true);
+      setView("auth");
+      return;
+    }
 
     if (readingData.is_fallback) {
       track("fallback_reading_served", {
