@@ -46,6 +46,9 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
   const [selectedMode, setSelectedMode] = useState("Both");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const [validationHint, setValidationHint] = useState(false);
+  const [domainShake, setDomainShake] = useState(false);
+
   const isValid = selectedDomain !== null && question.trim().length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
