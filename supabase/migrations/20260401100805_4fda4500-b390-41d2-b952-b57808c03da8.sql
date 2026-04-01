@@ -1,0 +1,1 @@
+CREATE POLICY "Users can delete their own outcomes" ON public.outcomes FOR DELETE TO public USING (auth.uid() = user_id);
