@@ -53,7 +53,15 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValid || !selectedDomain) return;
+    if (!isValid) {
+      if (!selectedDomain) {
+        setValidationHint(true);
+        setDomainShake(true);
+        setTimeout(() => setDomainShake(false), 350);
+        setTimeout(() => setValidationHint(false), 3000);
+      }
+      return;
+    }
     track("question_submitted", {
       domain: selectedDomain,
       mode: selectedMode,
