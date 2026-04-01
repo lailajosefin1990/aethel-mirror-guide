@@ -176,6 +176,7 @@ const Index = () => {
         id: r.id,
         domain: r.domain,
         date: new Date(r.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        createdAt: r.created_at,
         thirdWay: r.third_way_text || "",
         question: r.question,
         outcome: outcomeMap.get(r.id) as JournalEntry["outcome"] | undefined,
