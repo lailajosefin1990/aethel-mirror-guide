@@ -224,9 +224,54 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
                   <span className="px-2 py-0.5 rounded-sm bg-primary/15 font-body text-[11px] uppercase tracking-wider text-primary">
                     {entry.domain}
                   </span>
-                  <span className="font-body text-[11px] text-muted-foreground">
-                    {entry.date}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {entry.createdAt && !entry.outcome && (() => {
+                      const daysSince = Math.floor((Date.now() - new Date(entry.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+                      const timeText = daysSince === 0 ? "Today" : daysSince === 1 ? "Yesterday" : `${daysSince}d ago`;
+                      return <span className="font-body text-[11px] text-muted-foreground">{timeText}</span>;
+                    })()}
+                    <span className="font-body text-[11px] text-muted-foreground">
+                      {entry.date}
+                    </span>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === entry.id ? null : entry.id); }}
+                        className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <MoreHorizontal className="w-4 h-4" strokeWidth={1.5} />
+                      </button>
+                      {menuOpen === entry.id && (
+                        <div className="absolute right-0 top-7 z-20 bg-card border border-border rounded-md shadow-lg py-1 min-w-[140px]">
+                          {entry.outcome && (
+                            <button
+                              onClick={() => { setMenuOpen(null); setSheetEntryId(entry.id); setFollowedChoice(entry.outcome!.followed); setOutcomeNote(entry.outcome!.note); }}
+                              className="w-full text-left px-3 py-2 font-body text-[13px] text-foreground hover:bg-muted transition-colors"
+                            >
+                              Edit outcome
+                            </button>
+                          )}
+                          <button
+                            onClick={async () => {
+                              setMenuOpen(null);
+                              if (!confirm("Remove this entry?")) return;
+                              try {
+                                const { error } = await supabase.from("readings").delete().eq("id", entry.id);
+                                if (error) throw error;
+                                onDeleteEntry?.(entry.id);
+                                toast.success("Entry removed");
+                                track("journal_entry_deleted");
+                              } catch {
+                                toast.error("Couldn't delete entry");
+                              }
+                            }}
+                            className="w-full text-left px-3 py-2 font-body text-[13px] text-destructive hover:bg-muted transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <button
