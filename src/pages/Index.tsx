@@ -14,6 +14,7 @@ import TransitCalendar from "@/components/TransitCalendar";
 import AuthScreen from "@/components/AuthScreen";
 import PaywallModal from "@/components/PaywallModal";
 import ProgressStepper from "@/components/ProgressStepper";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
 import SettingsScreen from "@/components/SettingsScreen";
 import PushPermissionSheet from "@/components/PushPermissionSheet";
 import ConsentGate from "@/components/ConsentGate";
