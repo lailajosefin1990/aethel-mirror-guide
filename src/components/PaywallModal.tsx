@@ -9,9 +9,10 @@ import { track } from "@/lib/posthog";
 interface PaywallModalProps {
   open: boolean;
   onClose: () => void;
+  onRestorePurchase?: () => void;
 }
 
-const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
+const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) => {
   const [loading, setLoading] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -28,7 +29,12 @@ const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
       });
       if (error) throw error;
       if (data?.url) {
-        window.open(data.url, "_blank");
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+          window.location.href = data.url;
+        } else {
+          window.open(data.url, "_blank");
+        }
       }
     } catch (err) {
       console.error("Checkout error:", err);
@@ -113,8 +119,14 @@ const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
                           : "border border-primary text-primary hover:bg-primary/10"
                       }`}
                     >
-                      {loading === tier.name ? "..." : `Start ${tier.name} — ${tier.price}`}
+                      {/* Trial period configured in Stripe product settings */}
+                      {loading === tier.name ? "..." : isPro ? `Start ${tier.name} — ${tier.price}` : "Start 7-day free trial"}
                     </button>
+                    {!isPro && (
+                      <p className="font-body text-[11px] text-muted-foreground mt-1.5 text-center">
+                        Cancel anytime during trial — you won't be charged.
+                      </p>
+                    )}
                   </div>
                 );
               })}
@@ -125,6 +137,17 @@ const PaywallModal = ({ open, onClose }: PaywallModalProps) => {
               className="w-full font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors mb-3"
             >
               Maybe later
+            </button>
+
+            <button
+              onClick={() => {
+                track("restore_purchase_tapped");
+                onClose();
+                onRestorePurchase?.();
+              }}
+              className="font-body text-[12px] text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors mb-3"
+            >
+              Already subscribed? Restore
             </button>
 
             <button
