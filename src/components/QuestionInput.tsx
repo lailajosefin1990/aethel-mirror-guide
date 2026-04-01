@@ -26,6 +26,12 @@ const domains = [
 
 const modes = ["Reflect with me", "Coach me", "Both"];
 
+const MODE_DESCRIPTIONS: Record<string, string> = {
+  "Reflect with me": "Gentle and exploratory — helps you sit with the question",
+  "Coach me": "Direct and action-focused — gives you a clear next move",
+  "Both": "Starts with reflection, ends with a concrete step",
+};
+
 const MAX_CHARS = 300;
 
 const EXAMPLE_PROMPTS = [
