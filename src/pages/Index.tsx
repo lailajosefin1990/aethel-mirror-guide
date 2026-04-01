@@ -423,6 +423,7 @@ const Index = () => {
       }
     } catch (err) {
       console.error("Failed to save reading:", err);
+      toast.error("Couldn't save your reading. Please try again.");
       setActiveTab("journey");
       setView("dashboard");
     }
