@@ -124,8 +124,14 @@ const SettingsScreen = () => {
 
   const handleLanguageChange = async (lang: string) => {
     if (user) {
-      await supabase.from("profiles").update({ preferred_language: lang }).eq("user_id", user.id);
-      track("language_changed", { language: lang });
+      try {
+        const { error } = await supabase.from("profiles").update({ preferred_language: lang }).eq("user_id", user.id);
+        if (error) throw error;
+        track("language_changed", { language: lang });
+      } catch (err) {
+        console.error("Language change failed:", err);
+        toast.error("Couldn't update language. Please try again.");
+      }
     }
   };
 

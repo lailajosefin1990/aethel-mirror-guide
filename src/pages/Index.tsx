@@ -123,7 +123,7 @@ const Index = () => {
         localStorage.removeItem("aethel_ref");
       }
     };
-    linkReferral().catch(console.error);
+    linkReferral().catch(() => {});
   }, [user]);
 
   useEffect(() => {

@@ -80,7 +80,9 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         });
       }
     };
-    loadTransit();
+    loadTransit().catch(() => {
+      toast.error("Couldn't load today's transit. Showing default nudge.");
+    });
   }, [user]);
 
   const todayNudge = transitNudge || fallbackNudge;
