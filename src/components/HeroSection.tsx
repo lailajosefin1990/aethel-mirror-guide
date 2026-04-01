@@ -34,6 +34,13 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
     track("landing_viewed");
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTestimonialIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const scrollToHow = () => {
     howRef.current?.scrollIntoView({ behavior: "smooth" });
   };
