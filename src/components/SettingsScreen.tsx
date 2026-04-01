@@ -426,6 +426,43 @@ const SettingsScreen = () => {
         </div>
       </motion.div>
 
+      {/* Data & Privacy */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.32 }}
+        className="bg-card border border-border rounded-md p-5 mb-5"
+      >
+        <p className={sectionLabel}>D A T A &nbsp; & &nbsp; P R I V A C Y</p>
+        <div className="space-y-3">
+          <button
+            onClick={async () => {
+              if (!user) return;
+              track("data_export_requested");
+              const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+              const { data: readings } = await supabase.from("readings").select("*").eq("user_id", user.id);
+              const { data: outcomes } = await supabase.from("outcomes").select("*").eq("user_id", user.id);
+              const exportData = { profile, readings, outcomes, exported_at: new Date().toISOString() };
+              const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url; a.download = "aethel-mirror-data.json"; a.click();
+              URL.revokeObjectURL(url);
+              toast.success("Your data has been exported");
+            }}
+            className="w-full py-3 rounded-sm border border-border text-foreground/70 font-body text-[13px] hover:border-foreground/30 transition-all"
+          >
+            Export my data
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-full py-3 rounded-sm border border-destructive/30 text-destructive font-body text-[13px] hover:bg-destructive/5 transition-all"
+          >
+            Delete my account
+          </button>
+        </div>
+      </motion.div>
+
       {/* Sign out */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -439,6 +476,41 @@ const SettingsScreen = () => {
           {t("settings_sign_out")}
         </button>
       </motion.div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm px-5">
+          <div className="bg-card border border-border rounded-md p-6 max-w-sm w-full">
+            <p className="font-display text-[18px] text-foreground mb-2">Delete your account?</p>
+            <p className="font-body text-[13px] text-muted-foreground mb-4">
+              This will permanently remove all your readings, journal entries, and personal data. This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 py-2.5 rounded-sm border border-border font-body text-[13px] text-foreground/70 hover:border-foreground/30 transition-all">
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!user) return;
+                  try {
+                    await supabase.from("outcomes").delete().eq("user_id", user.id);
+                    await supabase.from("readings").delete().eq("user_id", user.id);
+                    track("account_deleted");
+                    await signOut();
+                    toast.success("Your data has been deleted");
+                    setShowDeleteConfirm(false);
+                  } catch {
+                    toast.error("Couldn't delete account. Please contact support.");
+                  }
+                }}
+                className="flex-1 py-2.5 rounded-sm bg-destructive text-destructive-foreground font-body text-[13px] hover:brightness-110 transition-all">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
