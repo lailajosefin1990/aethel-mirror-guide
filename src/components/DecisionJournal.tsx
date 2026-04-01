@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { track } from "@/lib/posthog";
+import { toast } from "sonner";
 
 export interface JournalEntry {
   id: string;
@@ -88,14 +89,19 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }
   const closedEntries = entries.filter((e) => e.outcome);
   const displayedEntries = tab === "open" ? openEntries : closedEntries;
 
-  const handleLogSubmit = () => {
+  const handleLogSubmit = async () => {
     if (!sheetEntryId || !followedChoice) return;
-    track("outcome_submitted", { followed: followedChoice, has_text: outcomeNote.length > 0, consent_to_share: consentToShare });
-    onUpdateEntry(sheetEntryId, { followed: followedChoice, note: outcomeNote }, consentToShare);
-    setSheetEntryId(null);
-    setFollowedChoice(null);
-    setOutcomeNote("");
-    setConsentToShare(false);
+    try {
+      track("outcome_submitted", { followed: followedChoice, has_text: outcomeNote.length > 0, consent_to_share: consentToShare });
+      await onUpdateEntry(sheetEntryId, { followed: followedChoice, note: outcomeNote }, consentToShare);
+      setSheetEntryId(null);
+      setFollowedChoice(null);
+      setOutcomeNote("");
+      setConsentToShare(false);
+    } catch (err) {
+      console.error("Outcome logging failed:", err);
+      toast.error("Couldn't save your outcome. Please try again.");
+    }
   };
 
   return (

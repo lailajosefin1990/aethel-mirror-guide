@@ -101,6 +101,7 @@ const SettingsScreen = () => {
       if (data?.url) window.open(data.url, "_blank");
     } catch (err) {
       console.error("Portal error:", err);
+      toast.error("Couldn't open subscription settings. Please try again.");
     } finally {
       setPortalLoading(false);
     }
@@ -108,17 +109,29 @@ const SettingsScreen = () => {
 
   const handleSaveBirthTime = async () => {
     if (!user || !birthTimeValue) return;
-    await supabase.from("profiles").update({ birth_time: birthTimeValue }).eq("user_id", user.id);
-    setCurrentBirthTime(birthTimeValue);
-    setEditingBirthTime(false);
-    toast.success("Birth time updated");
-    track("birth_time_updated_settings");
+    try {
+      const { error } = await supabase.from("profiles").update({ birth_time: birthTimeValue }).eq("user_id", user.id);
+      if (error) throw error;
+      setCurrentBirthTime(birthTimeValue);
+      setEditingBirthTime(false);
+      toast.success("Birth time updated");
+      track("birth_time_updated_settings");
+    } catch (err) {
+      console.error("Birth time update failed:", err);
+      toast.error("Couldn't update birth time. Please try again.");
+    }
   };
 
   const handleLanguageChange = async (lang: string) => {
     if (user) {
-      await supabase.from("profiles").update({ preferred_language: lang }).eq("user_id", user.id);
-      track("language_changed", { language: lang });
+      try {
+        const { error } = await supabase.from("profiles").update({ preferred_language: lang }).eq("user_id", user.id);
+        if (error) throw error;
+        track("language_changed", { language: lang });
+      } catch (err) {
+        console.error("Language change failed:", err);
+        toast.error("Couldn't update language. Please try again.");
+      }
     }
   };
 

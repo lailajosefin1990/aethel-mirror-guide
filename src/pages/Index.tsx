@@ -14,6 +14,7 @@ import TransitCalendar from "@/components/TransitCalendar";
 import AuthScreen from "@/components/AuthScreen";
 import PaywallModal from "@/components/PaywallModal";
 import ProgressStepper from "@/components/ProgressStepper";
+import DashboardSkeleton from "@/components/DashboardSkeleton";
 import SettingsScreen from "@/components/SettingsScreen";
 import PushPermissionSheet from "@/components/PushPermissionSheet";
 import ConsentGate from "@/components/ConsentGate";
@@ -22,6 +23,7 @@ import { subscribeToPush, wasPushDismissedRecently, dismissPushPrompt } from "@/
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { ReadingData } from "@/lib/reading";
+import { toast } from "sonner";
 
 type View = "home" | "question" | "auth" | "birth" | "loading" | "reading" | "dashboard";
 
@@ -121,7 +123,7 @@ const Index = () => {
         localStorage.removeItem("aethel_ref");
       }
     };
-    linkReferral().catch(console.error);
+    linkReferral().catch(() => {});
   }, [user]);
 
   useEffect(() => {
@@ -185,6 +187,8 @@ const Index = () => {
     loadData();
     return () => { cancelled = true; };
   }, [user]);
+
+  const dashboardLoading = user && !authLoading && (!profileLoaded || (profileLoaded && view === "home" && journalEntries.length === 0 && !profileBirthData));
 
   useEffect(() => {
     if (user && !authLoading && profileLoaded && view === "home" && journalEntries.length > 0) {
@@ -403,7 +407,7 @@ const Index = () => {
           question: questionData.question,
           third_way: readingData.third_way,
         },
-      }).catch((err) => console.error("Memory extraction failed:", err));
+      }).catch(() => {});
 
       setActiveTab("journey");
       setView("dashboard");
@@ -419,6 +423,7 @@ const Index = () => {
       }
     } catch (err) {
       console.error("Failed to save reading:", err);
+      toast.error("Couldn't save your reading. Please try again.");
       setActiveTab("journey");
       setView("dashboard");
     }
@@ -485,9 +490,14 @@ const Index = () => {
         } />
       )}
       <AnimatePresence mode="wait">
-        {view === "home" && (
+        {view === "home" && !dashboardLoading && (
           <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
             <HeroSection onStart={() => setView("question")} />
+          </motion.div>
+        )}
+        {view === "home" && dashboardLoading && (
+          <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
+            <DashboardSkeleton />
           </motion.div>
         )}
         {view === "question" && (

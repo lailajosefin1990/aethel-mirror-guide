@@ -4,6 +4,7 @@ import { type JournalEntry } from "./DecisionJournal";
 import { track } from "@/lib/posthog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface DailyNudgeProps {
   journalEntries: JournalEntry[];
@@ -79,7 +80,9 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         });
       }
     };
-    loadTransit();
+    loadTransit().catch(() => {
+      toast.error("Couldn't load today's transit. Showing default nudge.");
+    });
   }, [user]);
 
   const todayNudge = transitNudge || fallbackNudge;
