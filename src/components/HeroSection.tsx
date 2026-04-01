@@ -1,5 +1,5 @@
-import { useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useRef, useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Accordion,
@@ -19,12 +19,26 @@ const howItems = [
   "We give you one Third Way — a clear next move, today.",
 ];
 
+const TESTIMONIALS = [
+  { text: "I was stuck between two job offers for weeks. The Third Way gave me a frame I hadn't considered — I negotiated a hybrid role instead.", author: "Maia R.", domain: "Work & Money" },
+  { text: "Every reading has been eerily specific. I use it before any big conversation with my partner now.", author: "Jordan T.", domain: "Love & People" },
+  { text: "I was about to say yes to a collab that felt off. Aethel helped me see why — and gave me the words to say no gracefully.", author: "Sam K.", domain: "Visibility" },
+];
+
 const HeroSection = ({ onStart }: HeroSectionProps) => {
   const howRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
 
   useEffect(() => {
     track("landing_viewed");
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTestimonialIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const scrollToHow = () => {
@@ -82,15 +96,31 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             </p>
           </motion.div>
 
-          {/* Testimonial */}
-          <motion.p
+          {/* Testimonials */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="font-body text-[13px] text-foreground/70 text-center mb-10"
+            className="w-full min-h-[80px] flex items-center justify-center mb-10"
           >
-            "I'd been stuck for 3 months. I had clarity in 20 minutes." — S.K.
-          </motion.p>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={testimonialIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="flex flex-col items-center text-center"
+              >
+                <p className="font-display text-[13px] leading-[1.6] text-foreground/70 mb-2">
+                  "{TESTIMONIALS[testimonialIndex].text}"
+                </p>
+                <p className="font-body text-[12px] text-muted-foreground">
+                  — {TESTIMONIALS[testimonialIndex].author} · <span className="inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-body">{TESTIMONIALS[testimonialIndex].domain}</span>
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
 
           {/* CTA */}
           <motion.div
@@ -105,6 +135,10 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             >
               Get my Third Way →
             </button>
+
+            <p className="font-body text-[12px] text-muted-foreground mt-2 text-center">
+              Free · No card needed
+            </p>
 
             <button
               onClick={scrollToHow}
