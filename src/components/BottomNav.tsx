@@ -54,7 +54,7 @@ const BottomNav = ({ activeTab, onTabChange, subscriptionTier = "free" }: Bottom
   const tabs = [
     { id: "mirror", label: "Mirror" },
     { id: "journey", label: "Journey" },
-    { id: "calendar", label: "Calendar", locked: !isPaid },
+    { id: "calendar", label: "Transits", locked: !isPaid },
     { id: "settings", label: "Settings" },
   ];
 

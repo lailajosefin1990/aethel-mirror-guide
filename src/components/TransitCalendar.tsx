@@ -98,10 +98,9 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
 
   if (transits.length === 0) {
     return (
-      <section className="pt-8 pb-4 text-center">
-        <p className="font-body text-[14px] text-muted-foreground">
-          Couldn't load your calendar. Please try again later.
-        </p>
+      <section className="pt-8 pb-4 text-center py-12">
+        <p className="font-display text-[16px] text-foreground/70 mb-2">Your transits are being calculated</p>
+        <p className="font-body text-[13px] text-muted-foreground">Check back soon — your personalised transit data will appear here.</p>
       </section>
     );
   }

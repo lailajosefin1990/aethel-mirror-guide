@@ -128,6 +128,20 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
 
   const sectionLabel = "font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3";
 
+  const [showWelcome, setShowWelcome] = useState(() => {
+    const key = `aethel_welcome_${new Date().toDateString()}`;
+    if (sessionStorage.getItem(key)) return false;
+    sessionStorage.setItem(key, "1");
+    return true;
+  });
+
+  useEffect(() => {
+    if (showWelcome) {
+      const timer = setTimeout(() => setShowWelcome(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showWelcome]);
+
   return (
     <section className="pt-8 pb-4">
       {/* Date */}
@@ -145,10 +159,24 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="font-display text-[14px] tracking-[0.35em] text-primary mb-8"
+        className="font-display text-[14px] tracking-[0.35em] text-primary mb-4"
       >
         A E T H E L &nbsp; M I R R O R &nbsp; · &nbsp; T O D A Y
       </motion.p>
+
+      {/* Welcome back */}
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="font-display text-[14px] text-primary/70 mb-4 italic"
+          >
+            Your mirror has been thinking about you.
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       {/* Prominent new reading button */}
       <motion.button

@@ -63,6 +63,39 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
   const inputClass =
     "w-full h-12 px-4 rounded-sm bg-card text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300";
 
+  if (showEmailConfirmation) {
+    return (
+      <section className="min-h-screen px-5 py-8 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-app text-center py-8"
+        >
+          <p className="font-display text-[14px] tracking-[0.4em] text-primary mb-6">
+            A E T H E L &nbsp; M I R R O R
+          </p>
+          <p className="font-display text-[18px] text-foreground mb-2">Check your email</p>
+          <p className="font-body text-[13px] text-muted-foreground mb-6">
+            We sent a confirmation link to <span className="text-foreground">{email}</span>. Tap it to activate your mirror.
+          </p>
+          <button
+            onClick={() => { setShowEmailConfirmation(false); setIsSignUp(false); }}
+            className="font-body text-[13px] text-primary hover:text-primary/80 transition-colors"
+          >
+            Already confirmed? Sign in →
+          </button>
+          <button
+            onClick={onBack}
+            className="block mx-auto mt-4 font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors"
+          >
+            ← Back
+          </button>
+        </motion.div>
+      </section>
+    );
+  }
+
   return (
     <section className="min-h-screen px-5 py-8 flex items-center justify-center">
       <motion.div

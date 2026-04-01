@@ -340,10 +340,16 @@ const SettingsScreen = () => {
             <p className="font-body text-[12px] text-primary">
               Free month{rewardsEarned !== 1 ? "s" : ""} earned: {rewardsEarned}
             </p>
-          ) : (
-            <p className="font-body text-[12px] text-muted-foreground">
-              Next reward: refer {Math.max(1, 1 - referralCount)} more friend{referralCount === 0 ? "" : "s"}
-            </p>
+          ) : (() => {
+            const nextThreshold = referralCount < 1 ? 1 : referralCount < 3 ? 3 : referralCount < 5 ? 5 : referralCount + 1;
+            const remaining = Math.max(1, nextThreshold - referralCount);
+            const friendText = remaining === 1 ? "friend" : "friends";
+            return (
+              <p className="font-body text-[12px] text-muted-foreground">
+                Next reward: refer {remaining} more {friendText}
+              </p>
+            );
+          })()}
           )}
         </div>
       </motion.div>

@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import BottomNav from "./BottomNav";
 
 interface AppLayoutProps {
@@ -10,8 +10,23 @@ interface AppLayoutProps {
 }
 
 const AppLayout = ({ children, showNav = false, activeTab = "mirror", onTabChange, subscriptionTier }: AppLayoutProps) => {
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => { window.removeEventListener("online", handleOnline); window.removeEventListener("offline", handleOffline); };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {isOffline && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-primary/90 text-primary-foreground text-center py-2 font-body text-[13px]">
+          You're offline — your mirror will reconnect when you're back.
+        </div>
+      )}
       <main className={`max-w-app mx-auto px-5 ${showNav ? "pb-20" : ""}`}>
         {children}
       </main>
