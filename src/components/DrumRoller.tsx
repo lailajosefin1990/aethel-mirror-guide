@@ -167,7 +167,7 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
 
       <div
         ref={containerRef}
-        className="h-full overflow-hidden touch-none cursor-grab active:cursor-grabbing"
+        className="h-full overflow-hidden touch-none cursor-grab active:cursor-grabbing overscroll-contain"
         style={{ paddingTop: paddingHeight, paddingBottom: paddingHeight }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
