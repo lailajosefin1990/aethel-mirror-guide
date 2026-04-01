@@ -28,10 +28,17 @@ const modes = ["Reflect with me", "Coach me", "Both"];
 
 const MAX_CHARS = 300;
 
+const EXAMPLE_PROMPTS = [
+  "Should I take the job offer or stay where I am?",
+  "I'm torn between two cities — which move is right?",
+  "How do I set a boundary without losing the relationship?",
+];
+
 const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const [question, setQuestion] = useState("");
   const [selectedMode, setSelectedMode] = useState("Both");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isValid = selectedDomain !== null && question.trim().length > 0;
 
