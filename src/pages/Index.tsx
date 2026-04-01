@@ -332,8 +332,11 @@ const Index = () => {
     }
 
     setReadingData(data as ReadingData);
+    if (!user) {
+      track("anonymous_reading_generated", { domain: qd.domain });
+    }
     return data;
-  }, [birthData, questionData, i18n.language, regenerationFeedback]);
+  }, [birthData, questionData, i18n.language, regenerationFeedback, user]);
 
   const handleLoadingComplete = useCallback(() => {
     setView("reading");
