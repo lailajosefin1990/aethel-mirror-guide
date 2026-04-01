@@ -58,6 +58,7 @@ const Index = () => {
   const [regenerationFeedback, setRegenerationFeedback] = useState<string | null>(null);
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [pendingSave, setPendingSave] = useState(false);
 
   const referralLinked = useRef(false);
 
