@@ -119,8 +119,14 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
                           : "border border-primary text-primary hover:bg-primary/10"
                       }`}
                     >
-                      {loading === tier.name ? "..." : `Start ${tier.name} — ${tier.price}`}
+                      {/* Trial period configured in Stripe product settings */}
+                      {loading === tier.name ? "..." : isPro ? `Start ${tier.name} — ${tier.price}` : "Start 7-day free trial"}
                     </button>
+                    {!isPro && (
+                      <p className="font-body text-[11px] text-muted-foreground mt-1.5 text-center">
+                        Cancel anytime during trial — you won't be charged.
+                      </p>
+                    )}
                   </div>
                 );
               })}
