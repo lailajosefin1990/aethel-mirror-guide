@@ -119,14 +119,18 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
           className="space-y-8"
         >
           {/* Domain tiles — 2-column grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <motion.div
+            className="grid grid-cols-2 gap-3"
+            animate={domainShake ? { x: [0, -4, 4, -4, 4, 0] } : {}}
+            transition={{ duration: 0.3 }}
+          >
             {domains.map((domain) => {
               const isSelected = selectedDomain === domain;
               return (
                  <button
                    key={domain}
                    type="button"
-                   onClick={() => { setSelectedDomain(domain); track("question_domain_selected", { domain }); }}
+                   onClick={() => { setSelectedDomain(domain); setValidationHint(false); track("question_domain_selected", { domain }); }}
                   className={`px-4 py-3.5 rounded-sm font-body text-[13px] border transition-all duration-300 text-left ${
                     isSelected
                       ? "border-primary text-primary bg-primary/5"
@@ -137,7 +141,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
                 </button>
               );
             })}
-          </div>
+          </motion.div>
 
           {/* Life direction helper */}
           <AnimatePresence>
