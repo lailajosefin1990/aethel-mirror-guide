@@ -13,6 +13,7 @@ import DailyNudge from "@/components/DailyNudge";
 import TransitCalendar from "@/components/TransitCalendar";
 import AuthScreen from "@/components/AuthScreen";
 import PaywallModal from "@/components/PaywallModal";
+import ProgressStepper from "@/components/ProgressStepper";
 import SettingsScreen from "@/components/SettingsScreen";
 import PushPermissionSheet from "@/components/PushPermissionSheet";
 import ConsentGate from "@/components/ConsentGate";
