@@ -109,11 +109,17 @@ const SettingsScreen = () => {
 
   const handleSaveBirthTime = async () => {
     if (!user || !birthTimeValue) return;
-    await supabase.from("profiles").update({ birth_time: birthTimeValue }).eq("user_id", user.id);
-    setCurrentBirthTime(birthTimeValue);
-    setEditingBirthTime(false);
-    toast.success("Birth time updated");
-    track("birth_time_updated_settings");
+    try {
+      const { error } = await supabase.from("profiles").update({ birth_time: birthTimeValue }).eq("user_id", user.id);
+      if (error) throw error;
+      setCurrentBirthTime(birthTimeValue);
+      setEditingBirthTime(false);
+      toast.success("Birth time updated");
+      track("birth_time_updated_settings");
+    } catch (err) {
+      console.error("Birth time update failed:", err);
+      toast.error("Couldn't update birth time. Please try again.");
+    }
   };
 
   const handleLanguageChange = async (lang: string) => {
