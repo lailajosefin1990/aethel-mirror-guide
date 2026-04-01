@@ -23,6 +23,7 @@ const SettingsScreen = () => {
   const { t } = useTranslation();
   const { user, subscriptionTier, signOut } = useAuth();
   const navigate = useNavigate();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(true);
