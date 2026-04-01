@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { track } from "@/lib/posthog";
+import { toast } from "sonner";
 
 export interface JournalEntry {
   id: string;
