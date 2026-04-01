@@ -75,12 +75,16 @@ const FollowedBadge = ({ followed }: { followed: string }) => {
   );
 };
 
-const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onStartReading }: DecisionJournalProps) => {
+const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, onStartReading }: DecisionJournalProps) => {
   const entries = propEntries.length > 0 ? propEntries : SAMPLE_ENTRIES;
   const [tab, setTab] = useState<"open" | "closed">("open");
+  const [filterDomain, setFilterDomain] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
-  const openEntries = entries.filter((e) => !e.outcome);
-  const closedEntries = entries.filter((e) => e.outcome);
+  const domains = useMemo(() => [...new Set(entries.map((e) => e.domain))], [entries]);
+  const filtered = filterDomain ? entries.filter((e) => e.domain === filterDomain) : entries;
+  const openEntries = filtered.filter((e) => !e.outcome);
+  const closedEntries = filtered.filter((e) => e.outcome);
 
   const patternInsight = useMemo(() => {
     if (closedEntries.length < 3) {

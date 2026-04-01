@@ -269,6 +269,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
               Upgrade for unlimited readings
             </button>
           </p>
+          <p className="font-body text-[11px] text-muted-foreground mt-0.5 text-center">Resets monthly</p>
         </motion.div>
       )}
 
