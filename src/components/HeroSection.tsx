@@ -136,6 +136,10 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
               Get my Third Way →
             </button>
 
+            <p className="font-body text-[12px] text-muted-foreground mt-2 text-center">
+              Free · No card needed
+            </p>
+
             <button
               onClick={scrollToHow}
               className="font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors duration-300 bg-transparent border-none cursor-pointer"
