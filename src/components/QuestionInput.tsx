@@ -169,6 +169,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
           <div className="relative">
             <div className="flex gap-2 items-start">
               <textarea
+                ref={textareaRef}
                 value={question}
                 onChange={handleTextChange}
                 placeholder="Describe your decision or situation... e.g. Should I go all-in on this opportunity?"

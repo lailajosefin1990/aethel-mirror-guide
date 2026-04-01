@@ -12,7 +12,7 @@ const topics = [
   "Visibility",
   "Body & health",
   "Spiritual path",
-  "Everything at once",
+  "Life direction",
 ];
 
 const tones = ["Reflect with me", "Coach me", "Both"];

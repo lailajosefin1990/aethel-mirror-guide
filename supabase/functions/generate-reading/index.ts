@@ -127,9 +127,9 @@ serve(async (req) => {
       ? `\nRespond entirely in ${langName}. All reading text, Third Way, and journal prompt must be in ${langName}.`
       : "";
 
-    // Build domain-specific instruction for "Everything at once"
-    const everythingInstruction = domain === "Everything at once"
-      ? `\n\nSPECIAL INSTRUCTION FOR 'EVERYTHING AT ONCE' DOMAIN:\nThe user is overwhelmed and cannot identify a single decision to focus on. Your most important job here is to find THE ONE thread that, if pulled, would create the most movement across all areas. Do not try to address everything — pick the single highest leverage decision point and make the Third Way about that one thing only. Start the astrology reading with: 'Of everything you're carrying, the one thread worth pulling first is...'`
+    // Build domain-specific instruction for "Life direction"
+    const everythingInstruction = (domain === "Life direction" || domain === "Everything at once")
+      ? `\n\nSPECIAL INSTRUCTION FOR 'LIFE DIRECTION' DOMAIN:\nThe user is overwhelmed and cannot identify a single decision to focus on. Your most important job here is to find THE ONE thread that, if pulled, would create the most movement across all areas. Do not try to address everything — pick the single highest leverage decision point and make the Third Way about that one thing only. Start the astrology reading with: 'Of everything you're carrying, the one thread worth pulling first is...'`
       : "";
 
     // Build regeneration feedback instruction
