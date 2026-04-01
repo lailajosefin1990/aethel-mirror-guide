@@ -243,7 +243,8 @@ const Index = () => {
     }
   }, [subscriptionTier, monthlyReadingCount, profileBirthData]);
 
-  // Auto-proceed after OAuth redirect if we have pending question data
+  // OAuth return flow: sessionStorage restores questionData (aethel_pending_question) →
+  // onAuthStateChange sets user → this effect fires proceedAfterAuth → birth or loading
   useEffect(() => {
     if (user && !authLoading && questionData && view === "home") {
       proceedAfterAuth();
