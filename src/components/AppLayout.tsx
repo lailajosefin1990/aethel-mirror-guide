@@ -11,6 +11,7 @@ interface AppLayoutProps {
 }
 
 const AppLayout = ({ children, showNav = false, activeTab = "mirror", onTabChange, subscriptionTier }: AppLayoutProps) => {
+  const { t } = useTranslation();
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   useEffect(() => {
