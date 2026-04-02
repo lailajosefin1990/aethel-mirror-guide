@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import * as Sentry from "@sentry/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MoreHorizontal } from "lucide-react";
 import { trackEvent, EVENTS } from "@/lib/analytics";
