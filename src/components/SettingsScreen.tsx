@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { db } from "@/lib/db";
