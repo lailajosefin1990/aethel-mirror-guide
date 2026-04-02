@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { db } from "@/lib/db";
+import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { isPushActive, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
@@ -86,7 +87,7 @@ const SettingsScreen = () => {
     navigator.clipboard.writeText(link).then(() => {
       setCopied(true);
       toast.success("Referral link copied!");
-      track("referral_link_copied");
+      trackEvent(EVENTS.REFERRAL_LINK_COPIED);
       setTimeout(() => setCopied(false), 2000);
     });
   };
@@ -97,11 +98,11 @@ const SettingsScreen = () => {
     if (checked) {
       const ok = await subscribeToPush(user.id);
       setPushEnabled(ok);
-      if (ok) track("push_enabled_settings");
+      if (ok) trackEvent(EVENTS.PUSH_ENABLED_SETTINGS);
     } else {
       await unsubscribeFromPush(user.id);
       setPushEnabled(false);
-      track("push_disabled_settings");
+      trackEvent(EVENTS.PUSH_DISABLED_SETTINGS);
     }
     setPushLoading(false);
   };
@@ -135,7 +136,7 @@ const SettingsScreen = () => {
       if (birthPlaceValue) setCurrentBirthPlace(birthPlaceValue);
       setEditingBirth(false);
       toast.success("Birth details updated");
-      track("birth_details_updated_settings");
+      trackEvent(EVENTS.BIRTH_DETAILS_UPDATED_SETTINGS);
     } catch (err) {
       console.error("Birth details update failed:", err);
       toast.error("Couldn't update birth details. Please try again.");
@@ -147,7 +148,7 @@ const SettingsScreen = () => {
       try {
         const { error } = await supabase.from("profiles").update({ preferred_language: lang }).eq("user_id", user.id);
         if (error) throw error;
-        track("language_changed", { language: lang });
+        trackEvent(EVENTS.LANGUAGE_CHANGED, { language: lang });
       } catch (err) {
         console.error("Language change failed:", err);
         toast.error("Couldn't update language. Please try again.");
@@ -433,12 +434,12 @@ const SettingsScreen = () => {
         transition={{ duration: 0.5, delay: 0.32 }}
         className="bg-card border border-border rounded-md p-5 mb-5"
       >
-        <p className={sectionLabel}>D A T A &nbsp; & &nbsp; P R I V A C Y</p>
+        <p className={sectionLabel}>{t("settings_data_privacy")}</p>
         <div className="space-y-3">
           <button
             onClick={async () => {
               if (!user) return;
-              track("data_export_requested");
+              trackEvent(EVENTS.DATA_EXPORT_REQUESTED);
               const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
               const { data: readings } = await supabase.from("readings").select("*").eq("user_id", user.id);
               const { data: outcomes } = await supabase.from("outcomes").select("*").eq("user_id", user.id);
@@ -452,13 +453,13 @@ const SettingsScreen = () => {
             }}
             className="w-full py-3 rounded-sm border border-border text-foreground/70 font-body text-[13px] hover:border-foreground/30 transition-all"
           >
-            Export my data
+            {t("settings_export")}
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
             className="w-full py-3 rounded-sm border border-destructive/30 text-destructive font-body text-[13px] hover:bg-destructive/5 transition-all"
           >
-            Delete my account
+            {t("settings_delete_account")}
           </button>
         </div>
       </motion.div>
@@ -481,9 +482,9 @@ const SettingsScreen = () => {
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm px-5">
           <div className="bg-card border border-border rounded-md p-6 max-w-sm w-full">
-            <p className="font-display text-[18px] text-foreground mb-2">Delete your account?</p>
+            <p className="font-display text-[18px] text-foreground mb-2">{t("settings_delete_confirm_title")}</p>
             <p className="font-body text-[13px] text-muted-foreground mb-4">
-              This will permanently remove all your readings, journal entries, and personal data. This cannot be undone.
+              {t("settings_delete_confirm_body")}
             </p>
             <div className="flex gap-3">
               <button onClick={() => setShowDeleteConfirm(false)}
@@ -496,7 +497,7 @@ const SettingsScreen = () => {
                   try {
                     await supabase.from("outcomes").delete().eq("user_id", user.id);
                     await supabase.from("readings").delete().eq("user_id", user.id);
-                    track("account_deleted");
+                    trackEvent(EVENTS.ACCOUNT_DELETED);
                     await signOut();
                     toast.success("Your data has been deleted");
                     setShowDeleteConfirm(false);

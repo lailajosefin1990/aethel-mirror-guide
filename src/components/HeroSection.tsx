@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { trackEvent, EVENTS } from "@/lib/analytics";
+import { useTranslation } from "react-i18next";
 
 interface HeroSectionProps {
   onStart: () => void;
@@ -26,12 +27,13 @@ const TESTIMONIALS = [
 ];
 
 const HeroSection = ({ onStart }: HeroSectionProps) => {
+  const { t } = useTranslation();
   const howRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
   useEffect(() => {
-    trackEvent(EVENTS.landing_viewed);
+    trackEvent(EVENTS.LANDING_VIEWED);
   }, []);
 
   useEffect(() => {
@@ -92,7 +94,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             </p>
 
             <p className="font-body text-[12px] italic text-card-foreground/50">
-              I'm a mirror, not a master.
+              {t("reading_mirror_disclaimer")}
             </p>
           </motion.div>
 
@@ -130,25 +132,25 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             className="w-full flex flex-col items-center gap-4"
           >
             <button
-              onClick={() => { trackEvent(EVENTS.cta_get_third_way_clicked); onStart(); }}
+              onClick={() => { trackEvent(EVENTS.CTA_GET_THIRD_WAY_CLICKED); onStart(); }}
               className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-sm tracking-wide hover:brightness-110 transition-all duration-300"
             >
-              Get my Third Way →
+              {t("hero_get_third_way")}
             </button>
 
             <p className="font-body text-[12px] text-muted-foreground mt-2 text-center">
-              Free · No card needed
+              {t("hero_free_tag")}
             </p>
 
-            <a href="/evidence" onClick={() => trackEvent(EVENTS.evidence_link_hero_clicked)} className="block font-body text-[13px] text-primary/70 hover:text-primary underline underline-offset-2 mt-3 text-center transition-colors">
-              See real outcomes →
+            <a href="/evidence" onClick={() => trackEvent(EVENTS.EVIDENCE_LINK_HERO_CLICKED)} className="block font-body text-[13px] text-primary/70 hover:text-primary underline underline-offset-2 mt-3 text-center transition-colors">
+              {t("hero_see_outcomes")}
             </a>
 
             <button
               onClick={scrollToHow}
               className="font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors duration-300 bg-transparent border-none cursor-pointer mt-2"
             >
-              How it works ↓
+              {t("hero_how_it_works")}
             </button>
           </motion.div>
         </div>
@@ -160,9 +162,9 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="how" className="border-border">
               <AccordionTrigger
-                onClick={() => trackEvent(EVENTS.how_it_works_opened)}
+                onClick={() => trackEvent(EVENTS.HOW_IT_WORKS_OPENED)}
                 className="font-body text-[13px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground hover:no-underline py-4">
-                How it works
+                {t("hero_how_it_works")}
               </AccordionTrigger>
               <AccordionContent className="pb-6">
                 <div className="flex flex-col gap-4">
@@ -181,14 +183,14 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
                   ))}
 
                   <button
-                    onClick={() => { trackEvent(EVENTS.evidence_link_clicked); navigate("/evidence"); }}
+                    onClick={() => { trackEvent(EVENTS.EVIDENCE_LINK_CLICKED); navigate("/evidence"); }}
                     className="flex gap-3 items-start group mt-2"
                   >
                     <span className="font-body text-[12px] text-primary/60 mt-0.5 shrink-0">
                       04
                     </span>
                     <p className="font-display text-[15px] leading-[1.6] text-primary group-hover:text-primary/80 transition-colors">
-                      See real outcomes →
+                      {t("hero_see_outcomes")}
                     </p>
                   </button>
                 </div>

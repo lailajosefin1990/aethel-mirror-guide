@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import useOgImage from "@/hooks/useOgImage";
 import { toast } from "sonner";
 import { trackEvent, EVENTS } from "@/lib/analytics";
+import { useTranslation } from "react-i18next";
 
 interface ReadingOutputProps {
   domain: string;
@@ -35,6 +36,7 @@ const ExpandableBullet = ({ text }: { text: string }) => (
 );
 
 const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate, regenerationCount = 0, birthTimeUnknown = false }: ReadingOutputProps) => {
+  const { t } = useTranslation();
   const { subscriptionTier } = useAuth();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
@@ -51,7 +53,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   // Track reading loaded
   useEffect(() => {
     if (reading) {
-      trackEvent(EVENTS.reading_loaded, { confidence_level: reading.confidence_level });
+      trackEvent(EVENTS.READING_LOADED, { confidence_level: reading.confidence_level });
     }
   }, [reading]);
 
@@ -62,7 +64,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          trackEvent(EVENTS.third_way_read);
+          trackEvent(EVENTS.THIRD_WAY_READ);
           observer.disconnect();
         }
       },
@@ -80,7 +82,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   const handleShare = useCallback(async () => {
     if (!reading) return;
     setGenerating(true);
-    trackEvent(EVENTS.share_card_opened, { is_pro: isPro });
+    trackEvent(EVENTS.SHARE_CARD_OPENED, { is_pro: isPro });
     try {
       const blob = await generateThirdWayCard(reading.third_way, domain, isPro);
       setCardBlob(blob);
@@ -97,7 +99,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
 
   const handleDownload = useCallback(() => {
     if (!cardUrl || !cardBlob) return;
-    trackEvent(EVENTS.share_card_downloaded);
+    trackEvent(EVENTS.SHARE_CARD_DOWNLOADED);
     const a = document.createElement("a");
     a.href = cardUrl;
     a.download = "aethel-third-way.png";
@@ -150,13 +152,13 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
 
         {/* Stars section */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10">
-          <p className={sectionLabel}>W H A T &nbsp; Y O U R &nbsp; S T A R S &nbsp; S A Y &nbsp; ( W H E N )</p>
+          <p className={sectionLabel}>{t("reading_stars_label")}</p>
           <ExpandableText text={reading.astrology_reading} />
         </motion.div>
 
         {/* Design section */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-10">
-          <p className={sectionLabel}>W H A T &nbsp; Y O U R &nbsp; D E S I G N &nbsp; S A Y S &nbsp; ( H O W )</p>
+          <p className={sectionLabel}>{t("reading_design_label")}</p>
           <div className="space-y-4">
             {reading.design_insights.map((item, i) => (
               <ExpandableBullet key={i} text={item} />
@@ -164,7 +166,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
           </div>
           {birthTimeUnknown && (
             <p className="font-body text-[12px] italic text-muted-foreground mt-4">
-              *Human Design insights are estimated — for full accuracy, add your birth time in Settings.
+              {t("birth_time_disclaimer")}
             </p>
           )}
         </motion.div>
@@ -178,7 +180,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
         {/* Divider + Third Way */}
         <motion.div ref={thirdWayRef} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}
           className="border-t-2 border-primary/40 pt-8 mb-10">
-          <p className={`${sectionLabel} text-center`}>Y O U R &nbsp; T H I R D &nbsp; W A Y</p>
+          <p className={`${sectionLabel} text-center`}>{t("reading_third_way_label")}</p>
           <p className="font-display text-[22px] sm:text-[24px] leading-[1.4] text-foreground text-center font-medium">
             {reading.third_way}
           </p>
@@ -187,21 +189,21 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
         {/* Journal prompt */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}
           className="bg-card border border-border rounded-md p-5 mb-6">
-          <p className="font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3">J O U R N A L</p>
+          <p className="font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3">{t("reading_journal_label")}</p>
           <p className="font-display text-[16px] leading-[1.6] text-card-foreground">{reading.journal_prompt}</p>
         </motion.div>
 
         {/* Mirror disclaimer */}
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.45 }}
           className="font-body text-[12px] italic text-foreground/50 text-center mb-4">
-          I'm a mirror, not a master.
+          {t("reading_mirror_disclaimer")}
         </motion.p>
 
         {/* Fallback banner */}
         {reading.is_fallback && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.48 }}
             className="font-body text-[11px] text-muted-foreground text-center mb-8">
-            This reading is from our curated library — your personalised mirror will be ready on your next session.
+            {t("reading_fallback_banner")}
           </motion.p>
         )}
 
@@ -209,14 +211,14 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.47 }}
           className="flex items-center justify-center gap-4 mb-6">
           <button
-            onClick={() => { trackEvent(EVENTS.reading_reaction, { reaction: "positive" }); setReaction("positive"); }}
+            onClick={() => { trackEvent(EVENTS.READING_REACTION, { reaction: "positive" }); setReaction("positive"); }}
             className={`p-2 rounded-full border transition-all duration-200 ${
               reaction === "positive" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
             }`}>
             <span className="text-[16px]">👍</span>
           </button>
           <button
-            onClick={() => { trackEvent(EVENTS.reading_reaction, { reaction: "negative" }); setReaction("negative"); }}
+            onClick={() => { trackEvent(EVENTS.READING_REACTION, { reaction: "negative" }); setReaction("negative"); }}
             className={`p-2 rounded-full border transition-all duration-200 ${
               reaction === "negative" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
             }`}>
@@ -233,8 +235,8 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
             onClick={() => {
               if (saved) return;
               setSaved(true);
-              toast.success("Saved to your mirror ✓");
-              trackEvent(EVENTS.reading_saved);
+              toast.success(t("reading_saved_toast"));
+              trackEvent(EVENTS.READING_SAVED);
               onSave();
             }}
             disabled={saved}
@@ -243,7 +245,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
                 ? "bg-primary/60 text-primary-foreground cursor-default"
                 : "bg-primary text-primary-foreground hover:brightness-110"
             }`}>
-            {saved ? "Saved ✓" : "Save to my mirror"}
+            {saved ? t("reading_saved_btn") : t("reading_save")}
           </button>
 
           {saved && (
@@ -252,7 +254,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
               animate={{ opacity: 1, y: 0 }}
               onClick={onBack}
               className="w-full h-[48px] rounded-sm border border-primary text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300">
-              Go to my mirror →
+              {t("reading_go_mirror")}
             </motion.button>
           )}
 
@@ -264,17 +266,17 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
           <button onClick={handleShare} disabled={generating}
             className="w-full h-[48px] rounded-sm border border-primary text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50">
             <Share2 className="w-4 h-4" strokeWidth={1.5} />
-            {generating ? "Generating..." : "Share my Third Way ↗"}
+            {generating ? "Generating..." : t("reading_share")}
           </button>
 
           {regenerationCount >= 3 ? (
             <p className="font-body text-[13px] italic text-primary text-center py-3">
-              Your mirror has shown you three paths. Sometimes the resistance itself is the answer.
+              {t("reading_regen_cap")}
             </p>
           ) : (
             <button onClick={() => setFeedbackOpen(true)}
               className="w-full h-[48px] rounded-sm bg-transparent border border-border text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300">
-              That doesn't fit
+              {t("reading_doesnt_fit")}
             </button>
           )}
         </motion.div>
@@ -293,7 +295,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
                 <X className="w-4 h-4" strokeWidth={1.5} />
               </button>
 
-              <p className="font-display text-[18px] text-card-foreground mb-4">Your Third Way card</p>
+              <p className="font-display text-[18px] text-card-foreground mb-4">{t("reading_your_card")}</p>
 
               {/* Card preview */}
               <div className="mb-5 rounded-md overflow-hidden border border-border">
@@ -337,20 +339,20 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
                 className="absolute top-4 right-4 text-foreground/50 hover:text-foreground/70 transition-colors">
                 <ChevronDown className="w-4 h-4 rotate-45" strokeWidth={1.5} />
               </button>
-              <p className="font-display text-[18px] text-card-foreground mb-2">Tell us what missed the mark</p>
-              <p className="font-body text-[13px] text-muted-foreground mb-4">This helps us refine your mirror.</p>
+              <p className="font-display text-[18px] text-card-foreground mb-2">{t("reading_feedback_title")}</p>
+              <p className="font-body text-[13px] text-muted-foreground mb-4">{t("reading_feedback_subtitle")}</p>
               <textarea value={feedbackText} onChange={(e) => setFeedbackText(e.target.value)}
-                placeholder="What felt off?" rows={3}
+                placeholder={t("reading_feedback_placeholder")} rows={3}
                 className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-4" />
               <button onClick={() => { 
                   const feedback = feedbackText;
-                  trackEvent(EVENTS.reading_regenerated, { regeneration_number: (regenerationCount || 0) + 1 }); 
+                  trackEvent(EVENTS.READING_REGENERATED, { regeneration_number: (regenerationCount || 0) + 1 }); 
                   setFeedbackOpen(false); 
                   setFeedbackText(""); 
                   onRegenerate?.(feedback); 
                 }}
                 className="w-full h-[48px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] hover:brightness-110 transition-all duration-300">
-                Regenerate
+                {t("reading_regenerate")}
               </button>
             </motion.div>
           </motion.div>

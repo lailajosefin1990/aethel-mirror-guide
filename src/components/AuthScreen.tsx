@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { useTranslation } from "react-i18next";
 
 interface AuthScreenProps {
   onSuccess: () => void;
@@ -9,6 +10,7 @@ interface AuthScreenProps {
 }
 
 const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
+  const { t } = useTranslation();
   const [isSignUp, setIsSignUp] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +30,6 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        // Show confirmation message for sign-up
         setShowEmailConfirmation(true);
         setLoading(false);
         return;
@@ -38,7 +39,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
       }
       onSuccess();
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      setError(err.message || t("error_generic"));
     } finally {
       setLoading(false);
     }
@@ -47,7 +48,6 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
   const handleGoogle = async () => {
     setError("");
     try {
-      // Persist current view state so the app knows to resume after redirect
       sessionStorage.setItem("aethel_oauth_pending", "true");
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
@@ -75,15 +75,15 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           <p className="font-display text-[14px] tracking-[0.4em] text-primary mb-6">
             A E T H E L &nbsp; M I R R O R
           </p>
-          <p className="font-display text-[18px] text-foreground mb-2">Check your email</p>
+          <p className="font-display text-[18px] text-foreground mb-2">{t("auth_check_email")}</p>
           <p className="font-body text-[13px] text-muted-foreground mb-6">
-            We sent a confirmation link to <span className="text-foreground">{email}</span>. Tap it to activate your mirror.
+            {t("auth_confirmation_sent")} <span className="text-foreground">{email}</span>{t("auth_tap_activate")}
           </p>
           <button
             onClick={() => { setShowEmailConfirmation(false); setIsSignUp(false); }}
             className="font-body text-[13px] text-primary hover:text-primary/80 transition-colors"
           >
-            Already confirmed? Sign in →
+            {t("auth_already_confirmed")}
           </button>
           <button
             onClick={onBack}
@@ -109,10 +109,10 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
         </p>
 
         <h2 className="font-display text-[24px] leading-[1.3] text-foreground text-center mb-2">
-          Save your mirror
+          {t("auth_save_mirror")}
         </h2>
         <p className="font-body text-[14px] text-muted-foreground text-center mb-8">
-          Create a free account to keep your readings
+          {t("auth_create_account")}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4 mb-6">
@@ -120,7 +120,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
+            placeholder={t("auth_email")}
             required
             className={inputClass}
           />
@@ -128,7 +128,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
+            placeholder={t("auth_password")}
             required
             minLength={6}
             className={inputClass}
@@ -139,7 +139,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           )}
 
           {isSignUp && (
-            <p className="font-body text-[11px] text-muted-foreground -mt-2">At least 6 characters</p>
+            <p className="font-body text-[11px] text-muted-foreground -mt-2">{t("auth_password_hint")}</p>
           )}
 
           <button
@@ -162,7 +162,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           </div>
           <div className="relative flex justify-center">
             <span className="px-3 bg-background font-body text-[12px] text-muted-foreground">
-              Or continue with
+              {t("auth_or_continue")}
             </span>
           </div>
         </div>
@@ -181,12 +181,12 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
         </button>
 
         <p className="font-body text-[13px] text-muted-foreground text-center mt-6">
-          {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+          {isSignUp ? t("auth_already_account") : t("auth_no_account")}{" "}
           <button
             onClick={() => { setIsSignUp(!isSignUp); setError(""); }}
             className="text-primary hover:text-primary/80 transition-colors"
           >
-            {isSignUp ? "Sign in" : "Sign up"}
+            {isSignUp ? t("auth_sign_in") : t("auth_sign_up")}
           </button>
         </p>
 

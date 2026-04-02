@@ -67,9 +67,24 @@ export const EVENTS = {
   REFERRAL_LINK_COPIED: "referral_link_copied",
   LANGUAGE_CHANGED: "language_changed",
 
-  // Evidence
+  // Evidence & Hero
   EVIDENCE_PAGE_VIEWED: "evidence_page_viewed",
   EVIDENCE_LINK_HERO_CLICKED: "evidence_link_hero_clicked",
+  EVIDENCE_LINK_CLICKED: "evidence_link_clicked",
+
+  // Hero & landing
+  LANDING_VIEWED: "landing_viewed",
+  CTA_GET_THIRD_WAY_CLICKED: "cta_get_third_way_clicked",
+  HOW_IT_WORKS_OPENED: "how_it_works_opened",
+
+  // Reading output
+  READING_LOADED: "reading_loaded",
+  THIRD_WAY_READ: "third_way_read",
+  SHARE_CARD_OPENED: "share_card_opened",
+  SHARE_CARD_DOWNLOADED: "share_card_downloaded",
+
+  // Settings
+  BIRTH_DETAILS_UPDATED_SETTINGS: "birth_details_updated_settings",
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];
