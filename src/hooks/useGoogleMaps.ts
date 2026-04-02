@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 
 let loaderPromise: Promise<unknown> | null = null;
