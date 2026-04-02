@@ -23,6 +23,7 @@ interface DecisionJournalProps {
   onUpdateEntry: (id: string, outcome: JournalEntry["outcome"], consentToShare?: boolean) => void;
   onDeleteEntry?: (id: string) => void;
   onStartReading: () => void;
+  loading?: boolean;
 }
 
 const SAMPLE_ENTRIES: JournalEntry[] = [
