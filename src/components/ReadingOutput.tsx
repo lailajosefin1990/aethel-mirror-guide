@@ -138,10 +138,10 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   const confidenceText = CONFIDENCE_MESSAGES[reading.confidence_level] || CONFIDENCE_MESSAGES.medium;
 
   return (
-    <section className="min-h-screen px-5 py-8">
+    <section className="min-h-screen px-5 py-8" role="article" aria-label="Your reading">
       <div className="w-full max-w-app mx-auto">
         {/* Back */}
-        <button onClick={onBack} className="mb-8 text-foreground/50 hover:text-foreground/70 transition-colors duration-300">
+        <button onClick={onBack} className="mb-8 text-foreground/50 hover:text-foreground/70 transition-colors duration-300" aria-label="Go back">
           <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
         </button>
 
@@ -152,13 +152,13 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
         </motion.p>
 
         {/* Stars section */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10" aria-label="Astrology reading">
           <p className={sectionLabel}>{t("reading_stars_label")}</p>
           <ExpandableText text={reading.astrology_reading} />
         </motion.div>
 
         {/* Design section */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-10">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-10" aria-label="Design insights">
           <p className={sectionLabel}>{t("reading_design_label")}</p>
           <div className="space-y-4">
             {reading.design_insights.map((item, i) => (
@@ -174,7 +174,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
 
         {/* Confidence */}
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.3 }}
-          className="font-body text-[13px] italic text-primary/80 mb-10">
+          className="font-body text-[13px] italic text-primary/80 mb-10" aria-live="polite">
           {confidenceText}
         </motion.p>
 
