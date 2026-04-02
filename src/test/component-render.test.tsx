@@ -296,7 +296,7 @@ describe("DecisionJournal", () => {
 
   it("renders Open and Closed tabs", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // Tab buttons should be present
     expect(screen.getByText("Open")).toBeInTheDocument();
