@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -37,7 +38,7 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
         }
       }
     } catch (err) {
-      console.error("Checkout error:", err);
+      Sentry.captureException(err);
     } finally {
       setLoading(null);
     }

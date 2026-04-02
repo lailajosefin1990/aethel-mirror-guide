@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import * as Sentry from "@sentry/react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -67,7 +68,7 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
           setTransits(data.transits as TransitEntry[]);
         }
       } catch (err) {
-        console.error("Calendar load error:", err);
+        Sentry.captureException(err);
       }
       setLoading(false);
     };

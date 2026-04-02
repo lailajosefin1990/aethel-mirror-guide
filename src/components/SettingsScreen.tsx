@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { db } from "@/lib/db";
@@ -114,7 +115,7 @@ const SettingsScreen = () => {
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
     } catch (err) {
-      console.error("Portal error:", err);
+      Sentry.captureException(err);
       toast.error("Couldn't open subscription settings. Please try again.");
     } finally {
       setPortalLoading(false);
@@ -138,7 +139,7 @@ const SettingsScreen = () => {
       toast.success("Birth details updated");
       trackEvent(EVENTS.BIRTH_DETAILS_UPDATED_SETTINGS);
     } catch (err) {
-      console.error("Birth details update failed:", err);
+      Sentry.captureException(err);
       toast.error("Couldn't update birth details. Please try again.");
     }
   };
@@ -150,7 +151,7 @@ const SettingsScreen = () => {
         if (error) throw error;
         trackEvent(EVENTS.LANGUAGE_CHANGED, { language: lang });
       } catch (err) {
-        console.error("Language change failed:", err);
+        Sentry.captureException(err);
         toast.error("Couldn't update language. Please try again.");
       }
     }

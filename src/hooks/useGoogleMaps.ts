@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 
 let loaderPromise: Promise<unknown> | null = null;
@@ -15,7 +16,7 @@ export function useGoogleMaps() {
 
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
-      console.warn("VITE_GOOGLE_MAPS_API_KEY not set — using fallback geocoding");
+      Sentry.captureMessage("VITE_GOOGLE_MAPS_API_KEY not set — using fallback geocoding", "warning");
       hasFailed = true;
       setError(true);
       return;
@@ -32,7 +33,7 @@ export function useGoogleMaps() {
 
     const timeout = setTimeout(() => {
       if (!isLoaded) {
-        console.warn("Google Maps load timed out — using fallback geocoding");
+        Sentry.captureMessage("Google Maps load timed out — using fallback geocoding", "warning");
         hasFailed = true;
         setError(true);
       }
@@ -46,7 +47,7 @@ export function useGoogleMaps() {
       })
       .catch((err) => {
         clearTimeout(timeout);
-        console.warn("Google Maps failed to load:", err);
+        Sentry.captureException(err);
         hasFailed = true;
         setError(true);
       });

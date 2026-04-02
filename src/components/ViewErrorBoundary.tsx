@@ -1,4 +1,5 @@
 import React, { Component, type ReactNode } from "react";
+import * as Sentry from "@sentry/react";
 
 interface Props {
   children: ReactNode;
@@ -19,7 +20,7 @@ class ViewErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error) {
-    console.error(`[ViewErrorBoundary] ${this.props.fallbackView || "unknown"} crashed:`, error);
+    Sentry.captureException(error, { tags: { view: this.props.fallbackView || "unknown" } });
   }
 
   handleReset = () => {

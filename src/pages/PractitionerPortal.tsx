@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import * as Sentry from "@sentry/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Plus, X, User, ChevronRight, Sparkles, FileText, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -388,7 +389,7 @@ const PractitionerPortal = () => {
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
     } catch (err) {
-      console.error("Checkout error:", err);
+      Sentry.captureException(err);
     }
   };
 

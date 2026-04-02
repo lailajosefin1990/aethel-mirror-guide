@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import * as Sentry from "@sentry/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown, Download, Link2, Share2, X } from "lucide-react";
 import VoicePlayer from "./VoicePlayer";
@@ -90,7 +91,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
       setCardUrl(url);
       setShareOpen(true);
     } catch (err) {
-      console.error("Card generation error:", err);
+      Sentry.captureException(err);
       toast.error("Failed to generate card");
     } finally {
       setGenerating(false);

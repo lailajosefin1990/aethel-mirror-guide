@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import * as Sentry from "@sentry/react";
 
 const VAPID_PUBLIC_KEY = "BIPhVlqDPTcgHGeIO5Sh5ZNutBAraNW7WnyQzI7TM8_OE0bu7cf-HisXm-nI7DoqbdfvIOfGqB3hm3f22gC9qJ8";
 
@@ -32,7 +33,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   try {
     return await navigator.serviceWorker.register("/sw.js");
   } catch (err) {
-    console.error("SW registration failed:", err);
+    Sentry.captureException(err);
     return null;
   }
 }

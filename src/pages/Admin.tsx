@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +7,7 @@ import { track } from "@/lib/posthog";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Navigate } from "react-router-dom";
 
-const ADMIN_EMAILS = ["admin@aethelmirror.com"];
+const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || "").split(",").filter(Boolean);
 
 interface Stats {
   totalReadings: number;
@@ -87,7 +88,7 @@ const Admin = () => {
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/export-training-data`,
         {
           headers: {
-            "x-admin-key": "aethel-admin-export-2026",
+            "x-admin-key": import.meta.env.VITE_ADMIN_EXPORT_KEY || "",
             "Content-Type": "application/json",
           },
         }
@@ -101,7 +102,7 @@ const Admin = () => {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Export error:", err);
+      Sentry.captureException(err);
     } finally {
       setExporting(false);
     }

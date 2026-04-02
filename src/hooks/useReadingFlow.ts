@@ -1,4 +1,5 @@
 import { useCallback, Dispatch } from "react";
+import * as Sentry from "@sentry/react";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/db";
@@ -148,7 +149,7 @@ export function useReadingFlow(
         setTimeout(() => dispatch({ type: "SET_PUSH_SHEET", open: true }), 800);
       }
     } catch (err) {
-      console.error("Failed to save reading:", err);
+      Sentry.captureException(err);
       toast.error("Couldn't save your reading. Please try again.");
       dispatch({ type: "SAVE_COMPLETE", tab: "journey" });
     }

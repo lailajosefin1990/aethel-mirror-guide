@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import * as Sentry from "@sentry/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, MoreHorizontal } from "lucide-react";
 import { trackEvent, EVENTS } from "@/lib/analytics";
@@ -158,7 +159,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
       setOutcomeNote("");
       setConsentToShare(false);
     } catch (err) {
-      console.error("Outcome logging failed:", err);
+      Sentry.captureException(err);
       toast.error("Couldn't save your outcome. Please try again.");
     }
   };

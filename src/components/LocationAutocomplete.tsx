@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import * as Sentry from "@sentry/react";
 import { MapPin, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -44,7 +45,7 @@ async function fetchTimezone(lat: number, lng: number): Promise<string> {
         return data.timeZoneId;
       }
     } catch (err) {
-      console.warn("Google Timezone API failed, falling back to tz-lookup:", err);
+      Sentry.captureException(err);
     }
   }
 
@@ -174,7 +175,7 @@ const LocationAutocomplete = ({ value, onChange, className }: LocationAutocomple
       setValue(name, false);
       onChange({ name, lat, lng, timezone });
     } catch (err) {
-      console.error("Geocoding error:", err);
+      Sentry.captureException(err);
     }
   };
 
