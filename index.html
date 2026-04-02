@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://*.posthog.com https://*.sentry.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://developers.google.com; connect-src 'self' https://*.supabase.co https://*.posthog.com https://*.sentry.io https://api.resend.com https://nominatim.openstreetmap.org https://us.i.posthog.com wss://*.supabase.co; frame-src https://js.stripe.com; media-src 'self' blob:;" />
     <title>Aethel Mirror — Your Third Way</title>
     <meta name="description" content="Six ancient systems. One clear move. Aethel Mirror combines astrology, Human Design, and numerology to give you one specific next step for the decision you're sitting with." />
     <meta name="author" content="Aethel" />
@@ -11,6 +12,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Aethel Mirror" />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="canonical" href="https://aethelmirror.com" />
