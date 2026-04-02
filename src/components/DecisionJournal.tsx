@@ -118,7 +118,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
   const [consentToShare, setConsentToShare] = useState(false);
 
   useEffect(() => {
-    trackEvent(EVENTS.journal_viewed);
+    trackEvent(EVENTS.JOURNAL_VIEWED);
   }, []);
 
   const displayedEntries = tab === "open" ? openEntries : closedEntries;
@@ -147,7 +147,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
   const handleLogSubmit = async () => {
     if (!sheetEntryId || !followedChoice) return;
     try {
-      trackEvent(EVENTS.outcome_submitted, { followed: followedChoice, has_text: outcomeNote.length > 0, consent_to_share: consentToShare });
+      trackEvent(EVENTS.OUTCOME_SUBMITTED, { followed: followedChoice, has_text: outcomeNote.length > 0, consent_to_share: consentToShare });
       await onUpdateEntry(sheetEntryId, { followed: followedChoice, note: outcomeNote }, consentToShare);
       setSheetEntryId(null);
       setFollowedChoice(null);
@@ -281,7 +281,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
                                 if (error) throw error;
                                 onDeleteEntry?.(entry.id);
                                 toast.success("Entry removed");
-                                trackEvent(EVENTS.journal_entry_deleted);
+                                trackEvent(EVENTS.JOURNAL_ENTRY_DELETED);
                               } catch {
                                 toast.error("Couldn't delete entry");
                               }
@@ -318,7 +318,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
                   </div>
                 ) : (
                   <button
-                    onClick={() => { trackEvent(EVENTS.outcome_log_opened, { reading_id: entry.id }); setSheetEntryId(entry.id); }}
+                    onClick={() => { trackEvent(EVENTS.OUTCOME_LOG_OPENED, { reading_id: entry.id }); setSheetEntryId(entry.id); }}
                     className="mt-3 font-body text-[13px] text-primary hover:text-primary/80 transition-colors duration-300"
                   >
                     Log what happened →

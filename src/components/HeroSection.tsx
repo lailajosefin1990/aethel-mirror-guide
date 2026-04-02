@@ -33,7 +33,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
   useEffect(() => {
-    trackEvent(EVENTS.landing_viewed);
+    trackEvent(EVENTS.LANDING_VIEWED);
   }, []);
 
   useEffect(() => {
@@ -132,7 +132,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             className="w-full flex flex-col items-center gap-4"
           >
             <button
-              onClick={() => { trackEvent(EVENTS.cta_get_third_way_clicked); onStart(); }}
+              onClick={() => { trackEvent(EVENTS.CTA_GET_THIRD_WAY_CLICKED); onStart(); }}
               className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-sm tracking-wide hover:brightness-110 transition-all duration-300"
             >
               {t("hero_get_third_way")}
@@ -142,7 +142,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
               {t("hero_free_tag")}
             </p>
 
-            <a href="/evidence" onClick={() => trackEvent(EVENTS.evidence_link_hero_clicked)} className="block font-body text-[13px] text-primary/70 hover:text-primary underline underline-offset-2 mt-3 text-center transition-colors">
+            <a href="/evidence" onClick={() => trackEvent(EVENTS.EVIDENCE_LINK_HERO_CLICKED)} className="block font-body text-[13px] text-primary/70 hover:text-primary underline underline-offset-2 mt-3 text-center transition-colors">
               {t("hero_see_outcomes")}
             </a>
 
@@ -162,7 +162,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="how" className="border-border">
               <AccordionTrigger
-                onClick={() => trackEvent(EVENTS.how_it_works_opened)}
+                onClick={() => trackEvent(EVENTS.HOW_IT_WORKS_OPENED)}
                 className="font-body text-[13px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground hover:no-underline py-4">
                 {t("hero_how_it_works")}
               </AccordionTrigger>
@@ -183,7 +183,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
                   ))}
 
                   <button
-                    onClick={() => { trackEvent(EVENTS.evidence_link_clicked); navigate("/evidence"); }}
+                    onClick={() => { trackEvent(EVENTS.EVIDENCE_LINK_CLICKED); navigate("/evidence"); }}
                     className="flex gap-3 items-start group mt-2"
                   >
                     <span className="font-body text-[12px] text-primary/60 mt-0.5 shrink-0">

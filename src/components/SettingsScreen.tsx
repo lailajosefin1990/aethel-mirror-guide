@@ -87,7 +87,7 @@ const SettingsScreen = () => {
     navigator.clipboard.writeText(link).then(() => {
       setCopied(true);
       toast.success("Referral link copied!");
-      trackEvent(EVENTS.referral_link_copied);
+      trackEvent(EVENTS.REFERRAL_LINK_COPIED);
       setTimeout(() => setCopied(false), 2000);
     });
   };
@@ -98,11 +98,11 @@ const SettingsScreen = () => {
     if (checked) {
       const ok = await subscribeToPush(user.id);
       setPushEnabled(ok);
-      if (ok) trackEvent(EVENTS.push_enabled_settings);
+      if (ok) trackEvent(EVENTS.PUSH_ENABLED_SETTINGS);
     } else {
       await unsubscribeFromPush(user.id);
       setPushEnabled(false);
-      trackEvent(EVENTS.push_disabled_settings);
+      trackEvent(EVENTS.PUSH_DISABLED_SETTINGS);
     }
     setPushLoading(false);
   };
@@ -136,7 +136,7 @@ const SettingsScreen = () => {
       if (birthPlaceValue) setCurrentBirthPlace(birthPlaceValue);
       setEditingBirth(false);
       toast.success("Birth details updated");
-      trackEvent(EVENTS.birth_details_updated_settings);
+      trackEvent(EVENTS.BIRTH_DETAILS_UPDATED_SETTINGS);
     } catch (err) {
       console.error("Birth details update failed:", err);
       toast.error("Couldn't update birth details. Please try again.");
@@ -148,7 +148,7 @@ const SettingsScreen = () => {
       try {
         const { error } = await supabase.from("profiles").update({ preferred_language: lang }).eq("user_id", user.id);
         if (error) throw error;
-        trackEvent(EVENTS.language_changed, { language: lang });
+        trackEvent(EVENTS.LANGUAGE_CHANGED, { language: lang });
       } catch (err) {
         console.error("Language change failed:", err);
         toast.error("Couldn't update language. Please try again.");
@@ -439,7 +439,7 @@ const SettingsScreen = () => {
           <button
             onClick={async () => {
               if (!user) return;
-              trackEvent(EVENTS.data_export_requested);
+              trackEvent(EVENTS.DATA_EXPORT_REQUESTED);
               const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
               const { data: readings } = await supabase.from("readings").select("*").eq("user_id", user.id);
               const { data: outcomes } = await supabase.from("outcomes").select("*").eq("user_id", user.id);
@@ -497,7 +497,7 @@ const SettingsScreen = () => {
                   try {
                     await supabase.from("outcomes").delete().eq("user_id", user.id);
                     await supabase.from("readings").delete().eq("user_id", user.id);
-                    trackEvent(EVENTS.account_deleted);
+                    trackEvent(EVENTS.ACCOUNT_DELETED);
                     await signOut();
                     toast.success("Your data has been deleted");
                     setShowDeleteConfirm(false);

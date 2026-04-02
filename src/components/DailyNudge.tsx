@@ -93,7 +93,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
   const todayNudge = transitNudge || fallbackNudge;
 
   useEffect(() => {
-    trackEvent(EVENTS.nudge_displayed, { type: isPersonalised ? "personalised" : "general" });
+    trackEvent(EVENTS.NUDGE_DISPLAYED, { type: isPersonalised ? "personalised" : "general" });
   }, [isPersonalised]);
 
   const dateStr = today.toLocaleDateString("en-GB", {
@@ -112,7 +112,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
   const handleWeeklyRating = async (label: string) => {
     setWeeklyRating(label);
     setWeeklyLogged(true);
-    trackEvent(EVENTS.weekly_checkin_completed, { rating: label });
+    trackEvent(EVENTS.WEEKLY_CHECKIN_COMPLETED, { rating: label });
 
     if (user) {
       try {
@@ -121,7 +121,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
           rating: label,
           checked_in_at: new Date().toISOString(),
         });
-        trackEvent(EVENTS.weekly_checkin_stored, { rating: label });
+        trackEvent(EVENTS.WEEKLY_CHECKIN_STORED, { rating: label });
       } catch (err) {
         console.error("Failed to store check-in:", err);
       }
@@ -204,7 +204,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.15 }}
-        onClick={() => { trackEvent(EVENTS.new_reading_from_top); onNewReading(); }}
+        onClick={() => { trackEvent(EVENTS.NEW_READING_FROM_TOP); onNewReading(); }}
         className="w-full p-4 rounded-md border-2 border-dashed border-primary/30 hover:border-primary/60 text-primary font-body text-[14px] transition-all duration-200 mb-6"
       >
         {t("nudge_new_reading_btn")}
@@ -330,7 +330,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         className="pt-2"
       >
         <button
-          onClick={() => { trackEvent(EVENTS.new_reading_from_nudge); onNewReading(); }}
+          onClick={() => { trackEvent(EVENTS.NEW_READING_FROM_NUDGE); onNewReading(); }}
           className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300"
         >
           {t("nudge_new_reading")} →
