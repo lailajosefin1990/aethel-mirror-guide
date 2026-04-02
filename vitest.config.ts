@@ -21,29 +21,42 @@ export default defineConfig({
         "src/App.css",
       ],
       thresholds: {
-        // Global: enforce a floor that rises as tests are added
-        lines: 5,
-        functions: 10,
-        branches: 20,
-        statements: 5,
-        // Critical files: enforce 70%+ coverage on tested modules
+        // Global floor — raise as component tests are added
+        // Current: ~7% lines. Target path: 7 → 20 → 35 → 50
+        lines: 6,
+        functions: 14,
+        branches: 40,
+        statements: 6,
+        // Covered files: locked at 100% — any regression fails CI
         "src/context/appReducer.ts": {
-          lines: 70,
-          functions: 70,
-          branches: 50,
-          statements: 70,
+          lines: 100,
+          functions: 100,
+          branches: 100,
+          statements: 100,
         },
         "src/lib/analytics.ts": {
-          lines: 90,
-          functions: 90,
-          branches: 90,
-          statements: 90,
+          lines: 100,
+          functions: 100,
+          branches: 100,
+          statements: 100,
         },
         "src/lib/reading.ts": {
-          lines: 90,
-          functions: 90,
-          branches: 90,
-          statements: 90,
+          lines: 100,
+          functions: 100,
+          branches: 100,
+          statements: 100,
+        },
+        "src/lib/utils.ts": {
+          lines: 100,
+          functions: 100,
+          branches: 100,
+          statements: 100,
+        },
+        "src/lib/stripe.ts": {
+          lines: 100,
+          functions: 100,
+          branches: 100,
+          statements: 100,
         },
       },
     },

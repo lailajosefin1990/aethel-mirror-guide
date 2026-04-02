@@ -53,20 +53,24 @@ npx vitest run src/test/oauth-roundtrip.test.tsx                 # E2E (requires
 | File | Tests | Covers |
 |------|-------|--------|
 | `hooks-integration.test.tsx` | 21 | Reducer, OAuth restore, regeneration cap, anonymous save flow |
+| `unit-coverage.test.ts` | 28 | Reducer 100% branch coverage, utils, stripe, analytics, reading |
 | `regeneration-feedback.test.tsx` | 7 | Feedback pipeline from modal to edge function |
 | `regeneration-cap.test.tsx` | 4 | 3-regeneration cap + UI lockout |
 | `example.test.ts` | 1 | Sanity check |
 | `oauth-roundtrip.test.tsx` | 6 | Full-page OAuth E2E (excluded from CI, run locally) |
 
 **Coverage thresholds** (enforced in CI):
-- `appReducer.ts`: 70% lines, 70% functions, 50% branches
-- `analytics.ts`: 90% lines/functions/branches
-- `reading.ts`: 90% lines/functions/branches
+
+*Per-file — locked at 100%, any regression fails CI:*
+- `appReducer.ts`, `analytics.ts`, `reading.ts`, `utils.ts`, `stripe.ts`
+
+*Global floor — raises as component tests are added:*
+- Lines: 6% → 20% → 35% → 50% (current: ~7%)
 
 ## CI
 
 Every push to `main` and every pull request runs:
 1. `npm install` — dependency installation
 2. `tsc --noEmit` — TypeScript type checking
-3. `vitest run --coverage` — 33 tests + coverage thresholds
+3. `vitest run --coverage` — 61 tests + coverage thresholds
 4. `vite build` — production build verification
