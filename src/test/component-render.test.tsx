@@ -50,7 +50,7 @@ const { mockUser, mockSupabase } = vi.hoisted(() => {
 });
 
 vi.mock("@supabase/supabase-js", () => ({ createClient: vi.fn(() => mockSupabase) }));
-vi.mock("@/lib/posthog", () => ({ track: vi.fn(), identify: vi.fn(), reset: vi.fn() }));
+vi.mock("@/lib/posthog", () => ({ track: vi.fn(), identify: vi.fn(), reset: vi.fn(), identifyUser: vi.fn(), resetUser: vi.fn() }));
 vi.mock("@/lib/analytics", () => ({
   trackEvent: vi.fn(),
   EVENTS: {
