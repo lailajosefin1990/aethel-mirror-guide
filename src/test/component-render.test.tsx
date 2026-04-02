@@ -258,7 +258,7 @@ describe("DecisionJournal", () => {
 
   it("renders sample entries when no entries provided (fallback)", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={[]} onUpdateEntry={vi.fn()} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={[]} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // Component falls back to SAMPLE_ENTRIES when empty
     // So it always renders something — check for structural elements
