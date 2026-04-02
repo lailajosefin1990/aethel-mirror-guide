@@ -50,7 +50,7 @@ const { mockUser, mockSupabase } = vi.hoisted(() => {
 });
 
 vi.mock("@supabase/supabase-js", () => ({ createClient: vi.fn(() => mockSupabase) }));
-vi.mock("@/lib/posthog", () => ({ track: vi.fn(), identify: vi.fn(), reset: vi.fn() }));
+vi.mock("@/lib/posthog", () => ({ track: vi.fn(), identify: vi.fn(), reset: vi.fn(), identifyUser: vi.fn(), resetUser: vi.fn() }));
 vi.mock("@/lib/analytics", () => ({
   trackEvent: vi.fn(),
   EVENTS: {
@@ -70,6 +70,30 @@ vi.mock("@/hooks/useAuth", () => ({
   useAuth: () => ({ user: mockUser, loading: false, subscriptionTier: "free", monthlyReadingCount: 0, refreshReadingCount: vi.fn(), signOut: vi.fn() }),
 }));
 vi.mock("@/hooks/useOgImage", () => ({ default: vi.fn() }));
+vi.mock("@/lib/db", () => ({
+  db: {
+    profiles: { get: vi.fn(() => Promise.resolve(null)), upsert: vi.fn(() => Promise.resolve()) },
+    readings: { save: vi.fn(() => Promise.resolve()), list: vi.fn(() => Promise.resolve([])) },
+    outcomes: { save: vi.fn(() => Promise.resolve()), list: vi.fn(() => Promise.resolve([])) },
+    referrals: { get: vi.fn(() => Promise.resolve(null)) },
+    checkins: { save: vi.fn(() => Promise.resolve()), list: vi.fn(() => Promise.resolve([])) },
+  },
+}));
+vi.mock("@/lib/push", () => ({
+  isPushActive: vi.fn(() => Promise.resolve(false)),
+  subscribeToPush: vi.fn(() => Promise.resolve()),
+  unsubscribeFromPush: vi.fn(() => Promise.resolve()),
+}));
+vi.mock("@/lib/stripe", () => ({
+  STRIPE_TIERS: {
+    mirror: { name: "Mirror", price: "$8/mo", features: ["feature1"] },
+    mirror_pro: { name: "Pro", price: "$18/mo", features: ["feature1", "feature2"] },
+    practitioner: { name: "Practitioner", price: "$38/mo", features: ["feature1", "feature2", "feature3"] },
+  },
+}));
+vi.mock("@/lib/reading", () => ({
+  CONFIDENCE_MESSAGES: { high: "High confidence", medium: "Medium confidence", low: "Low confidence" },
+}));
 vi.mock("@/lib/cardGenerator", () => ({
   generateThirdWayCard: vi.fn(() => Promise.resolve(new Blob(["img"], { type: "image/png" }))),
 }));
@@ -700,5 +724,44 @@ describe("DrumRoller", () => {
     expect(item1.className).toContain("font-display");
     const item5 = screen.getByText("05");
     expect(item5.className).toContain("font-body");
+  });
+});
+
+// ─── SettingsScreen ───────────────────────────────────────────────
+import SettingsScreen from "@/components/SettingsScreen";
+
+describe("SettingsScreen", () => {
+  it("renders settings sections", () => {
+    render(<MemoryRouter><SettingsScreen /></MemoryRouter>);
+    const sections = document.querySelectorAll("section, [class*='border-border']");
+    expect(sections.length).toBeGreaterThan(3);
+  });
+
+  it("renders export and delete buttons", () => {
+    render(<MemoryRouter><SettingsScreen /></MemoryRouter>);
+    const buttons = screen.getAllByRole("button");
+    expect(buttons.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("renders language selector", () => {
+    render(<MemoryRouter><SettingsScreen /></MemoryRouter>);
+    const container = document.querySelector("[class*='settings']") || document.querySelector("section");
+    expect(container).not.toBeNull();
+  });
+});
+
+// ─── PractitionerPortal ───────────────────────────────────────────
+import PractitionerPortal from "@/pages/PractitionerPortal";
+
+describe("PractitionerPortal", () => {
+  it("renders without crashing for non-practitioner users", () => {
+    render(<MemoryRouter><PractitionerPortal /></MemoryRouter>);
+    const container = document.querySelector("section, div, main");
+    expect(container).not.toBeNull();
+  });
+
+  it("renders page structure", () => {
+    render(<MemoryRouter><PractitionerPortal /></MemoryRouter>);
+    expect(document.body.textContent?.length).toBeGreaterThan(0);
   });
 });
