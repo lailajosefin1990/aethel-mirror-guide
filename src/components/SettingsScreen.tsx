@@ -139,7 +139,7 @@ const SettingsScreen = () => {
       toast.success("Birth details updated");
       trackEvent(EVENTS.BIRTH_DETAILS_UPDATED_SETTINGS);
     } catch (err) {
-      console.error("Birth details update failed:", err);
+      Sentry.captureException(err);
       toast.error("Couldn't update birth details. Please try again.");
     }
   };
