@@ -73,7 +73,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const { domain, question, mode, birthDate, birthPlace, birthTime, birthLat, birthLng, birthTimezone, language, regenerationFeedback } = await req.json();
+    const body = await req.json();
+    const { domain, question, mode, birthDate, birthPlace, birthTime, birthLat, birthLng, birthTimezone, language, regenerationFeedback } = body;
     if (!domain || !question) throw new Error("Missing domain or question");
 
     // ─── Crisis detection pre-check ───
