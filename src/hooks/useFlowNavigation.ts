@@ -1,7 +1,7 @@
 import { useCallback, useEffect, Dispatch } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { track } from "@/lib/posthog";
-import { supabase } from "@/integrations/supabase/client";
+import { trackEvent, EVENTS } from "@/lib/analytics";
+import { db } from "@/lib/db";
 import type { User } from "@supabase/supabase-js";
 import type { QuestionData } from "@/components/QuestionInput";
 import type { BirthData } from "@/components/BirthCoordinates";
@@ -144,7 +144,7 @@ export function useFlowNavigation(
       dispatch({ type: "SET_QUESTION", data });
       sessionStorage.setItem("aethel_pending_question", JSON.stringify(data));
       if (!user) {
-        track("anonymous_reading_started");
+        trackEvent(EVENTS.ANONYMOUS_READING_STARTED);
         dispatch({ type: "SET_LOADING_ERROR", error: null });
         setView("loading");
         return;
@@ -175,18 +175,14 @@ export function useFlowNavigation(
     async (data: BirthData) => {
       dispatch({ type: "SET_BIRTH_DATA", data });
       if (user) {
-        await supabase
-          .from("profiles")
-          .update({
-            birth_date: data.date.toISOString().split("T")[0],
-            birth_time: data.unknownTime ? null : data.time,
-            birth_place: data.birthPlace,
-            birth_lat: data.birthLat ?? null,
-            birth_lng: data.birthLng ?? null,
-            birth_timezone: data.birthTimezone ?? null,
-            birth_place_name: data.birthPlace,
-          })
-          .eq("user_id", user.id);
+        await db.profiles.updateBirth(user.id, {
+          birth_date: data.date.toISOString().split("T")[0],
+          birth_time: data.unknownTime ? null : data.time,
+          birth_place: data.birthPlace,
+          birth_lat: data.birthLat ?? null,
+          birth_lng: data.birthLng ?? null,
+          birth_timezone: data.birthTimezone ?? null,
+        });
         dispatch({
           type: "SET_PROFILE_BIRTH",
           data: {

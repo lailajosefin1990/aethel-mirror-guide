@@ -1,6 +1,7 @@
 import { useCallback, Dispatch } from "react";
-import { track } from "@/lib/posthog";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/db";
 import type { User } from "@supabase/supabase-js";
 import type { JournalEntry } from "@/components/DecisionJournal";
 import type { ReadingData } from "@/lib/reading";
@@ -46,7 +47,7 @@ export function useReadingFlow(
     if (data?.error) throw new Error(data.error);
 
     if (data?.is_crisis) {
-      track("crisis_signal_detected", {
+      trackEvent(EVENTS.CRISIS_SIGNAL_DETECTED, {
         domain: data.domain,
         confidence: data.confidence,
       });
@@ -56,7 +57,7 @@ export function useReadingFlow(
 
     dispatch({ type: "SET_READING_DATA", data: data as ReadingData });
     if (!user) {
-      track("anonymous_reading_generated", { domain: qd.domain });
+      trackEvent(EVENTS.ANONYMOUS_READING_GENERATED, { domain: qd.domain });
     }
     return data;
   }, [birthData, questionData, i18nLanguage, regenerationFeedback, user, dispatch]);
@@ -65,33 +66,29 @@ export function useReadingFlow(
     if (!questionData || !readingData) return;
 
     if (!user) {
-      track("anonymous_save_prompted");
+      trackEvent(EVENTS.ANONYMOUS_SAVE_PROMPTED);
       dispatch({ type: "AUTH_REDIRECT_FOR_SAVE" });
       return;
     }
 
     if (readingData.is_fallback) {
-      track("fallback_reading_served", {
+      trackEvent(EVENTS.FALLBACK_READING_SERVED, {
         domain: questionData.domain,
         reason: readingData.fallback_reason || "api_error",
       });
     }
 
     try {
-      const { data: reading, error } = await supabase
-        .from("readings")
-        .insert({
-          user_id: user.id,
-          domain: questionData.domain,
-          question: questionData.question,
-          mode: questionData.mode,
-          reading_text: readingData.astrology_reading,
-          third_way_text: readingData.third_way,
-          journal_prompt: readingData.journal_prompt,
-          confidence_level: readingData.confidence_level,
-        })
-        .select()
-        .single();
+      const { data: reading, error } = await db.readings.save({
+        user_id: user.id,
+        domain: questionData.domain,
+        question: questionData.question,
+        mode: questionData.mode,
+        reading_text: readingData.astrology_reading,
+        third_way_text: readingData.third_way,
+        journal_prompt: readingData.journal_prompt,
+        confidence_level: readingData.confidence_level,
+      });
 
       if (error) throw error;
 
@@ -148,7 +145,7 @@ export function useReadingFlow(
     async (id: string, outcome: JournalEntry["outcome"], consentToShare?: boolean) => {
       if (!user || !outcome) return;
 
-      await supabase.from("outcomes").insert({
+      await db.outcomes.save({
         reading_id: id,
         user_id: user.id,
         followed: outcome.followed,

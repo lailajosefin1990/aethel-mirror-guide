@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -6,14 +7,18 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { Sentry } from "@/lib/sentry";
 import Index from "./pages/Index.tsx";
-import PractitionerPortal from "./pages/PractitionerPortal.tsx";
-import Evidence from "./pages/Evidence.tsx";
-import Privacy from "./pages/Privacy.tsx";
-import Terms from "./pages/Terms.tsx";
-import Cookies from "./pages/Cookies.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
+const PractitionerPortal = React.lazy(() => import("./pages/PractitionerPortal.tsx"));
+const Evidence = React.lazy(() => import("./pages/Evidence.tsx"));
+const Privacy = React.lazy(() => import("./pages/Privacy.tsx"));
+const Terms = React.lazy(() => import("./pages/Terms.tsx"));
+const Cookies = React.lazy(() => import("./pages/Cookies.tsx"));
+const Admin = React.lazy(() => import("./pages/Admin.tsx"));
+
 const queryClient = new QueryClient();
+
+const LazyFallback = () => <div className="min-h-screen" />;
 
 const App = () => (
   <Sentry.ErrorBoundary fallback={<div className="min-h-screen flex items-center justify-center font-body text-muted-foreground">Something went wrong. Please refresh.</div>}>
@@ -31,11 +36,12 @@ const App = () => (
             <Route path="/reading" element={<Index />} />
             <Route path="/mirror" element={<Index />} />
             <Route path="/mirror/:tab" element={<Index />} />
-            <Route path="/practitioner" element={<PractitionerPortal />} />
-            <Route path="/evidence" element={<Evidence />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/cookies" element={<Cookies />} />
+            <Route path="/practitioner" element={<Suspense fallback={<LazyFallback />}><PractitionerPortal /></Suspense>} />
+            <Route path="/evidence" element={<Suspense fallback={<LazyFallback />}><Evidence /></Suspense>} />
+            <Route path="/privacy" element={<Suspense fallback={<LazyFallback />}><Privacy /></Suspense>} />
+            <Route path="/terms" element={<Suspense fallback={<LazyFallback />}><Terms /></Suspense>} />
+            <Route path="/cookies" element={<Suspense fallback={<LazyFallback />}><Cookies /></Suspense>} />
+            <Route path="/admin" element={<Suspense fallback={<LazyFallback />}><Admin /></Suspense>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

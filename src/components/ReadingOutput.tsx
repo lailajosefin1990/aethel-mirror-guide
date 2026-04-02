@@ -8,7 +8,7 @@ import { generateThirdWayCard } from "@/lib/cardGenerator";
 import { useAuth } from "@/hooks/useAuth";
 import useOgImage from "@/hooks/useOgImage";
 import { toast } from "sonner";
-import { track } from "@/lib/posthog";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 
 interface ReadingOutputProps {
   domain: string;
@@ -51,7 +51,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   // Track reading loaded
   useEffect(() => {
     if (reading) {
-      track("reading_loaded", { confidence_level: reading.confidence_level });
+      trackEvent(EVENTS.reading_loaded, { confidence_level: reading.confidence_level });
     }
   }, [reading]);
 
@@ -62,7 +62,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          track("third_way_read");
+          trackEvent(EVENTS.third_way_read);
           observer.disconnect();
         }
       },
@@ -80,7 +80,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   const handleShare = useCallback(async () => {
     if (!reading) return;
     setGenerating(true);
-    track("share_card_opened", { is_pro: isPro });
+    trackEvent(EVENTS.share_card_opened, { is_pro: isPro });
     try {
       const blob = await generateThirdWayCard(reading.third_way, domain, isPro);
       setCardBlob(blob);
@@ -97,7 +97,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
 
   const handleDownload = useCallback(() => {
     if (!cardUrl || !cardBlob) return;
-    track("share_card_downloaded");
+    trackEvent(EVENTS.share_card_downloaded);
     const a = document.createElement("a");
     a.href = cardUrl;
     a.download = "aethel-third-way.png";
@@ -209,14 +209,14 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.47 }}
           className="flex items-center justify-center gap-4 mb-6">
           <button
-            onClick={() => { track("reading_reaction", { reaction: "positive" }); setReaction("positive"); }}
+            onClick={() => { trackEvent(EVENTS.reading_reaction, { reaction: "positive" }); setReaction("positive"); }}
             className={`p-2 rounded-full border transition-all duration-200 ${
               reaction === "positive" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
             }`}>
             <span className="text-[16px]">👍</span>
           </button>
           <button
-            onClick={() => { track("reading_reaction", { reaction: "negative" }); setReaction("negative"); }}
+            onClick={() => { trackEvent(EVENTS.reading_reaction, { reaction: "negative" }); setReaction("negative"); }}
             className={`p-2 rounded-full border transition-all duration-200 ${
               reaction === "negative" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
             }`}>
@@ -234,7 +234,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
               if (saved) return;
               setSaved(true);
               toast.success("Saved to your mirror ✓");
-              track("reading_saved");
+              trackEvent(EVENTS.reading_saved);
               onSave();
             }}
             disabled={saved}
@@ -344,7 +344,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
                 className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-4" />
               <button onClick={() => { 
                   const feedback = feedbackText;
-                  track("reading_regenerated", { regeneration_number: (regenerationCount || 0) + 1 }); 
+                  trackEvent(EVENTS.reading_regenerated, { regeneration_number: (regenerationCount || 0) + 1 }); 
                   setFeedbackOpen(false); 
                   setFeedbackText(""); 
                   onRegenerate?.(feedback); 

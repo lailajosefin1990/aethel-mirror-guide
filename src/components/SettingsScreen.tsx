@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { isPushActive, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
-import { track } from "@/lib/posthog";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 import { useNavigate } from "react-router-dom";
 import { Copy, Check, Clock, MapPin, Calendar } from "lucide-react";
 import { toast } from "sonner";
