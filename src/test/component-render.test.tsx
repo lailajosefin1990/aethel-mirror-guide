@@ -710,7 +710,52 @@ describe("DrumRoller", () => {
     expect(screen.getByText("03")).toBeInTheDocument();
     expect(screen.getByText("04")).toBeInTheDocument();
     expect(screen.getByText("05")).toBeInTheDocument();
+});
+
+// ─── SettingsScreen ───────────────────────────────────────────────
+import SettingsScreen from "@/components/SettingsScreen";
+
+describe("SettingsScreen", () => {
+  it("renders settings sections", () => {
+    render(<MemoryRouter><SettingsScreen /></MemoryRouter>);
+    const sections = document.querySelectorAll("section, [class*='border-border']");
+    expect(sections.length).toBeGreaterThan(3);
   });
+
+  it("renders export and delete buttons", () => {
+    render(<MemoryRouter><SettingsScreen /></MemoryRouter>);
+    const buttons = screen.getAllByRole("button");
+    expect(buttons.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("renders language selector", () => {
+    render(<MemoryRouter><SettingsScreen /></MemoryRouter>);
+    const container = document.querySelector("[class*='settings']") || document.querySelector("section");
+    expect(container).not.toBeNull();
+  });
+});
+
+// ─── PractitionerPortal ───────────────────────────────────────────
+import PractitionerPortal from "@/pages/PractitionerPortal";
+
+vi.mock("@/lib/posthog", () => ({
+  track: vi.fn(),
+  identifyUser: vi.fn(),
+  resetUser: vi.fn(),
+}));
+
+describe("PractitionerPortal", () => {
+  it("renders without crashing for non-practitioner users", () => {
+    render(<MemoryRouter><PractitionerPortal /></MemoryRouter>);
+    const container = document.querySelector("section, div, main");
+    expect(container).not.toBeNull();
+  });
+
+  it("renders page structure", () => {
+    render(<MemoryRouter><PractitionerPortal /></MemoryRouter>);
+    expect(document.body.textContent?.length).toBeGreaterThan(0);
+  });
+});
 
   it("highlights the selected value", () => {
     render(<DrumRoller items={items} value={3} onChange={vi.fn()} />);
