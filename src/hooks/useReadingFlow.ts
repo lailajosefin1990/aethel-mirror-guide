@@ -1,4 +1,5 @@
 import { useCallback, Dispatch } from "react";
+import * as Sentry from "@sentry/react";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/db";
