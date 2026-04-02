@@ -303,10 +303,9 @@ describe("DecisionJournal", () => {
       <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // Filter pills render for domains present in entries
-    expect(screen.getByText("All")).toBeInTheDocument();
-    // Domain names appear as filter pills
+    expect(screen.getByText("journal_filter_all")).toBeInTheDocument();
     const allButtons = screen.getAllByRole("button");
-    expect(allButtons.length).toBeGreaterThan(2); // At minimum: All + domain pills + tab buttons
+    expect(allButtons.length).toBeGreaterThan(2);
   });
 
   it("renders time context for entries", () => {
@@ -322,9 +321,8 @@ describe("DecisionJournal", () => {
     render(
       <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
-    // Tab buttons should be present
-    expect(screen.getByText("Open")).toBeInTheDocument();
-    expect(screen.getByText("Closed")).toBeInTheDocument();
+    expect(screen.getByText("journal_tab_open")).toBeInTheDocument();
+    expect(screen.getByText("journal_tab_closed")).toBeInTheDocument();
   });
 });
 
@@ -482,7 +480,7 @@ describe("CrisisInterstitial", () => {
     const onReturn = vi.fn();
     const user = userEvent.setup();
     render(<CrisisInterstitial onReturn={onReturn} />);
-    const returnBtn = screen.getByText("Return to mirror");
+    const returnBtn = screen.getByText("crisis_return");
     await user.click(returnBtn);
     expect(onReturn).toHaveBeenCalledTimes(1);
   });
@@ -638,10 +636,9 @@ describe("TransitCalendar", () => {
     render(
       <MemoryRouter><TransitCalendar /></MemoryRouter>
     );
-    // Initially shows loading state, then switches to empty state after fetch
     await waitFor(() => {
       const text = document.body.textContent || "";
-      expect(text).toMatch(/Generating your calendar|transits are being calculated/i);
+      expect(text).toMatch(/transit_empty_title|transit_loading/i);
     });
   });
 });
