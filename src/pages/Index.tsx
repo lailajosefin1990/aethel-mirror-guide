@@ -143,6 +143,9 @@ const Index = () => {
 
   return (
     <>
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-sm">
+        Skip to content
+      </a>
       {showConsentGate && <ConsentGate onAccept={handleConsentAccept} />}
       {showCrisis && <CrisisInterstitial onReturn={handleCrisisReturn} />}
       {["question", "auth", "birth", "loading", "reading"].includes(view) && (
@@ -152,6 +155,7 @@ const Index = () => {
           view === "loading" ? 3 : 4
         } />
       )}
+      <div ref={mainRef} id="main-content" tabIndex={-1} className="outline-none">
       <AnimatePresence mode="wait">
         {view === "home" && !dashboardLoading && (
           <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={slideTransition}>
