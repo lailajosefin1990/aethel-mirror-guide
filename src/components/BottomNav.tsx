@@ -59,7 +59,7 @@ const BottomNav = ({ activeTab, onTabChange, subscriptionTier = "free" }: Bottom
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm z-50">
+    <nav className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm z-50" role="navigation" aria-label="Main navigation">
       <div className="max-w-app mx-auto flex items-center justify-around px-4 py-3">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -76,6 +76,8 @@ const BottomNav = ({ activeTab, onTabChange, subscriptionTier = "free" }: Bottom
                   }
                   onTabChange(tab.id);
                 }}
+                aria-current={isActive && !isLocked ? "page" : undefined}
+                aria-label={tab.label}
                 className={`flex flex-col items-center gap-1 py-1 transition-colors duration-300 ${
                   isLocked ? "opacity-40" : ""
                 }`}

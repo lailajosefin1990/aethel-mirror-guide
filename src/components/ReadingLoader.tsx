@@ -84,7 +84,7 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
   }
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center px-5">
+    <section className="min-h-screen flex flex-col items-center justify-center px-5" aria-label="Loading your reading">
       <motion.p
         animate={{ opacity: [0.4, 1, 0.4] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -93,7 +93,7 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
         A E T H E L &nbsp; M I R R O R
       </motion.p>
 
-      <div className="h-6 relative">
+      <div className="h-6 relative" role="status" aria-live="polite">
         <AnimatePresence mode="wait">
           <motion.p
             key={phraseIndex}

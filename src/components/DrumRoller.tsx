@@ -169,6 +169,29 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
         ref={containerRef}
         className="h-full overflow-hidden touch-none cursor-grab active:cursor-grabbing overscroll-contain"
         style={{ paddingTop: paddingHeight, paddingBottom: paddingHeight }}
+        role="listbox"
+        aria-label="Select a value"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+            e.preventDefault();
+            const next = Math.min(selectedIdx + 1, items.length - 1);
+            const item = items[next];
+            if (item && !item.disabled) {
+              onChange(item.value);
+            }
+          } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+            e.preventDefault();
+            const prev = Math.max(selectedIdx - 1, 0);
+            const item = items[prev];
+            if (item && !item.disabled) {
+              onChange(item.value);
+            }
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            // confirm current selection — already selected via onChange
+          }
+        }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -180,6 +203,8 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
           return (
             <div
               key={`${item.value}`}
+              role="option"
+              aria-selected={isSelected}
               className={cn(
                 "flex items-center justify-center transition-all duration-150",
                 item.disabled

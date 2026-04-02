@@ -1,4 +1,4 @@
-import React, { Suspense, useReducer, useMemo, useCallback, useEffect } from "react";
+import React, { Suspense, useReducer, useMemo, useCallback, useEffect, useRef } from "react";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { db } from "@/lib/db";
 import { useTranslation } from "react-i18next";
@@ -72,6 +72,13 @@ const Index = () => {
     document.title = titles[view] || "Aethel Mirror";
   }, [view]);
 
+  const mainRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.focus();
+    }
+  }, [view]);
+
   const dashboardLoading = user && !authLoading && (!state.profileLoaded || (state.profileLoaded && view === "home" && journalEntries.length === 0 && !profileBirthData));
   const remainingReadings = Math.max(0, FREE_READING_LIMIT - monthlyReadingCount);
 
@@ -136,6 +143,9 @@ const Index = () => {
 
   return (
     <>
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-sm">
+        Skip to content
+      </a>
       {showConsentGate && <ConsentGate onAccept={handleConsentAccept} />}
       {showCrisis && <CrisisInterstitial onReturn={handleCrisisReturn} />}
       {["question", "auth", "birth", "loading", "reading"].includes(view) && (
@@ -145,6 +155,7 @@ const Index = () => {
           view === "loading" ? 3 : 4
         } />
       )}
+      <div ref={mainRef} id="main-content" tabIndex={-1} className="outline-none">
       <AnimatePresence mode="wait">
         {view === "home" && !dashboardLoading && (
           <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={slideTransition}>
@@ -248,6 +259,7 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
 
       <PaywallModal open={paywallOpen} onClose={handleClosePaywall} onRestorePurchase={handleRestorePurchase} />
 

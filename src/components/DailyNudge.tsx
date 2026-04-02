@@ -217,6 +217,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
         className="bg-card border border-border rounded-md p-5 mb-5"
+        aria-label="Today's nudge"
       >
         <p className={sectionLabel}>
           {isPersonalised
@@ -250,6 +251,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
           className="bg-card border border-border rounded-md p-5 mb-5"
+          aria-label="Open decision to revisit"
         >
           <p className={sectionLabel}>
             {t("nudge_open_decision")}
@@ -286,10 +288,12 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
               {t("nudge_weekly_logged", { rating: weeklyRating })}
             </p>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex gap-2" role="radiogroup" aria-label="Weekly check-in rating">
               {weeklyOptions.map((opt) => (
                 <button
                   key={opt.label}
+                  role="radio"
+                  aria-checked={weeklyRating === opt.label}
                   onClick={() => handleWeeklyRating(opt.label)}
                   className="flex-1 py-3 rounded-sm border border-border bg-transparent hover:border-primary/40 transition-all duration-300 flex flex-col items-center gap-1"
                 >

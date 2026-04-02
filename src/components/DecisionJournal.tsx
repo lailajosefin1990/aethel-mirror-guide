@@ -188,11 +188,20 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-8">
+      <div className="flex gap-1 mb-8" role="tablist" aria-label={t("journal_heading")}>
         {(["open", "closed"] as const).map((t_tab) => (
           <button
             key={t_tab}
+            role="tab"
+            aria-selected={tab === t_tab}
+            aria-controls={`tabpanel-${t_tab}`}
             onClick={() => setTab(t_tab)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                e.preventDefault();
+                setTab(t_tab === "open" ? "closed" : "open");
+              }
+            }}
             className={`flex-1 py-2.5 rounded-sm font-body text-[13px] border transition-all duration-300 ${
               tab === t_tab
                 ? "bg-primary text-primary-foreground border-primary"
@@ -208,7 +217,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
       </div>
 
       {/* Entries */}
-      <div className="space-y-4">
+      <div className="space-y-4" role="tabpanel" id={`tabpanel-${tab}`} aria-label={tab === "open" ? t("journal_tab_open") : t("journal_tab_closed")}>
         <AnimatePresence mode="popLayout">
           {displayedEntries.length === 0 && tab === "open" && (
             <motion.div

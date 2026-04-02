@@ -125,16 +125,32 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
           {/* Domain tiles — 2-column grid */}
           <motion.div
             className="grid grid-cols-2 gap-3"
+            role="radiogroup"
+            aria-label={t("question_heading")}
             animate={domainShake ? { x: [0, -4, 4, -4, 4, 0] } : {}}
             transition={{ duration: 0.3 }}
           >
-            {domainKeys.map(({ key, value }) => {
+            {domainKeys.map(({ key, value }, idx) => {
               const isSelected = selectedDomain === value;
               return (
                  <button
                    key={value}
                    type="button"
+                   role="radio"
+                   aria-checked={isSelected}
+                   tabIndex={0}
                    onClick={() => { setSelectedDomain(value); setValidationHint(false); trackEvent(EVENTS.QUESTION_DOMAIN_SELECTED, { domain: value }); }}
+                   onKeyDown={(e) => {
+                     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+                       e.preventDefault();
+                       const next = domainKeys[(idx + 1) % domainKeys.length];
+                       setSelectedDomain(next.value);
+                     } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+                       e.preventDefault();
+                       const prev = domainKeys[(idx - 1 + domainKeys.length) % domainKeys.length];
+                       setSelectedDomain(prev.value);
+                     }
+                   }}
                   className={`px-4 py-3.5 rounded-sm font-body text-[13px] border transition-all duration-300 text-left ${
                     isSelected
                       ? "border-primary text-primary bg-primary/5"
@@ -214,14 +230,26 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
           />
 
           {/* Mode toggles */}
-          <div className="flex gap-2">
-            {modeKeys.map(({ key, value }) => {
+          <div className="flex gap-2" role="radiogroup" aria-label="Reading mode">
+            {modeKeys.map(({ key, value }, idx) => {
               const isSelected = selectedMode === value;
               return (
                 <button
                   key={value}
                   type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  tabIndex={0}
                   onClick={() => setSelectedMode(value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowRight") {
+                      e.preventDefault();
+                      setSelectedMode(modeKeys[(idx + 1) % modeKeys.length].value);
+                    } else if (e.key === "ArrowLeft") {
+                      e.preventDefault();
+                      setSelectedMode(modeKeys[(idx - 1 + modeKeys.length) % modeKeys.length].value);
+                    }
+                  }}
                   className={`flex-1 py-2.5 rounded-sm font-body text-[12px] sm:text-[13px] border transition-all duration-300 ${
                     isSelected
                       ? "bg-primary text-primary-foreground border-primary"
