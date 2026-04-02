@@ -127,7 +127,7 @@ describe("appReducer — remaining actions", () => {
       { id: "b", domain: "Love", date: "2", createdAt: "2026-01-02", thirdWay: "y", question: "q2?" },
     ];
     const state: AppState = { ...initialState, journalEntries: entries };
-    const outcome = { followed: true, note: "It worked" };
+    const outcome = { followed: "yes" as const, note: "It worked" };
     const next = appReducer(state, { type: "UPDATE_JOURNAL_ENTRY", id: "a", outcome });
     expect(next.journalEntries[0].outcome).toEqual(outcome);
     expect(next.journalEntries[1].outcome).toBeUndefined();

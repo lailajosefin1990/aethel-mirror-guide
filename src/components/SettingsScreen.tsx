@@ -495,12 +495,13 @@ const SettingsScreen = () => {
                 onClick={async () => {
                   if (!user) return;
                   try {
-                    await supabase.from("outcomes").delete().eq("user_id", user.id);
-                    await supabase.from("readings").delete().eq("user_id", user.id);
+                    const { error } = await supabase.functions.invoke("delete-account");
+                    if (error) throw error;
                     trackEvent(EVENTS.ACCOUNT_DELETED);
-                    await signOut();
-                    toast.success("Your data has been deleted");
+                    await supabase.auth.signOut();
+                    toast.success("Your account has been deleted");
                     setShowDeleteConfirm(false);
+                    window.location.href = "/";
                   } catch {
                     toast.error("Couldn't delete account. Please contact support.");
                   }

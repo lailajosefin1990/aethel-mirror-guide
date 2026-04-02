@@ -100,8 +100,8 @@ const baseReading = {
 
 const sampleEntries = [
   { id: "e1", domain: "Work & money", date: "1 Apr 2026", createdAt: "2026-04-01T10:00:00Z", thirdWay: "Take the bold path.", question: "Should I quit?" },
-  { id: "e2", domain: "Love & people", date: "28 Mar 2026", createdAt: "2026-03-28T10:00:00Z", thirdWay: "Set the boundary.", question: "Is this healthy?", outcome: { followed: true, note: "It worked." } },
-  { id: "e3", domain: "Work & money", date: "25 Mar 2026", createdAt: "2026-03-25T10:00:00Z", thirdWay: "Negotiate first.", question: "Take the offer?", outcome: { followed: false, note: "Waited too long." } },
+  { id: "e2", domain: "Love & people", date: "28 Mar 2026", createdAt: "2026-03-28T10:00:00Z", thirdWay: "Set the boundary.", question: "Is this healthy?", outcome: { followed: "yes" as const, note: "It worked." } },
+  { id: "e3", domain: "Work & money", date: "25 Mar 2026", createdAt: "2026-03-25T10:00:00Z", thirdWay: "Negotiate first.", question: "Take the offer?", outcome: { followed: "no" as const, note: "Waited too long." } },
 ];
 
 // ─── DailyNudge ────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ describe("DailyNudge", () => {
   });
 
   it("does not show open decision when all entries have outcomes", () => {
-    const closedEntries = [{ id: "e1", domain: "Work", date: "1 Apr", createdAt: "2026-04-01", thirdWay: "Done.", question: "Q?", outcome: { followed: true, note: "yes" } }];
+    const closedEntries = [{ id: "e1", domain: "Work", date: "1 Apr", createdAt: "2026-04-01", thirdWay: "Done.", question: "Q?", outcome: { followed: "yes" as const, note: "yes" } }];
     render(
       <MemoryRouter><DailyNudge journalEntries={closedEntries} onNewReading={vi.fn()} onRevisitDecision={vi.fn()} /></MemoryRouter>
     );
@@ -250,7 +250,7 @@ describe("ReadingOutput", () => {
 describe("DecisionJournal", () => {
   it("renders loading skeleton when loading=true", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={[]} onUpdateEntry={vi.fn()} loading={true} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={[]} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} loading={true} /></MemoryRouter>
     );
     const pulseElements = document.querySelectorAll(".animate-pulse");
     expect(pulseElements.length).toBeGreaterThan(0);
@@ -258,7 +258,7 @@ describe("DecisionJournal", () => {
 
   it("renders sample entries when no entries provided (fallback)", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={[]} onUpdateEntry={vi.fn()} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={[]} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // Component falls back to SAMPLE_ENTRIES when empty
     // So it always renders something — check for structural elements
@@ -267,7 +267,7 @@ describe("DecisionJournal", () => {
 
   it("renders open journal entries in default tab", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // Default tab shows open entries (no outcome)
     expect(screen.getByText(/Take the bold path/)).toBeInTheDocument();
@@ -276,7 +276,7 @@ describe("DecisionJournal", () => {
 
   it("shows domain filter pills when entries span multiple domains", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // Filter pills render for domains present in entries
     expect(screen.getByText("All")).toBeInTheDocument();
@@ -287,7 +287,7 @@ describe("DecisionJournal", () => {
 
   it("renders time context for entries", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // At least some time context should be rendered (Today, Yesterday, X days ago)
     const timeTexts = document.querySelectorAll("[class*='muted-foreground']");
@@ -296,7 +296,7 @@ describe("DecisionJournal", () => {
 
   it("renders Open and Closed tabs", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // Tab buttons should be present
     expect(screen.getByText("Open")).toBeInTheDocument();
@@ -515,7 +515,7 @@ describe("ReadingLoader", () => {
       <ReadingLoader 
         onComplete={vi.fn()} 
         onError={vi.fn()} 
-        generateReading={vi.fn(() => Promise.resolve({}))} 
+        generateReading={vi.fn(() => Promise.resolve(undefined))} 
       />
     );
     // Should have animated content
