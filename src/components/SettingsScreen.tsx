@@ -115,7 +115,7 @@ const SettingsScreen = () => {
       if (error) throw error;
       if (data?.url) window.open(data.url, "_blank");
     } catch (err) {
-      console.error("Portal error:", err);
+      Sentry.captureException(err);
       toast.error("Couldn't open subscription settings. Please try again.");
     } finally {
       setPortalLoading(false);
