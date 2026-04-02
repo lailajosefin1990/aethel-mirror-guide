@@ -87,7 +87,7 @@ const Admin = () => {
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/export-training-data`,
         {
           headers: {
-            "x-admin-key": "aethel-admin-export-2026",
+            "x-admin-key": import.meta.env.VITE_ADMIN_EXPORT_KEY || "",
             "Content-Type": "application/json",
           },
         }
