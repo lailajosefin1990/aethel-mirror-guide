@@ -1,5 +1,5 @@
 import { useEffect, useRef, Dispatch } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/db";
 import type { User } from "@supabase/supabase-js";
 import type { i18n as I18nType } from "i18next";
 import type { JournalEntry } from "@/components/DecisionJournal";
@@ -45,27 +45,19 @@ export function useProfileData(
     referralLinked.current = true;
 
     const linkReferral = async () => {
-      const { data: existing } = await supabase
-        .from("referrals")
-        .select("id")
-        .eq("referred_user_id", user.id)
-        .maybeSingle();
+      const { data: existing } = await db.referrals.check(user.id);
 
       if (existing) {
         localStorage.removeItem("aethel_ref");
         return;
       }
 
-      const { data: referrerProfile } = await supabase
-        .from("profiles")
-        .select("user_id")
-        .eq("referral_code", ref)
-        .maybeSingle();
+      const { data: referrerProfile } = await db.referrals.findReferrer(ref);
 
       if (referrerProfile && referrerProfile.user_id !== user.id) {
-        await supabase.from("referrals").insert({
+        await db.referrals.create({
           referrer_user_id: referrerProfile.user_id,
-          referred_email: user.email,
+          referred_email: user.email!,
           referred_user_id: user.id,
           status: "signed_up",
         });
@@ -81,13 +73,7 @@ export function useProfileData(
     let cancelled = false;
 
     const loadData = async () => {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select(
-          "birth_date, birth_time, birth_place, birth_lat, birth_lng, birth_timezone, consent_accepted, preferred_language"
-        )
-        .eq("user_id", user.id)
-        .single();
+      const { data: profile } = await db.profiles.get(user.id);
 
       if (cancelled) return;
 
@@ -104,19 +90,12 @@ export function useProfileData(
       }
       dispatch({ type: "SET_PROFILE_LOADED", loaded: true });
 
-      const { data: readings } = await supabase
-        .from("readings")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+      const { data: readings } = await db.readings.getByUser(user.id);
 
       if (cancelled) return;
       if (!readings) return;
 
-      const { data: outcomes } = await supabase
-        .from("outcomes")
-        .select("*")
-        .eq("user_id", user.id);
+      const { data: outcomes } = await db.outcomes.getByUser(user.id);
 
       if (cancelled) return;
 
