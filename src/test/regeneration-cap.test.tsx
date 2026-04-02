@@ -217,13 +217,13 @@ describe("Regeneration Cap — Full Integration", () => {
     );
 
     // ── Regeneration 1 ──
-    expect(screen.getByText("That doesn't fit")).toBeInTheDocument();
-    await user.click(screen.getByText("That doesn't fit"));
+    expect(screen.getByText("reading_doesnt_fit")).toBeInTheDocument();
+    await user.click(screen.getByText("reading_doesnt_fit"));
     await user.type(
-      await screen.findByPlaceholderText("What felt off?"),
+      await screen.findByPlaceholderText("reading_feedback_placeholder"),
       "Too vague on career timing"
     );
-    await user.click(screen.getByText("Regenerate"));
+    await user.click(screen.getByText("reading_regenerate"));
 
     await waitFor(() => {
       expect(screen.getByTestId("regen-count")).toHaveTextContent("1");
@@ -231,29 +231,29 @@ describe("Regeneration Cap — Full Integration", () => {
     expect(screen.getByTestId("invoke-count")).toHaveTextContent("1");
 
     // "That doesn't fit" should reappear (count < 3)
-    expect(screen.getByText("That doesn't fit")).toBeInTheDocument();
+    expect(screen.getByText("reading_doesnt_fit")).toBeInTheDocument();
 
     // ── Regeneration 2 ──
-    await user.click(screen.getByText("That doesn't fit"));
+    await user.click(screen.getByText("reading_doesnt_fit"));
     await user.type(
-      await screen.findByPlaceholderText("What felt off?"),
+      await screen.findByPlaceholderText("reading_feedback_placeholder"),
       "Third way not actionable"
     );
-    await user.click(screen.getByText("Regenerate"));
+    await user.click(screen.getByText("reading_regenerate"));
 
     await waitFor(() => {
       expect(screen.getByTestId("regen-count")).toHaveTextContent("2");
     });
     expect(screen.getByTestId("invoke-count")).toHaveTextContent("2");
-    expect(screen.getByText("That doesn't fit")).toBeInTheDocument();
+    expect(screen.getByText("reading_doesnt_fit")).toBeInTheDocument();
 
     // ── Regeneration 3 (final allowed) ──
-    await user.click(screen.getByText("That doesn't fit"));
+    await user.click(screen.getByText("reading_doesnt_fit"));
     await user.type(
-      await screen.findByPlaceholderText("What felt off?"),
+      await screen.findByPlaceholderText("reading_feedback_placeholder"),
       "Still doesn't resonate"
     );
-    await user.click(screen.getByText("Regenerate"));
+    await user.click(screen.getByText("reading_regenerate"));
 
     await waitFor(() => {
       expect(screen.getByTestId("regen-count")).toHaveTextContent("3");
@@ -261,9 +261,9 @@ describe("Regeneration Cap — Full Integration", () => {
     expect(screen.getByTestId("invoke-count")).toHaveTextContent("3");
 
     // ── After 3: button gone, "three paths" message shown ──
-    expect(screen.queryByText("That doesn't fit")).not.toBeInTheDocument();
+    expect(screen.queryByText("reading_doesnt_fit")).not.toBeInTheDocument();
     expect(
-      screen.getByText(/your mirror has shown you three paths/i)
+      screen.getByText("reading_regen_cap")
     ).toBeInTheDocument();
 
     // ── Verify exactly 3 edge function calls were made ──
@@ -280,34 +280,34 @@ describe("Regeneration Cap — Full Integration", () => {
     );
 
     // Regen 1
-    await user.click(screen.getByText("That doesn't fit"));
+    await user.click(screen.getByText("reading_doesnt_fit"));
     await user.type(
-      await screen.findByPlaceholderText("What felt off?"),
+      await screen.findByPlaceholderText("reading_feedback_placeholder"),
       "Feedback one"
     );
-    await user.click(screen.getByText("Regenerate"));
+    await user.click(screen.getByText("reading_regenerate"));
     await waitFor(() => {
       expect(screen.getByTestId("regen-count")).toHaveTextContent("1");
     });
 
     // Regen 2
-    await user.click(screen.getByText("That doesn't fit"));
+    await user.click(screen.getByText("reading_doesnt_fit"));
     await user.type(
-      await screen.findByPlaceholderText("What felt off?"),
+      await screen.findByPlaceholderText("reading_feedback_placeholder"),
       "Feedback two"
     );
-    await user.click(screen.getByText("Regenerate"));
+    await user.click(screen.getByText("reading_regenerate"));
     await waitFor(() => {
       expect(screen.getByTestId("regen-count")).toHaveTextContent("2");
     });
 
     // Regen 3
-    await user.click(screen.getByText("That doesn't fit"));
+    await user.click(screen.getByText("reading_doesnt_fit"));
     await user.type(
-      await screen.findByPlaceholderText("What felt off?"),
+      await screen.findByPlaceholderText("reading_feedback_placeholder"),
       "Feedback three"
     );
-    await user.click(screen.getByText("Regenerate"));
+    await user.click(screen.getByText("reading_regenerate"));
     await waitFor(() => {
       expect(screen.getByTestId("regen-count")).toHaveTextContent("3");
     });
@@ -342,11 +342,11 @@ describe("Regeneration Cap — Full Integration", () => {
     );
 
     // "That doesn't fit" should not be present
-    expect(screen.queryByText("That doesn't fit")).not.toBeInTheDocument();
+    expect(screen.queryByText("reading_doesnt_fit")).not.toBeInTheDocument();
 
     // "Three paths" message should be shown
     expect(
-      screen.getByText(/your mirror has shown you three paths/i)
+      screen.getByText("reading_regen_cap")
     ).toBeInTheDocument();
 
     // No edge function calls
@@ -367,7 +367,7 @@ describe("Regeneration Cap — Full Integration", () => {
         />
       </MemoryRouter>
     );
-    expect(screen.getByText("That doesn't fit")).toBeInTheDocument();
+    expect(screen.getByText("reading_doesnt_fit")).toBeInTheDocument();
 
     rerender(
       <MemoryRouter>
@@ -382,7 +382,7 @@ describe("Regeneration Cap — Full Integration", () => {
         />
       </MemoryRouter>
     );
-    expect(screen.getByText("That doesn't fit")).toBeInTheDocument();
+    expect(screen.getByText("reading_doesnt_fit")).toBeInTheDocument();
 
     rerender(
       <MemoryRouter>
@@ -397,7 +397,7 @@ describe("Regeneration Cap — Full Integration", () => {
         />
       </MemoryRouter>
     );
-    expect(screen.getByText("That doesn't fit")).toBeInTheDocument();
+    expect(screen.getByText("reading_doesnt_fit")).toBeInTheDocument();
 
     rerender(
       <MemoryRouter>
@@ -412,7 +412,7 @@ describe("Regeneration Cap — Full Integration", () => {
         />
       </MemoryRouter>
     );
-    expect(screen.queryByText("That doesn't fit")).not.toBeInTheDocument();
-    expect(screen.getByText(/three paths/i)).toBeInTheDocument();
+    expect(screen.queryByText("reading_doesnt_fit")).not.toBeInTheDocument();
+    expect(screen.getByText("reading_regen_cap")).toBeInTheDocument();
   });
 });

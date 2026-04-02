@@ -163,15 +163,15 @@ describe("Regeneration Feedback Pipeline", () => {
       );
 
       // Open feedback modal
-      const doesntFitBtn = screen.getByText("That doesn't fit");
+      const doesntFitBtn = screen.getByText("reading_doesnt_fit");
       await user.click(doesntFitBtn);
 
       // Type feedback
-      const textarea = await screen.findByPlaceholderText("What felt off?");
+      const textarea = await screen.findByPlaceholderText("reading_feedback_placeholder");
       await user.type(textarea, "The career advice felt too generic");
 
       // Click Regenerate
-      const regenBtn = screen.getByText("Regenerate");
+      const regenBtn = screen.getByText("reading_regenerate");
       await user.click(regenBtn);
 
       // Verify onRegenerate was called WITH the feedback text
@@ -196,10 +196,10 @@ describe("Regeneration Feedback Pipeline", () => {
         </MemoryRouter>
       );
 
-      const doesntFitBtn = screen.getByText("That doesn't fit");
+      const doesntFitBtn = screen.getByText("reading_doesnt_fit");
       await user.click(doesntFitBtn);
 
-      const regenBtn = screen.getByText("Regenerate");
+      const regenBtn = screen.getByText("reading_regenerate");
       await user.click(regenBtn);
 
       expect(onRegenerateSpy).toHaveBeenCalledTimes(1);
@@ -221,8 +221,8 @@ describe("Regeneration Feedback Pipeline", () => {
         </MemoryRouter>
       );
 
-      expect(screen.queryByText("That doesn't fit")).not.toBeInTheDocument();
-      expect(screen.getByText(/three paths/i)).toBeInTheDocument();
+      expect(screen.queryByText("reading_doesnt_fit")).not.toBeInTheDocument();
+      expect(screen.getByText("reading_regen_cap")).toBeInTheDocument();
     });
 
     it("closes the feedback modal after clicking Regenerate", async () => {
@@ -242,13 +242,13 @@ describe("Regeneration Feedback Pipeline", () => {
         </MemoryRouter>
       );
 
-      await user.click(screen.getByText("That doesn't fit"));
-      expect(screen.getByText("Tell us what missed the mark")).toBeInTheDocument();
+      await user.click(screen.getByText("reading_doesnt_fit"));
+      expect(screen.getByText("reading_feedback_title")).toBeInTheDocument();
 
-      await user.click(screen.getByText("Regenerate"));
+      await user.click(screen.getByText("reading_regenerate"));
 
       await waitFor(() => {
-        expect(screen.queryByText("Tell us what missed the mark")).not.toBeInTheDocument();
+        expect(screen.queryByText("reading_feedback_title")).not.toBeInTheDocument();
       });
     });
 
@@ -270,10 +270,10 @@ describe("Regeneration Feedback Pipeline", () => {
       );
 
       // First regeneration with feedback
-      await user.click(screen.getByText("That doesn't fit"));
-      const textarea = await screen.findByPlaceholderText("What felt off?");
+      await user.click(screen.getByText("reading_doesnt_fit"));
+      const textarea = await screen.findByPlaceholderText("reading_feedback_placeholder");
       await user.type(textarea, "Too vague");
-      await user.click(screen.getByText("Regenerate"));
+      await user.click(screen.getByText("reading_regenerate"));
 
       expect(onRegenerateSpy).toHaveBeenCalledWith("Too vague");
     });

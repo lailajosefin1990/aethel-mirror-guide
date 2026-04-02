@@ -197,16 +197,16 @@ describe("Google OAuth round-trip: questionData persistence", () => {
     const user = userEvent.setup();
     renderIndex();
 
-    const cta = await screen.findByText(/Get my Third Way/i);
+    const cta = await screen.findByText("hero_get_third_way");
     await user.click(cta);
 
-    const domainButton = await screen.findByText("Work & money");
+    const domainButton = await screen.findByText("domain_work");
     await user.click(domainButton);
 
-    const textarea = screen.getByPlaceholderText(/Describe your decision/i);
+    const textarea = screen.getByPlaceholderText("question_placeholder");
     fireEvent.change(textarea, { target: { value: "Should I accept the new job offer?" } });
 
-    const submitButton = screen.getByText(/Find my Third Way/i);
+    const submitButton = screen.getByText("question_cta");
     await user.click(submitButton);
 
     const stored = sessionStorage.getItem("aethel_pending_question");
@@ -309,16 +309,16 @@ describe("Google OAuth round-trip: questionData persistence", () => {
     const user = userEvent.setup();
     renderIndex();
 
-    const cta = await screen.findByText(/Get my Third Way/i);
+    const cta = await screen.findByText("hero_get_third_way");
     await user.click(cta);
 
-    const domainButton = await screen.findByText("Work & money");
+    const domainButton = await screen.findByText("domain_work");
     await user.click(domainButton);
 
-    const textarea = screen.getByPlaceholderText(/Describe your decision/i);
+    const textarea = screen.getByPlaceholderText("question_placeholder");
     await user.type(textarea, "Should I quit my job?");
 
-    const submitButton = screen.getByText(/Find my Third Way/i);
+    const submitButton = screen.getByText("question_cta");
     await user.click(submitButton);
 
     const googleButton = await screen.findByText("Google");
