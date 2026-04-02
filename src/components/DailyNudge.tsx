@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type JournalEntry } from "./DecisionJournal";
 import { trackEvent, EVENTS } from "@/lib/analytics";
