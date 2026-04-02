@@ -54,7 +54,26 @@ const weeklyOptions = [
   { emoji: "🌕", label: "Clear" },
 ];
 
-const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscriptionTier = "free", remainingReadings = 1, onUpgrade, hasBirthTime = false }: DailyNudgeProps) => {
+const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscriptionTier = "free", remainingReadings = 1, onUpgrade, hasBirthTime = false, loading }: DailyNudgeProps) => {
+  if (loading) {
+    return (
+      <section className="pt-8 pb-4 space-y-5">
+        <div className="h-4 w-40 bg-muted rounded animate-pulse" />
+        <div className="h-5 w-56 bg-muted rounded animate-pulse" />
+        <div className="border border-border rounded-md p-5 bg-card space-y-4">
+          <div className="h-3 w-24 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-full bg-muted rounded animate-pulse" />
+          <div className="h-4 w-5/6 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
+        </div>
+        <div className="border border-border rounded-md p-5 bg-card space-y-3">
+          <div className="h-3 w-20 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-full bg-muted rounded animate-pulse" />
+        </div>
+      </section>
+    );
+  }
+
   const { user } = useAuth();
   const today = new Date();
   const isSunday = today.getDay() === 0;
