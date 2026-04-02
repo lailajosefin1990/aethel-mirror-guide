@@ -515,7 +515,7 @@ describe("ReadingLoader", () => {
       <ReadingLoader 
         onComplete={vi.fn()} 
         onError={vi.fn()} 
-        generateReading={vi.fn(() => Promise.resolve({}))} 
+        generateReading={vi.fn(() => Promise.resolve(undefined))} 
       />
     );
     // Should have animated content
