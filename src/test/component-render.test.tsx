@@ -100,8 +100,8 @@ const baseReading = {
 
 const sampleEntries = [
   { id: "e1", domain: "Work & money", date: "1 Apr 2026", createdAt: "2026-04-01T10:00:00Z", thirdWay: "Take the bold path.", question: "Should I quit?" },
-  { id: "e2", domain: "Love & people", date: "28 Mar 2026", createdAt: "2026-03-28T10:00:00Z", thirdWay: "Set the boundary.", question: "Is this healthy?", outcome: { followed: true, note: "It worked." } },
-  { id: "e3", domain: "Work & money", date: "25 Mar 2026", createdAt: "2026-03-25T10:00:00Z", thirdWay: "Negotiate first.", question: "Take the offer?", outcome: { followed: false, note: "Waited too long." } },
+  { id: "e2", domain: "Love & people", date: "28 Mar 2026", createdAt: "2026-03-28T10:00:00Z", thirdWay: "Set the boundary.", question: "Is this healthy?", outcome: { followed: "yes" as const, note: "It worked." } },
+  { id: "e3", domain: "Work & money", date: "25 Mar 2026", createdAt: "2026-03-25T10:00:00Z", thirdWay: "Negotiate first.", question: "Take the offer?", outcome: { followed: "no" as const, note: "Waited too long." } },
 ];
 
 // ─── DailyNudge ────────────────────────────────────────────────────
