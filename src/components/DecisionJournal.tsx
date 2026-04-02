@@ -77,26 +77,6 @@ const FollowedBadge = ({ followed }: { followed: string }) => {
 };
 
 const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, onStartReading, loading }: DecisionJournalProps) => {
-  if (loading) {
-    return (
-      <section className="pt-8 pb-4">
-        <div className="h-5 w-48 bg-muted rounded animate-pulse mb-8" />
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="border border-border rounded-md p-4 bg-card space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-                <div className="h-3 w-16 bg-muted rounded animate-pulse" />
-              </div>
-              <div className="h-4 w-full bg-muted rounded animate-pulse" />
-              <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
-            </div>
-          ))}
-        </div>
-      </section>
-    );
-  }
-
   const entries = propEntries.length > 0 ? propEntries : SAMPLE_ENTRIES;
   const [tab, setTab] = useState<"open" | "closed">("open");
   const [filterDomain, setFilterDomain] = useState<string | null>(null);
@@ -142,6 +122,27 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
   }, []);
 
   const displayedEntries = tab === "open" ? openEntries : closedEntries;
+
+  if (loading) {
+    return (
+      <section className="pt-8 pb-4">
+        <div className="h-5 w-48 bg-muted rounded animate-pulse mb-8" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border border-border rounded-md p-4 bg-card space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+                <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+              </div>
+              <div className="h-4 w-full bg-muted rounded animate-pulse" />
+              <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
 
   const handleLogSubmit = async () => {
     if (!sheetEntryId || !followedChoice) return;
