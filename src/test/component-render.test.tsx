@@ -321,9 +321,8 @@ describe("DecisionJournal", () => {
     render(
       <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
-    // Tab buttons should be present
-    expect(screen.getByText("Open")).toBeInTheDocument();
-    expect(screen.getByText("Closed")).toBeInTheDocument();
+    expect(screen.getByText("journal_tab_open")).toBeInTheDocument();
+    expect(screen.getByText("journal_tab_closed")).toBeInTheDocument();
   });
 });
 
