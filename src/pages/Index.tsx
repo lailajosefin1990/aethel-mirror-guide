@@ -1,4 +1,4 @@
-import React, { Suspense, useReducer, useMemo, useCallback, useEffect } from "react";
+import React, { Suspense, useReducer, useMemo, useCallback, useEffect, useRef } from "react";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { db } from "@/lib/db";
 import { useTranslation } from "react-i18next";
