@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import * as Sentry from "@sentry/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Plus, X, User, ChevronRight, Sparkles, FileText, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
