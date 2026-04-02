@@ -145,7 +145,7 @@ describe("DailyNudge", () => {
   });
 
   it("does not show open decision when all entries have outcomes", () => {
-    const closedEntries = [{ id: "e1", domain: "Work", date: "1 Apr", createdAt: "2026-04-01", thirdWay: "Done.", question: "Q?", outcome: { followed: true, note: "yes" } }];
+    const closedEntries = [{ id: "e1", domain: "Work", date: "1 Apr", createdAt: "2026-04-01", thirdWay: "Done.", question: "Q?", outcome: { followed: "yes" as const, note: "yes" } }];
     render(
       <MemoryRouter><DailyNudge journalEntries={closedEntries} onNewReading={vi.fn()} onRevisitDecision={vi.fn()} /></MemoryRouter>
     );
