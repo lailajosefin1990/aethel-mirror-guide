@@ -259,6 +259,7 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
 
       <PaywallModal open={paywallOpen} onClose={handleClosePaywall} onRestorePurchase={handleRestorePurchase} />
 

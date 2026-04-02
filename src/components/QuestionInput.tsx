@@ -230,14 +230,26 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
           />
 
           {/* Mode toggles */}
-          <div className="flex gap-2">
-            {modeKeys.map(({ key, value }) => {
+          <div className="flex gap-2" role="radiogroup" aria-label="Reading mode">
+            {modeKeys.map(({ key, value }, idx) => {
               const isSelected = selectedMode === value;
               return (
                 <button
                   key={value}
                   type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  tabIndex={0}
                   onClick={() => setSelectedMode(value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowRight") {
+                      e.preventDefault();
+                      setSelectedMode(modeKeys[(idx + 1) % modeKeys.length].value);
+                    } else if (e.key === "ArrowLeft") {
+                      e.preventDefault();
+                      setSelectedMode(modeKeys[(idx - 1 + modeKeys.length) % modeKeys.length].value);
+                    }
+                  }}
                   className={`flex-1 py-2.5 rounded-sm font-body text-[12px] sm:text-[13px] border transition-all duration-300 ${
                     isSelected
                       ? "bg-primary text-primary-foreground border-primary"

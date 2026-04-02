@@ -180,7 +180,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
 
         {/* Divider + Third Way */}
         <motion.div ref={thirdWayRef} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}
-          className="border-t-2 border-primary/40 pt-8 mb-10">
+          className="border-t-2 border-primary/40 pt-8 mb-10" aria-label="Your Third Way">
           <p className={`${sectionLabel} text-center`}>{t("reading_third_way_label")}</p>
           <p className="font-display text-[22px] sm:text-[24px] leading-[1.4] text-foreground text-center font-medium">
             {reading.third_way}
@@ -189,7 +189,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
 
         {/* Journal prompt */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}
-          className="bg-card border border-border rounded-md p-5 mb-6">
+          className="bg-card border border-border rounded-md p-5 mb-6" aria-label="Journal prompt">
           <p className="font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3">{t("reading_journal_label")}</p>
           <p className="font-display text-[16px] leading-[1.6] text-card-foreground">{reading.journal_prompt}</p>
         </motion.div>

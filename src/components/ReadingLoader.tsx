@@ -93,7 +93,7 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
         A E T H E L &nbsp; M I R R O R
       </motion.p>
 
-      <div className="h-6 relative">
+      <div className="h-6 relative" role="status" aria-live="polite">
         <AnimatePresence mode="wait">
           <motion.p
             key={phraseIndex}

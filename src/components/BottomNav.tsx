@@ -76,6 +76,8 @@ const BottomNav = ({ activeTab, onTabChange, subscriptionTier = "free" }: Bottom
                   }
                   onTabChange(tab.id);
                 }}
+                aria-current={isActive && !isLocked ? "page" : undefined}
+                aria-label={tab.label}
                 className={`flex flex-col items-center gap-1 py-1 transition-colors duration-300 ${
                   isLocked ? "opacity-40" : ""
                 }`}
