@@ -1,5 +1,6 @@
-import { useReducer, useMemo, useCallback } from "react";
-import { track } from "@/lib/posthog";
+import React, { Suspense, useReducer, useMemo, useCallback } from "react";
+import { trackEvent, EVENTS } from "@/lib/analytics";
+import { db } from "@/lib/db";
 import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
@@ -10,24 +11,24 @@ import ReadingOutput from "@/components/ReadingOutput";
 import AppLayout from "@/components/AppLayout";
 import DecisionJournal from "@/components/DecisionJournal";
 import DailyNudge from "@/components/DailyNudge";
-import TransitCalendar from "@/components/TransitCalendar";
 import AuthScreen from "@/components/AuthScreen";
 import PaywallModal from "@/components/PaywallModal";
 import ProgressStepper from "@/components/ProgressStepper";
 import DashboardSkeleton from "@/components/DashboardSkeleton";
-import SettingsScreen from "@/components/SettingsScreen";
 import PushPermissionSheet from "@/components/PushPermissionSheet";
 import ConsentGate from "@/components/ConsentGate";
 import CrisisInterstitial from "@/components/CrisisInterstitial";
 import ViewErrorBoundary from "@/components/ViewErrorBoundary";
 import { subscribeToPush, dismissPushPrompt } from "@/lib/push";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { appReducer, initialState } from "@/context/appReducer";
 import { useProfileData } from "@/hooks/useProfileData";
 import { useReadingFlow } from "@/hooks/useReadingFlow";
 import { useFlowNavigation } from "@/hooks/useFlowNavigation";
 import type { View } from "@/context/appReducer";
+
+const TransitCalendar = React.lazy(() => import("@/components/TransitCalendar"));
+const SettingsScreen = React.lazy(() => import("@/components/SettingsScreen"));
 
 const FREE_READING_LIMIT = 3;
 const MAX_REGENERATIONS = 3;
@@ -56,7 +57,7 @@ const Index = () => {
   } = useFlowNavigation(state, dispatch, user, authLoading, subscriptionTier, monthlyReadingCount, handleSave);
 
   const { view, activeTab, questionData, readingData, profileBirthData, journalEntries,
-    regenerationCount, paywallOpen, pushSheetOpen, showConsentGate, showCrisis, pendingSave } = state;
+    regenerationCount, paywallOpen, pushSheetOpen, showConsentGate, showCrisis } = state;
 
   const dashboardLoading = user && !authLoading && (!state.profileLoaded || (state.profileLoaded && view === "home" && journalEntries.length === 0 && !profileBirthData));
   const remainingReadings = Math.max(0, FREE_READING_LIMIT - monthlyReadingCount);
@@ -97,10 +98,7 @@ const Index = () => {
 
   const handleConsentAccept = useCallback(async () => {
     if (user) {
-      await supabase.from("profiles").update({
-        consent_accepted: true,
-        consent_date: new Date().toISOString(),
-      }).eq("user_id", user.id);
+      await db.profiles.updateConsent(user.id);
     }
     dispatch({ type: "CONSENT_ACCEPTED" });
   }, [user, dispatch]);
@@ -109,14 +107,14 @@ const Index = () => {
     dispatch({ type: "SET_PUSH_SHEET", open: false });
     if (user) {
       const ok = await subscribeToPush(user.id);
-      if (ok) track("push_permission_granted");
+      if (ok) trackEvent(EVENTS.PUSH_PERMISSION_GRANTED);
     }
   }, [dispatch, user]);
 
   const handlePushDismiss = useCallback(() => {
     dispatch({ type: "SET_PUSH_SHEET", open: false });
     dismissPushPrompt();
-    track("push_permission_dismissed");
+    trackEvent(EVENTS.PUSH_PERMISSION_DISMISSED);
   }, [dispatch]);
 
   // ─── Error boundary resets ────────────────────────────────────────
@@ -221,12 +219,16 @@ const Index = () => {
               )}
               {activeTab === "calendar" && (
                 <ViewErrorBoundary fallbackView="calendar" onReset={resetToDashboard}>
-                  <TransitCalendar onRevisitDecision={handleRevisitDecision} />
+                  <Suspense fallback={<div className="min-h-[60vh]" />}>
+                    <TransitCalendar onRevisitDecision={handleRevisitDecision} />
+                  </Suspense>
                 </ViewErrorBoundary>
               )}
               {activeTab === "settings" && (
                 <ViewErrorBoundary fallbackView="settings" onReset={resetToDashboard}>
-                  <SettingsScreen />
+                  <Suspense fallback={<div className="min-h-[60vh]" />}>
+                    <SettingsScreen />
+                  </Suspense>
                 </ViewErrorBoundary>
               )}
             </AppLayout>
