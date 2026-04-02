@@ -19,6 +19,7 @@ import SettingsScreen from "@/components/SettingsScreen";
 import PushPermissionSheet from "@/components/PushPermissionSheet";
 import ConsentGate from "@/components/ConsentGate";
 import CrisisInterstitial from "@/components/CrisisInterstitial";
+import ViewErrorBoundary from "@/components/ViewErrorBoundary";
 import { subscribeToPush, dismissPushPrompt } from "@/lib/push";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,15 +39,12 @@ const Index = () => {
   const { user, loading: authLoading, subscriptionTier, monthlyReadingCount, refreshReadingCount } = useAuth();
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  // Load profile, readings, referral data
   useProfileData(user, i18n, dispatch);
 
-  // Reading generation, saving, outcome updates
   const { generateReading, handleSave, handleUpdateEntry } = useReadingFlow(
     state, dispatch, user, i18n.language, refreshReadingCount
   );
 
-  // View navigation, route sync, auth flow
   const {
     setView,
     handleQuestionSubmit,
@@ -73,6 +71,30 @@ const Index = () => {
     return true;
   }, [state.birthData, profileBirthData]);
 
+  // ─── Memoized handlers ────────────────────────────────────────────
+  const handleBack = useCallback(() => setView("home"), [setView]);
+  const handleBackToQuestion = useCallback(() => setView("question"), [setView]);
+  const handleReadingBack = useCallback(() => setView(readingBackTarget as View), [setView, readingBackTarget]);
+  const handleDeleteEntry = useCallback((id: string) => dispatch({ type: "DELETE_JOURNAL_ENTRY", id }), [dispatch]);
+  const handleClosePaywall = useCallback(() => dispatch({ type: "SET_PAYWALL", open: false }), [dispatch]);
+  const handleRestorePurchase = useCallback(() => dispatch({ type: "SET_TAB", tab: "settings" }), [dispatch]);
+  const handleTabChange = useCallback((tab: string) => dispatch({ type: "SET_TAB", tab }), [dispatch]);
+  const handleRevisitDecision = useCallback(() => dispatch({ type: "SET_TAB", tab: "journey" }), [dispatch]);
+  const handleUpgrade = useCallback(() => dispatch({ type: "SET_PAYWALL", open: true }), [dispatch]);
+  const handleCrisisReturn = useCallback(() => dispatch({ type: "CRISIS_RETURN" }), [dispatch]);
+
+  const handleSaveReading = useCallback(() => {
+    dispatch({ type: "RESET_REGENERATION" });
+    handleSave();
+  }, [dispatch, handleSave]);
+
+  const handleRegenerate = useMemo(() => {
+    if (regenerationCount >= MAX_REGENERATIONS) return undefined;
+    return (feedback?: string) => {
+      dispatch({ type: "REGENERATE", feedback: feedback || null });
+    };
+  }, [regenerationCount, dispatch]);
+
   const handleConsentAccept = useCallback(async () => {
     if (user) {
       await supabase.from("profiles").update({
@@ -83,10 +105,28 @@ const Index = () => {
     dispatch({ type: "CONSENT_ACCEPTED" });
   }, [user, dispatch]);
 
+  const handlePushAccept = useCallback(async () => {
+    dispatch({ type: "SET_PUSH_SHEET", open: false });
+    if (user) {
+      const ok = await subscribeToPush(user.id);
+      if (ok) track("push_permission_granted");
+    }
+  }, [dispatch, user]);
+
+  const handlePushDismiss = useCallback(() => {
+    dispatch({ type: "SET_PUSH_SHEET", open: false });
+    dismissPushPrompt();
+    track("push_permission_dismissed");
+  }, [dispatch]);
+
+  // ─── Error boundary resets ────────────────────────────────────────
+  const resetToQuestion = useCallback(() => dispatch({ type: "SET_VIEW", view: "question" }), [dispatch]);
+  const resetToDashboard = useCallback(() => dispatch({ type: "SET_VIEW", view: "dashboard" }), [dispatch]);
+
   return (
     <>
       {showConsentGate && <ConsentGate onAccept={handleConsentAccept} />}
-      {showCrisis && <CrisisInterstitial onReturn={() => dispatch({ type: "CRISIS_RETURN" })} />}
+      {showCrisis && <CrisisInterstitial onReturn={handleCrisisReturn} />}
       {["question", "auth", "birth", "loading", "reading"].includes(view) && (
         <ProgressStepper currentStep={
           view === "question" ? 1 :
@@ -97,7 +137,7 @@ const Index = () => {
       <AnimatePresence mode="wait">
         {view === "home" && !dashboardLoading && (
           <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={slideTransition}>
-            <HeroSection onStart={() => setView("question")} />
+            <HeroSection onStart={handleStartReading} />
           </motion.div>
         )}
         {view === "home" && dashboardLoading && (
@@ -107,91 +147,99 @@ const Index = () => {
         )}
         {view === "question" && (
           <motion.div key="question" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
-            <QuestionInput onSubmit={handleQuestionSubmit} onBack={() => setView("home")} />
+            <QuestionInput onSubmit={handleQuestionSubmit} onBack={handleBack} />
           </motion.div>
         )}
         {view === "auth" && (
           <motion.div key="auth" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
-            <AuthScreen onSuccess={handleAuthSuccess} onBack={() => setView("question")} />
+            <ViewErrorBoundary fallbackView="auth" onReset={resetToQuestion}>
+              <AuthScreen onSuccess={handleAuthSuccess} onBack={handleBackToQuestion} />
+            </ViewErrorBoundary>
           </motion.div>
         )}
         {view === "birth" && (
           <motion.div key="birth" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
-            <BirthCoordinates onSubmit={handleBirthSubmit} onBack={() => setView("question")} />
+            <ViewErrorBoundary fallbackView="birth" onReset={resetToQuestion}>
+              <BirthCoordinates onSubmit={handleBirthSubmit} onBack={handleBackToQuestion} />
+            </ViewErrorBoundary>
           </motion.div>
         )}
         {view === "loading" && (
           <motion.div key="loading" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
-            <ReadingLoader
-              onComplete={handleLoadingComplete}
-              onError={handleLoadingError}
-              generateReading={generateReading}
-            />
+            <ViewErrorBoundary fallbackView="loading" onReset={resetToQuestion}>
+              <ReadingLoader
+                onComplete={handleLoadingComplete}
+                onError={handleLoadingError}
+                generateReading={generateReading}
+              />
+            </ViewErrorBoundary>
           </motion.div>
         )}
         {view === "reading" && (
           <motion.div key="reading" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
-            <ReadingOutput
-              domain={questionData?.domain ?? "General"}
-              question={questionData?.question ?? ""}
-              reading={readingData}
-              onSave={() => { dispatch({ type: "RESET_REGENERATION" }); handleSave(); }}
-              onBack={() => setView(readingBackTarget as View)}
-              regenerationCount={regenerationCount}
-              birthTimeUnknown={birthTimeUnknown}
-              onRegenerate={regenerationCount < MAX_REGENERATIONS ? (feedback?: string) => {
-                dispatch({ type: "REGENERATE", feedback: feedback || null });
-              } : undefined}
-            />
+            <ViewErrorBoundary fallbackView="reading" onReset={resetToQuestion}>
+              <ReadingOutput
+                domain={questionData?.domain ?? "General"}
+                question={questionData?.question ?? ""}
+                reading={readingData}
+                onSave={handleSaveReading}
+                onBack={handleReadingBack}
+                regenerationCount={regenerationCount}
+                birthTimeUnknown={birthTimeUnknown}
+                onRegenerate={handleRegenerate}
+              />
+            </ViewErrorBoundary>
           </motion.div>
         )}
         {view === "dashboard" && (
           <motion.div key="dashboard" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={slideTransition}>
-            <AppLayout showNav activeTab={activeTab} onTabChange={(tab) => dispatch({ type: "SET_TAB", tab })} subscriptionTier={subscriptionTier}>
+            <AppLayout showNav activeTab={activeTab} onTabChange={handleTabChange} subscriptionTier={subscriptionTier}>
               {activeTab === "mirror" && (
-                <DailyNudge
-                  journalEntries={journalEntries}
-                  onNewReading={handleStartReading}
-                  onRevisitDecision={() => dispatch({ type: "SET_TAB", tab: "journey" })}
-                  subscriptionTier={subscriptionTier}
-                  remainingReadings={remainingReadings}
-                  onUpgrade={() => dispatch({ type: "SET_PAYWALL", open: true })}
-                  hasBirthTime={!!profileBirthData?.birth_time}
-                />
+                <ViewErrorBoundary fallbackView="mirror" onReset={resetToDashboard}>
+                  <DailyNudge
+                    journalEntries={journalEntries}
+                    onNewReading={handleStartReading}
+                    onRevisitDecision={handleRevisitDecision}
+                    subscriptionTier={subscriptionTier}
+                    remainingReadings={remainingReadings}
+                    onUpgrade={handleUpgrade}
+                    hasBirthTime={!!profileBirthData?.birth_time}
+                    loading={!state.profileLoaded}
+                  />
+                </ViewErrorBoundary>
               )}
               {activeTab === "journey" && (
-                <DecisionJournal
-                  entries={journalEntries}
-                  onUpdateEntry={handleUpdateEntry}
-                  onDeleteEntry={(id) => dispatch({ type: "DELETE_JOURNAL_ENTRY", id })}
-                  onStartReading={handleStartReading}
-                />
+                <ViewErrorBoundary fallbackView="journey" onReset={resetToDashboard}>
+                  <DecisionJournal
+                    entries={journalEntries}
+                    onUpdateEntry={handleUpdateEntry}
+                    onDeleteEntry={handleDeleteEntry}
+                    onStartReading={handleStartReading}
+                    loading={!state.profileLoaded}
+                  />
+                </ViewErrorBoundary>
               )}
               {activeTab === "calendar" && (
-                <TransitCalendar onRevisitDecision={() => dispatch({ type: "SET_TAB", tab: "journey" })} />
+                <ViewErrorBoundary fallbackView="calendar" onReset={resetToDashboard}>
+                  <TransitCalendar onRevisitDecision={handleRevisitDecision} />
+                </ViewErrorBoundary>
               )}
-              {activeTab === "settings" && <SettingsScreen />}
+              {activeTab === "settings" && (
+                <ViewErrorBoundary fallbackView="settings" onReset={resetToDashboard}>
+                  <SettingsScreen />
+                </ViewErrorBoundary>
+              )}
             </AppLayout>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <PaywallModal open={paywallOpen} onClose={() => dispatch({ type: "SET_PAYWALL", open: false })} onRestorePurchase={() => dispatch({ type: "SET_TAB", tab: "settings" })} />
+      <PaywallModal open={paywallOpen} onClose={handleClosePaywall} onRestorePurchase={handleRestorePurchase} />
 
       <PushPermissionSheet
         open={pushSheetOpen}
-        onAccept={async () => {
-          dispatch({ type: "SET_PUSH_SHEET", open: false });
-          if (user) {
-            const ok = await subscribeToPush(user.id);
-            if (ok) track("push_permission_granted");
-          }
-        }}
-        onDismiss={() => {
-          dispatch({ type: "SET_PUSH_SHEET", open: false });
-          dismissPushPrompt();
-          track("push_permission_dismissed");
-        }}
+        onAccept={handlePushAccept}
+        onDismiss={handlePushDismiss}
       />
     </>
   );
