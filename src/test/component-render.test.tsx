@@ -287,7 +287,7 @@ describe("DecisionJournal", () => {
 
   it("renders time context for entries", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // At least some time context should be rendered (Today, Yesterday, X days ago)
     const timeTexts = document.querySelectorAll("[class*='muted-foreground']");
