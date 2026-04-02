@@ -70,6 +70,30 @@ vi.mock("@/hooks/useAuth", () => ({
   useAuth: () => ({ user: mockUser, loading: false, subscriptionTier: "free", monthlyReadingCount: 0, refreshReadingCount: vi.fn(), signOut: vi.fn() }),
 }));
 vi.mock("@/hooks/useOgImage", () => ({ default: vi.fn() }));
+vi.mock("@/lib/db", () => ({
+  db: {
+    profiles: { get: vi.fn(() => Promise.resolve(null)), upsert: vi.fn(() => Promise.resolve()) },
+    readings: { save: vi.fn(() => Promise.resolve()), list: vi.fn(() => Promise.resolve([])) },
+    outcomes: { save: vi.fn(() => Promise.resolve()), list: vi.fn(() => Promise.resolve([])) },
+    referrals: { get: vi.fn(() => Promise.resolve(null)) },
+    checkins: { save: vi.fn(() => Promise.resolve()), list: vi.fn(() => Promise.resolve([])) },
+  },
+}));
+vi.mock("@/lib/push", () => ({
+  isPushActive: vi.fn(() => Promise.resolve(false)),
+  subscribeToPush: vi.fn(() => Promise.resolve()),
+  unsubscribeFromPush: vi.fn(() => Promise.resolve()),
+}));
+vi.mock("@/lib/stripe", () => ({
+  STRIPE_TIERS: {
+    mirror: { name: "Mirror", price: "$8/mo", features: ["feature1"] },
+    mirror_pro: { name: "Pro", price: "$18/mo", features: ["feature1", "feature2"] },
+    practitioner: { name: "Practitioner", price: "$38/mo", features: ["feature1", "feature2", "feature3"] },
+  },
+}));
+vi.mock("@/lib/reading", () => ({
+  CONFIDENCE_MESSAGES: { high: "High confidence", medium: "Medium confidence", low: "Low confidence" },
+}));
 vi.mock("@/lib/cardGenerator", () => ({
   generateThirdWayCard: vi.fn(() => Promise.resolve(new Blob(["img"], { type: "image/png" }))),
 }));
