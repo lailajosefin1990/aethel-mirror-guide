@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type JournalEntry } from "./DecisionJournal";
-import { track } from "@/lib/posthog";
-import { supabase } from "@/integrations/supabase/client";
+import { trackEvent, EVENTS } from "@/lib/analytics";
+import { db } from "@/lib/db";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 

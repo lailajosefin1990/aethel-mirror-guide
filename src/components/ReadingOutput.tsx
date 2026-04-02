@@ -8,7 +8,7 @@ import { generateThirdWayCard } from "@/lib/cardGenerator";
 import { useAuth } from "@/hooks/useAuth";
 import useOgImage from "@/hooks/useOgImage";
 import { toast } from "sonner";
-import { track } from "@/lib/posthog";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 
 interface ReadingOutputProps {
   domain: string;
