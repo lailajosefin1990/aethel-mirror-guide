@@ -6,7 +6,7 @@ import { track } from "@/lib/posthog";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Navigate } from "react-router-dom";
 
-const ADMIN_EMAILS = ["admin@aethelmirror.com"];
+const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || "").split(",").filter(Boolean);
 
 interface Stats {
   totalReadings: number;
