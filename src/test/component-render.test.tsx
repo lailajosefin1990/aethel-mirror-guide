@@ -276,7 +276,7 @@ describe("DecisionJournal", () => {
 
   it("shows domain filter pills when entries span multiple domains", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // Filter pills render for domains present in entries
     expect(screen.getByText("All")).toBeInTheDocument();
