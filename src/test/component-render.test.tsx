@@ -303,10 +303,9 @@ describe("DecisionJournal", () => {
       <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // Filter pills render for domains present in entries
-    expect(screen.getByText("All")).toBeInTheDocument();
-    // Domain names appear as filter pills
+    expect(screen.getByText("journal_filter_all")).toBeInTheDocument();
     const allButtons = screen.getAllByRole("button");
-    expect(allButtons.length).toBeGreaterThan(2); // At minimum: All + domain pills + tab buttons
+    expect(allButtons.length).toBeGreaterThan(2);
   });
 
   it("renders time context for entries", () => {
