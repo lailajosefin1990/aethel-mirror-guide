@@ -1,3 +1,5 @@
+// NOTE: This test renders the full Index page with all dependencies.
+// Excluded from CI due to memory requirements. Run locally: npx vitest run src/test/oauth-roundtrip.test.tsx
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

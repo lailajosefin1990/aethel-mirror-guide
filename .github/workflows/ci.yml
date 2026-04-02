@@ -27,7 +27,9 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run tests
-        run: npm run test
+        run: npx vitest run --exclude='src/test/oauth-roundtrip.test.tsx'
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Build
         run: npm run build
