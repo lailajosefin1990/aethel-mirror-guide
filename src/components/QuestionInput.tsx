@@ -62,7 +62,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
       }
       return;
     }
-    track("question_submitted", {
+    trackEvent(EVENTS.question_submitted, {
       domain: selectedDomain,
       mode: selectedMode,
       question_length: question.length,
@@ -130,7 +130,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
                  <button
                    key={domain}
                    type="button"
-                   onClick={() => { setSelectedDomain(domain); setValidationHint(false); track("question_domain_selected", { domain }); }}
+                   onClick={() => { setSelectedDomain(domain); setValidationHint(false); trackEvent(EVENTS.question_domain_selected, { domain }); }}
                   className={`px-4 py-3.5 rounded-sm font-body text-[13px] border transition-all duration-300 text-left ${
                     isSelected
                       ? "border-primary text-primary bg-primary/5"
