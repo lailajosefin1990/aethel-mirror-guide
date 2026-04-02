@@ -33,7 +33,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   try {
     return await navigator.serviceWorker.register("/sw.js");
   } catch (err) {
-    console.error("SW registration failed:", err);
+    Sentry.captureException(err);
     return null;
   }
 }

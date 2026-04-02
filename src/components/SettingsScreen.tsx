@@ -151,7 +151,7 @@ const SettingsScreen = () => {
         if (error) throw error;
         trackEvent(EVENTS.LANGUAGE_CHANGED, { language: lang });
       } catch (err) {
-        console.error("Language change failed:", err);
+        Sentry.captureException(err);
         toast.error("Couldn't update language. Please try again.");
       }
     }

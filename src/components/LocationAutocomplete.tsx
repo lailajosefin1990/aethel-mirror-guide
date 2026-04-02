@@ -175,7 +175,7 @@ const LocationAutocomplete = ({ value, onChange, className }: LocationAutocomple
       setValue(name, false);
       onChange({ name, lat, lng, timezone });
     } catch (err) {
-      console.error("Geocoding error:", err);
+      Sentry.captureException(err);
     }
   };
 

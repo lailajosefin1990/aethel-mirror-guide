@@ -47,7 +47,7 @@ export function useGoogleMaps() {
       })
       .catch((err) => {
         clearTimeout(timeout);
-        console.warn("Google Maps failed to load:", err);
+        Sentry.captureException(err);
         hasFailed = true;
         setError(true);
       });

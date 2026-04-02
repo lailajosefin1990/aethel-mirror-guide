@@ -102,7 +102,7 @@ const Admin = () => {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Export error:", err);
+      Sentry.captureException(err);
     } finally {
       setExporting(false);
     }

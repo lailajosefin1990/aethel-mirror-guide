@@ -20,7 +20,7 @@ class ViewErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error) {
-    console.error(`[ViewErrorBoundary] ${this.props.fallbackView || "unknown"} crashed:`, error);
+    Sentry.captureException(error, { tags: { view: this.props.fallbackView || "unknown" } });
   }
 
   handleReset = () => {

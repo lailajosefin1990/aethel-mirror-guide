@@ -124,7 +124,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         });
         trackEvent(EVENTS.WEEKLY_CHECKIN_STORED, { rating: label });
       } catch (err) {
-        console.error("Failed to store check-in:", err);
+        Sentry.captureException(err);
       }
     }
   };

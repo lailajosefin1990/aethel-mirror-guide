@@ -38,7 +38,7 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
         }
       }
     } catch (err) {
-      console.error("Checkout error:", err);
+      Sentry.captureException(err);
     } finally {
       setLoading(null);
     }

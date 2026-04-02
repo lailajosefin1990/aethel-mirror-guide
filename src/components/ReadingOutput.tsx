@@ -91,7 +91,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
       setCardUrl(url);
       setShareOpen(true);
     } catch (err) {
-      console.error("Card generation error:", err);
+      Sentry.captureException(err);
       toast.error("Failed to generate card");
     } finally {
       setGenerating(false);

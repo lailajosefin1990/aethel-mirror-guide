@@ -68,7 +68,7 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
           setTransits(data.transits as TransitEntry[]);
         }
       } catch (err) {
-        console.error("Calendar load error:", err);
+        Sentry.captureException(err);
       }
       setLoading(false);
     };

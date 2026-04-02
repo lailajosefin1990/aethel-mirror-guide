@@ -159,7 +159,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
       setOutcomeNote("");
       setConsentToShare(false);
     } catch (err) {
-      console.error("Outcome logging failed:", err);
+      Sentry.captureException(err);
       toast.error("Couldn't save your outcome. Please try again.");
     }
   };
