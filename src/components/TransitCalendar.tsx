@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { track } from "@/lib/posthog";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface TransitEntry {
   id: string;
@@ -44,6 +45,7 @@ function getMoonEmoji(moonPhase: string): string {
 }
 
 const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [transits, setTransits] = useState<TransitEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,7 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
 
   useEffect(() => {
     if (!user) return;
-    track("calendar_viewed");
+    trackEvent(EVENTS.CALENDAR_VIEWED);
 
     const load = async () => {
       try {
@@ -74,7 +76,7 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
 
   const scrollToCard = useCallback((dateStr: string) => {
     setSelectedDate(dateStr);
-    track("calendar_day_tapped", {
+    trackEvent(EVENTS.CALENDAR_DAY_TAPPED, {
       date: dateStr,
       traffic_light: transits.find((t) => t.date === dateStr)?.traffic_light,
     });
@@ -84,14 +86,12 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
     }
   }, [transits]);
 
-  const sectionLabel = "font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3";
-
   if (loading) {
     return (
       <section className="pt-8 pb-4 flex flex-col items-center justify-center min-h-[60vh]">
         <Loader2 className="w-6 h-6 text-primary animate-spin mb-4" />
-        <p className="font-body text-[14px] text-muted-foreground mb-1">Generating your calendar...</p>
-        <p className="font-body text-[12px] text-muted-foreground/60">This may take a moment on first load.</p>
+        <p className="font-body text-[14px] text-muted-foreground mb-1">{t("transit_loading")}</p>
+        <p className="font-body text-[12px] text-muted-foreground/60">{t("transit_loading_detail")}</p>
       </section>
     );
   }
@@ -99,8 +99,8 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
   if (transits.length === 0) {
     return (
       <section className="pt-8 pb-4 text-center py-12">
-        <p className="font-display text-[16px] text-foreground/70 mb-2">Your transits are being calculated</p>
-        <p className="font-body text-[13px] text-muted-foreground">Check back soon — your personalised transit data will appear here.</p>
+        <p className="font-display text-[16px] text-foreground/70 mb-2">{t("transit_empty_title")}</p>
+        <p className="font-body text-[13px] text-muted-foreground">{t("transit_empty_detail")}</p>
       </section>
     );
   }
@@ -115,10 +115,10 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
         className="mb-6"
       >
         <p className="font-display text-[14px] tracking-[0.35em] text-primary mb-2">
-          Y O U R &nbsp; 3 0 &nbsp; D A Y S
+          {t("transit_heading")}
         </p>
         <p className="font-body text-[13px] text-muted-foreground">
-          Personalised to your chart.
+          {t("transit_subtitle")}
         </p>
       </motion.div>
 
@@ -134,14 +134,14 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
           className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {transits.map((t) => {
-            const d = new Date(t.date + "T00:00:00");
-            const isToday = t.date === todayStr;
-            const isSelected = t.date === selectedDate;
+          {transits.map((tr) => {
+            const d = new Date(tr.date + "T00:00:00");
+            const isToday = tr.date === todayStr;
+            const isSelected = tr.date === selectedDate;
             return (
               <button
-                key={t.date}
-                onClick={() => scrollToCard(t.date)}
+                key={tr.date}
+                onClick={() => scrollToCard(tr.date)}
                 className={`shrink-0 flex flex-col items-center gap-1 rounded-md px-2.5 py-2 transition-all duration-200 ${
                   isToday
                     ? "bg-primary/15 border border-primary/30 min-w-[48px]"
@@ -160,7 +160,7 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
                 >
                   {d.getDate()}
                 </span>
-                <span className={`w-2 h-2 rounded-full ${TRAFFIC_DOTS[t.traffic_light]}`} />
+                <span className={`w-2 h-2 rounded-full ${TRAFFIC_DOTS[tr.traffic_light]}`} />
               </button>
             );
           })}
@@ -169,15 +169,15 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
 
       {/* Day cards */}
       <div className="space-y-4 pb-20">
-        {transits.map((t, i) => {
-          const d = new Date(t.date + "T00:00:00");
-          const isToday = t.date === todayStr;
-          const moonEmoji = getMoonEmoji(t.moon_phase);
+        {transits.map((tr, i) => {
+          const d = new Date(tr.date + "T00:00:00");
+          const isToday = tr.date === todayStr;
+          const moonEmoji = getMoonEmoji(tr.moon_phase);
 
           return (
             <motion.div
-              key={t.date}
-              ref={(el) => { cardRefs.current[t.date] = el; }}
+              key={tr.date}
+              ref={(el) => { cardRefs.current[tr.date] = el; }}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: Math.min(i * 0.03, 0.5) }}
@@ -196,45 +196,45 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
                 </p>
                 {isToday && (
                   <span className="px-2 py-0.5 rounded-sm bg-primary/15 font-body text-[10px] uppercase tracking-wider text-primary">
-                    Today
+                    {t("transit_today")}
                   </span>
                 )}
               </div>
 
               {/* Moon phase */}
               <span className="inline-block px-2.5 py-1 rounded-full bg-muted font-body text-[11px] text-muted-foreground mb-3">
-                {moonEmoji} {t.moon_phase}
+                {moonEmoji} {tr.moon_phase}
               </span>
 
               {/* Traffic light + headline */}
               <div className="flex items-start gap-2.5 mb-2">
                 <span
-                  className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${TRAFFIC_DOTS[t.traffic_light]}`}
+                  className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${TRAFFIC_DOTS[tr.traffic_light]}`}
                 />
                 <p className="font-display text-[15px] leading-[1.5] text-card-foreground font-medium">
-                  {t.transit_headline}
+                  {tr.transit_headline}
                 </p>
               </div>
 
               {/* Detail */}
               <p className="font-body text-[13px] leading-[1.6] text-muted-foreground mb-3 pl-5">
-                {t.transit_detail}
+                {tr.transit_detail}
               </p>
 
               {/* Linked decision */}
-              {t.linked_domain && (
+              {tr.linked_domain && (
                 <button
                   onClick={() => {
-                    track("calendar_decision_link_tapped");
-                    onRevisitDecision?.(t.linked_domain!);
+                    trackEvent(EVENTS.CALENDAR_DECISION_LINK_TAPPED);
+                    onRevisitDecision?.(tr.linked_domain!);
                   }}
                   className="flex items-center gap-2 pl-5"
                 >
                   <span className="px-2 py-0.5 rounded-sm bg-primary/15 font-body text-[11px] uppercase tracking-wider text-primary">
-                    Relevant to: {t.linked_domain}
+                    {t("transit_relevant", { domain: tr.linked_domain })}
                   </span>
                   <span className="font-body text-[12px] text-primary hover:text-primary/80 transition-colors">
-                    Revisit this decision →
+                    {t("transit_revisit")}
                   </span>
                 </button>
               )}

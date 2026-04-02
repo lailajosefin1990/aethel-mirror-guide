@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { track } from "@/lib/posthog";
+import { trackEvent, EVENTS } from "@/lib/analytics";
+import { useTranslation } from "react-i18next";
 
 interface EvidenceData {
   total_outcomes: number;
@@ -14,12 +15,14 @@ interface EvidenceData {
 }
 
 const Evidence = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [data, setData] = useState<EvidenceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notReady, setNotReady] = useState(false);
 
   useEffect(() => {
+    document.title = "Evidence — Aethel Mirror";
     const load = async () => {
       try {
         const { data: result, error } = await supabase.functions.invoke("evidence");
@@ -28,7 +31,7 @@ const Evidence = () => {
           setNotReady(true);
         } else {
           setData(result as EvidenceData);
-          track("evidence_page_viewed", { total_outcomes_shown: result.total_outcomes });
+          trackEvent(EVENTS.EVIDENCE_PAGE_VIEWED, { total_outcomes_shown: result.total_outcomes });
         }
       } catch {
         setNotReady(true);
@@ -41,7 +44,7 @@ const Evidence = () => {
   if (loading) {
     return (
       <section className="min-h-screen flex items-center justify-center">
-        <p className="font-body text-[14px] text-muted-foreground">Loading...</p>
+        <p className="font-body text-[14px] text-muted-foreground">{t("evidence_loading")}</p>
       </section>
     );
   }
@@ -50,15 +53,15 @@ const Evidence = () => {
     return (
       <section className="min-h-screen flex items-center justify-center px-5">
         <div className="text-center">
-          <p className="font-display text-[18px] text-foreground mb-4">Not enough data yet</p>
+          <p className="font-display text-[18px] text-foreground mb-4">{t("evidence_not_enough")}</p>
           <p className="font-body text-[14px] text-muted-foreground mb-8">
-            We need more logged outcomes before we can share results. Come back soon.
+            {t("evidence_not_enough_detail")}
           </p>
           <button
             onClick={() => navigate("/")}
             className="h-[48px] px-8 rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] hover:brightness-110 transition-all duration-300"
           >
-            Get my Third Way →
+            {t("hero_get_third_way")}
           </button>
         </div>
       </section>
@@ -79,10 +82,10 @@ const Evidence = () => {
           className="text-center mb-12"
         >
           <p className="font-display text-[14px] tracking-[0.4em] text-primary mb-4">
-            D O E S &nbsp; I T &nbsp; W O R K ?
+            {t("evidence_heading")}
           </p>
           <p className="font-body text-[14px] text-muted-foreground leading-relaxed">
-            We track outcomes. Here's what the mirror has shown.
+            {t("evidence_subtitle")}
           </p>
         </motion.div>
 
@@ -97,9 +100,9 @@ const Evidence = () => {
             <p className="font-display text-[32px] text-foreground font-semibold mb-1">
               {data.followed_rate.yes + data.followed_rate.partially}%
             </p>
-            <p className="font-body text-[13px] text-foreground/80 mb-2">acted on their Third Way</p>
+            <p className="font-body text-[13px] text-foreground/80 mb-2">{t("evidence_acted")}</p>
             <p className="font-body text-[11px] text-muted-foreground">
-              based on {data.total_outcomes} logged outcomes
+              {t("evidence_based_on", { count: data.total_outcomes })}
             </p>
           </motion.div>
 
@@ -112,9 +115,9 @@ const Evidence = () => {
             <p className="font-display text-[32px] text-foreground font-semibold mb-1">
               {data.total_outcomes}
             </p>
-            <p className="font-body text-[13px] text-foreground/80 mb-2">decisions logged</p>
+            <p className="font-body text-[13px] text-foreground/80 mb-2">{t("evidence_decisions_logged")}</p>
             <p className="font-body text-[11px] text-muted-foreground">
-              across all domains
+              {t("evidence_across_domains")}
             </p>
           </motion.div>
 
@@ -127,9 +130,9 @@ const Evidence = () => {
             <p className="font-display text-[32px] text-foreground font-semibold mb-1">
               {data.positive_rate}%
             </p>
-            <p className="font-body text-[13px] text-foreground/80 mb-2">reported a positive outcome</p>
+            <p className="font-body text-[13px] text-foreground/80 mb-2">{t("evidence_positive")}</p>
             <p className="font-body text-[11px] text-muted-foreground">
-              based on {data.total_outcomes} logged outcomes
+              {t("evidence_based_on", { count: data.total_outcomes })}
             </p>
           </motion.div>
         </div>
@@ -143,7 +146,7 @@ const Evidence = () => {
             className="mb-12"
           >
             <p className="font-body text-[11px] uppercase tracking-[0.35em] text-muted-foreground mb-5">
-              B Y &nbsp; D O M A I N
+              {t("evidence_by_domain")}
             </p>
             <div className="space-y-4">
               {domainEntries
@@ -177,7 +180,7 @@ const Evidence = () => {
             className="mb-12"
           >
             <p className="font-body text-[11px] uppercase tracking-[0.35em] text-muted-foreground mb-5">
-              F R O M &nbsp; T H E &nbsp; M I R R O R
+              {t("evidence_from_mirror")}
             </p>
             <div className="space-y-4">
               {data.recent_quotes.map((quote, i) => (
@@ -208,7 +211,7 @@ const Evidence = () => {
             onClick={() => navigate("/")}
             className="w-full max-w-[320px] h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300"
           >
-            Get your Third Way →
+            {t("evidence_cta")}
           </button>
         </motion.div>
       </div>

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
-import { track } from "@/lib/posthog";
+import { trackEvent, EVENTS } from "@/lib/analytics";
+import { useTranslation } from "react-i18next";
 
 interface CrisisInterstitialProps {
   onReturn: () => void;
@@ -17,6 +18,7 @@ const CRISIS_RESOURCES: Record<string, { name: string; phone?: string; text?: st
   ],
   ES: [
     { name: "Teléfono de la Esperanza", phone: "717 003 717", url: "https://www.telefonodelaesperanza.org" },
+    { name: "Línea de Atención a la Conducta Suicida", phone: "024", url: "https://www.sanidad.gob.es" },
   ],
   SE: [
     { name: "Mind Självmordslinjen", phone: "90101", url: "https://mind.se" },
@@ -34,6 +36,7 @@ const CRISIS_RESOURCES: Record<string, { name: string; phone?: string; text?: st
 };
 
 const CrisisInterstitial = ({ onReturn }: CrisisInterstitialProps) => {
+  const { t } = useTranslation();
   const locale = navigator.language?.split("-")[1]?.toUpperCase() || "DEFAULT";
   const localResources = CRISIS_RESOURCES[locale] || [];
   const defaultResources = CRISIS_RESOURCES.DEFAULT;
@@ -51,11 +54,9 @@ const CrisisInterstitial = ({ onReturn }: CrisisInterstitialProps) => {
       >
         <Heart className="w-8 h-8 text-primary mx-auto mb-6" />
 
-        <h2 className="font-display text-2xl text-foreground mb-4">We see you.</h2>
+        <h2 className="font-display text-2xl text-foreground mb-4">{t("crisis_heading")}</h2>
         <p className="font-body text-sm text-muted-foreground mb-8 leading-relaxed max-w-sm mx-auto">
-          What you're sitting with sounds like more than a decision.
-          Aethel Mirror is a reflective tool — for what you're describing,
-          you deserve real human support.
+          {t("crisis_body")}
         </p>
 
         <div className="space-y-3 mb-8">
@@ -65,7 +66,7 @@ const CrisisInterstitial = ({ onReturn }: CrisisInterstitialProps) => {
               href={r.phone ? `tel:${r.phone.replace(/\s/g, "")}` : r.url}
               target={r.phone ? undefined : "_blank"}
               rel="noopener"
-              onClick={() => track("crisis_resource_tapped", { resource: r.name, type: r.phone ? "phone" : "text_or_web" })}
+              onClick={() => trackEvent(EVENTS.CRISIS_RESOURCE_TAPPED, { resource: r.name, type: r.phone ? "phone" : "text_or_web" })}
               className="block w-full p-4 rounded-md border border-border hover:border-primary/40 transition-colors text-left"
             >
               <p className="font-display text-[16px] text-foreground">{r.name}</p>
@@ -76,14 +77,14 @@ const CrisisInterstitial = ({ onReturn }: CrisisInterstitialProps) => {
         </div>
 
         <p className="font-body text-xs text-muted-foreground mb-6 italic">
-          Your mirror will be here when you're ready.
+          {t("crisis_footer")}
         </p>
 
         <button
           onClick={onReturn}
           className="w-full h-[48px] rounded-sm border border-border text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300"
         >
-          Return to mirror
+          {t("crisis_return")}
         </button>
       </motion.div>
     </div>
