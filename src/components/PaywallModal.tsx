@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import * as Sentry from "@sentry/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
