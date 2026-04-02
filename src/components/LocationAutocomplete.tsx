@@ -45,7 +45,7 @@ async function fetchTimezone(lat: number, lng: number): Promise<string> {
         return data.timeZoneId;
       }
     } catch (err) {
-      console.warn("Google Timezone API failed, falling back to tz-lookup:", err);
+      Sentry.captureException(err);
     }
   }
 
