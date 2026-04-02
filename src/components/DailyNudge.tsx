@@ -251,6 +251,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
           className="bg-card border border-border rounded-md p-5 mb-5"
+          aria-label="Open decision to revisit"
         >
           <p className={sectionLabel}>
             {t("nudge_open_decision")}
