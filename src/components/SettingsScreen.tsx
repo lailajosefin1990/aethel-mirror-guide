@@ -505,7 +505,7 @@ const SettingsScreen = () => {
                   } catch {
                     toast.error("Couldn't delete account. Please contact support.");
                   }
-                }
+                }}
                 className="flex-1 py-2.5 rounded-sm bg-destructive text-destructive-foreground font-body text-[13px] hover:brightness-110 transition-all">
                 Delete
               </button>
