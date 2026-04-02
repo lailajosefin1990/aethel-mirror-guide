@@ -267,7 +267,7 @@ describe("DecisionJournal", () => {
 
   it("renders open journal entries in default tab", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={sampleEntries} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} /></MemoryRouter>
     );
     // Default tab shows open entries (no outcome)
     expect(screen.getByText(/Take the bold path/)).toBeInTheDocument();
