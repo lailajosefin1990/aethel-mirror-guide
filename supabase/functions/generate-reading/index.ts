@@ -125,6 +125,72 @@ serve(async (req) => {
     const { domain, question, mode, birthDate, birthPlace, birthTime, birthLat, birthLng, birthTimezone, language, regenerationFeedback } = body;
     if (!domain || !question) throw new Error("Missing domain or question");
 
+    // ─── Fetch user memory context ───
+    let memoryContext = "";
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      try {
+        const userClient = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_ANON_KEY")!,
+          { global: { headers: { Authorization: authHeader } } }
+        );
+        const token = authHeader.replace("Bearer ", "");
+        const { data: claimsData } = await userClient.auth.getClaims(token);
+        if (claimsData?.claims?.sub) {
+          const adminClient = createClient(
+            Deno.env.get("SUPABASE_URL")!,
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+          );
+          const { data: memories } = await adminClient
+            .from("user_memory")
+            .select("memory_type, memory_value, frequency")
+            .eq("user_id", claimsData.claims.sub as string)
+            .order("frequency", { ascending: false })
+            .limit(10);
+
+          if (memories && memories.length > 0) {
+            const themes = memories.filter((m: any) => m.memory_type === "theme").map((m: any) => m.memory_value).join(", ");
+            const patterns = memories.filter((m: any) => m.memory_type === "pattern").map((m: any) => m.memory_value).join("; ");
+            const fears = memories.filter((m: any) => m.memory_type === "recurring_fear").map((m: any) => m.memory_value).join(", ");
+            const parts = [];
+            if (themes) parts.push(`Recurring themes: ${themes}`);
+            if (patterns) parts.push(`Observed patterns: ${patterns}`);
+            if (fears) parts.push(`Recurring fears: ${fears}`);
+            if (parts.length > 0) {
+              memoryContext = `\n\nMEMORY CONTEXT: ${parts.join(". ")}. Use this context to make the reading feel like a continuation, not a cold start. Reference their journey if relevant.`;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Memory fetch failed:", err);
+      }
+    }
+
+    // ─── Calculate numerology / Gene Keys / Destiny Matrix from birth date ───
+    let calculatorContext = "";
+    if (birthDate && birthDate !== "unknown") {
+      try {
+        let parsedDate: Date;
+        const dateParts = birthDate.split("/");
+        if (dateParts.length === 3) {
+          parsedDate = new Date(parseInt(dateParts[2], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[0], 10));
+        } else {
+          parsedDate = new Date(birthDate);
+        }
+        if (!isNaN(parsedDate.getTime())) {
+          const lp = lifePathNumber(parsedDate);
+          const py = personalYear(parsedDate);
+          const sg = sunGateFromDate(parsedDate);
+          const gk = GENE_KEYS[sg] || GENE_KEYS[1];
+          const dm = destinyMatrixNumbers(parsedDate);
+          calculatorContext = `\nNumerology life path: ${lp}\nPersonal year: ${py}\nSun gate: ${sg}\nGene Key: Shadow of ${gk.shadow}, Gift of ${gk.gift}, Siddhi of ${gk.siddhi}\nDestiny Matrix: personality ${dm.personality}, soul ${dm.soul}, purpose ${dm.purpose}`;
+        }
+      } catch {
+        // Calculator failed — continue without it
+      }
+    }
+
     // ─── Crisis detection pre-check ───
     try {
       const crisisResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
