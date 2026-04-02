@@ -250,7 +250,7 @@ describe("ReadingOutput", () => {
 describe("DecisionJournal", () => {
   it("renders loading skeleton when loading=true", () => {
     render(
-      <MemoryRouter><DecisionJournal entries={[]} onUpdateEntry={vi.fn()} loading={true} /></MemoryRouter>
+      <MemoryRouter><DecisionJournal entries={[]} onUpdateEntry={vi.fn()} onStartReading={vi.fn()} loading={true} /></MemoryRouter>
     );
     const pulseElements = document.querySelectorAll(".animate-pulse");
     expect(pulseElements.length).toBeGreaterThan(0);
