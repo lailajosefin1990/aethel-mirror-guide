@@ -26,7 +26,7 @@ const AppLayout = ({ children, showNav = false, activeTab = "mirror", onTabChang
     <div className="min-h-screen bg-background text-foreground">
       {isOffline && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-primary/90 text-primary-foreground text-center py-2 font-body text-[13px]">
-          You're offline — your mirror will reconnect when you're back.
+          {t("offline_banner")}
         </div>
       )}
       <main className={`max-w-app mx-auto px-5 ${showNav ? "pb-20" : ""}`}>

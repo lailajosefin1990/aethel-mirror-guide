@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { type JournalEntry } from "./DecisionJournal";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { db } from "@/lib/db";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface DailyNudgeProps {
   journalEntries: JournalEntry[];
@@ -55,6 +57,7 @@ const weeklyOptions = [
 ];
 
 const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscriptionTier = "free", remainingReadings = 1, onUpgrade, hasBirthTime = false, loading }: DailyNudgeProps) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const today = new Date();
   const isSunday = today.getDay() === 0;
@@ -113,7 +116,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
 
     if (user) {
       try {
-        await supabase.from("weekly_checkins").insert({
+        await db.weeklyCheckins.save({
           user_id: user.id,
           rating: label,
           checked_in_at: new Date().toISOString(),
@@ -160,7 +163,6 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
     );
   }
 
-
   return (
     <section className="pt-8 pb-4">
       {/* Date */}
@@ -192,7 +194,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
             exit={{ opacity: 0 }}
             className="font-display text-[14px] text-primary/70 mb-4 italic"
           >
-            Your mirror has been thinking about you.
+            {t("nudge_welcome")}
           </motion.p>
         )}
       </AnimatePresence>
@@ -205,7 +207,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         onClick={() => { trackEvent(EVENTS.new_reading_from_top); onNewReading(); }}
         className="w-full p-4 rounded-md border-2 border-dashed border-primary/30 hover:border-primary/60 text-primary font-body text-[14px] transition-all duration-200 mb-6"
       >
-        + New reading
+        {t("nudge_new_reading_btn")}
       </motion.button>
 
       {/* Main nudge card */}
@@ -217,8 +219,8 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
       >
         <p className={sectionLabel}>
           {isPersonalised
-            ? "Y O U R &nbsp; T R A N S I T"
-            : "T O D A Y ' S &nbsp; G E N E R A L &nbsp; E N E R G Y"}
+            ? t("nudge_your_transit")
+            : t("nudge_todays_energy")}
         </p>
         <p className="font-display text-[16px] leading-[1.6] text-card-foreground mb-5">
           {todayNudge.transit}
@@ -226,7 +228,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
 
         <div className="border-t border-primary/30 pt-4">
           <p className={sectionLabel}>
-            L I T T L E &nbsp; N U D G E :
+            {t("nudge_little_nudge")}
           </p>
           <p className="font-display text-[15px] leading-[1.6] italic text-card-foreground/90">
             {todayNudge.nudge}
@@ -235,7 +237,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
 
         {!isPersonalised && !hasBirthTime && (
           <p className="font-body text-[11px] text-muted-foreground italic mt-2">
-            Add your birth time in Settings for personalised transits.
+            {t("nudge_birth_hint")}
           </p>
         )}
       </motion.div>
@@ -249,7 +251,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
           className="bg-card border border-border rounded-md p-5 mb-5"
         >
           <p className={sectionLabel}>
-            O P E N &nbsp; D E C I S I O N
+            {t("nudge_open_decision")}
           </p>
           <p className="font-display text-[15px] leading-[1.6] text-card-foreground line-clamp-2 mb-3">
             {latestOpen.thirdWay}
@@ -258,7 +260,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
             onClick={onRevisitDecision}
             className="font-body text-[13px] text-primary hover:text-primary/80 transition-colors duration-300"
           >
-            Revisit this →
+            {t("nudge_revisit")}
           </button>
         </motion.div>
       )}
@@ -272,15 +274,15 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
           className="bg-card border border-border rounded-md p-5 mb-5"
         >
           <p className={sectionLabel}>
-            W E E K L Y &nbsp; C H E C K - I N
+            {t("nudge_weekly_checkin")}
           </p>
           <p className="font-display text-[15px] leading-[1.6] text-card-foreground mb-4">
-            How did this week's decisions land?
+            {t("nudge_weekly_question")}
           </p>
 
           {weeklyLogged ? (
             <p className="font-body text-[13px] text-primary">
-              Logged: {weeklyRating}. Thank you. ✦
+              {t("nudge_weekly_logged", { rating: weeklyRating })}
             </p>
           ) : (
             <div className="flex gap-2">
@@ -309,14 +311,14 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         >
           <p className="font-body text-[13px] text-muted-foreground text-center">
             {remainingReadings > 0
-              ? `${remainingReadings} reading remaining this month`
-              : "No readings remaining this month"}
+              ? t("nudge_remaining_one", { count: remainingReadings })
+              : t("nudge_remaining_zero")}
             {" · "}
             <button onClick={onUpgrade} className="text-primary hover:text-primary/80 transition-colors">
-              Upgrade for unlimited readings
+              {t("nudge_upgrade")}
             </button>
           </p>
-          <p className="font-body text-[11px] text-muted-foreground mt-0.5 text-center">Resets monthly</p>
+          <p className="font-body text-[11px] text-muted-foreground mt-0.5 text-center">{t("nudge_resets_monthly")}</p>
         </motion.div>
       )}
 
@@ -331,7 +333,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
           onClick={() => { trackEvent(EVENTS.new_reading_from_nudge); onNewReading(); }}
           className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300"
         >
-          New reading →
+          {t("nudge_new_reading")} →
         </button>
       </motion.div>
     </section>
