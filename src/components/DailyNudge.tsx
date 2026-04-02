@@ -14,6 +14,7 @@ interface DailyNudgeProps {
   remainingReadings?: number;
   onUpgrade?: () => void;
   hasBirthTime?: boolean;
+  loading?: boolean;
 }
 
 const nudges = [
