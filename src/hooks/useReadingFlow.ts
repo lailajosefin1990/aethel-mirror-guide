@@ -125,6 +125,19 @@ export function useReadingFlow(
 
       dispatch({ type: "SAVE_COMPLETE", tab: "journey" });
 
+      // Send welcome email on first reading
+      if (state.journalEntries.length === 0 && user.email) {
+        supabase.functions
+          .invoke("send-welcome-email", {
+            body: {
+              user_id: user.id,
+              email: user.email,
+              thirdWay: readingData.third_way,
+            },
+          })
+          .catch(() => {});
+      }
+
       if (
         !hasShownPushPrompt &&
         "PushManager" in window &&

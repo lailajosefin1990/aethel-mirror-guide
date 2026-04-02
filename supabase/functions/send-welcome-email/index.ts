@@ -3,32 +3,12 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const FROM_EMAIL = "hello@aethelmirror.com";
 const APP_URL = "https://aethelmirror.com";
-
-async function sendEmail(to: string, subject: string, html: string) {
-  const apiKey = Deno.env.get("RESEND_API_KEY");
-  if (!apiKey) {
-    throw new Error("RESEND_API_KEY is not configured");
-  }
-
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from: `Aethel Mirror <${FROM_EMAIL}>`, to: [to], subject, html }),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Resend error: ${res.status} ${err}`);
-  }
-  return res.json();
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -36,13 +16,21 @@ serve(async (req) => {
   }
 
   try {
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    if (!RESEND_API_KEY) {
+      console.warn("[WELCOME-EMAIL] RESEND_API_KEY not set — email not sent");
+      return new Response(JSON.stringify({ skipped: true, reason: "no_api_key" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       { auth: { persistSession: false } }
     );
 
-    const { user_id, email } = await req.json();
+    const { user_id, email, name, thirdWay } = await req.json();
     if (!user_id || !email) throw new Error("Missing user_id or email");
 
     // Check duplicate
@@ -66,16 +54,24 @@ serve(async (req) => {
   </p>
 
   <h1 style="font-size: 24px; font-weight: 400; line-height: 1.3; margin-bottom: 24px;">
-    Welcome to Aethel Mirror.
+    Welcome${name ? `, ${name}` : ""}.
   </h1>
 
-  <p style="font-size: 16px; line-height: 1.7; margin-bottom: 32px; color: #F5F0E8cc;">
-    You now have a mirror that reads six systems together — astrology, Human Design, numerology, Gene Keys, and more — and gives you one clear next move called the Third Way. Not a horoscope. Not a personality test. A specific action you can take in the next 48 hours for the decision you're sitting with right now.
+  <p style="font-size: 16px; line-height: 1.7; margin-bottom: 24px; color: #F5F0E8cc;">
+    Your mirror is anchored. From now on, every decision gets clearer.
   </p>
 
+  <p style="font-size: 16px; line-height: 1.7; margin-bottom: 32px; color: #F5F0E8cc;">
+    You now have a mirror that reads six systems together — astrology, Human Design, numerology, Gene Keys, and more — and gives you one clear next move called the Third Way.
+  </p>
+
+  ${thirdWay ? `<div style="border-left: 2px solid #C9A84C; padding-left: 16px; margin: 24px 0;">
+    <p style="font-size: 16px; line-height: 1.6; font-style: italic; color: #F5F0E8cc;">${thirdWay}</p>
+  </div>` : ""}
+
   <div style="text-align: center; margin-bottom: 40px;">
-    <a href="${APP_URL}" style="display: inline-block; padding: 14px 32px; background-color: #C9A84C; color: #0A0E1A; text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: 0.05em;">
-      Start your first reading →
+    <a href="${APP_URL}" style="display: inline-block; padding: 14px 32px; background-color: #C9A84C; color: #0A0E1A; text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: 0.05em; border-radius: 4px;">
+      Open your mirror →
     </a>
   </div>
 
@@ -84,7 +80,24 @@ serve(async (req) => {
   </p>
 </div>`;
 
-    await sendEmail(email, "Your mirror is ready.", html);
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: `Aethel Mirror <${FROM_EMAIL}>`,
+        to: [email],
+        subject: "Your mirror is ready ✦",
+        html,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Resend error: ${res.status} ${err}`);
+    }
 
     await supabase.from("email_log").insert({
       user_id,

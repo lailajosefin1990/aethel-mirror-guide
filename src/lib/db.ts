@@ -1,5 +1,20 @@
 import { supabase } from "@/integrations/supabase/client";
 
+// Required Supabase tables (managed via migrations):
+// - profiles: user_id, birth_date, birth_time, birth_place, birth_lat, birth_lng, birth_timezone, consent_accepted, preferred_language, referral_code, subscription_tier
+// - readings: user_id, domain, question, mode, reading_text, third_way_text, journal_prompt, confidence_level
+// - outcomes: reading_id, user_id, followed, outcome_text, consent_to_share, outcome_sentiment, quality_score, time_to_outcome
+// - referrals: referrer_user_id, referred_user_id, referred_email, status, reward_granted
+// - weekly_checkins: user_id, rating, checked_in_at
+//   RLS: user can only INSERT/SELECT own rows
+// - push_subscriptions: user_id, endpoint, p256dh, auth, is_active
+//   RLS: user can INSERT/UPDATE/SELECT own rows; service_role full access
+// - user_memory: user_id, memory_type, memory_value, frequency, last_seen_at
+//   RLS: user can SELECT own rows; service_role full access
+// - transit_cache: user_id, date, transit_headline, transit_detail, traffic_light, moon_phase
+// - email_log: user_id, email_type, sent_at
+// - notification_log: user_id, type, reading_id, sent_at
+
 export const db = {
   profiles: {
     get: (userId: string) =>
