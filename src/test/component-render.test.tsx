@@ -636,10 +636,9 @@ describe("TransitCalendar", () => {
     render(
       <MemoryRouter><TransitCalendar /></MemoryRouter>
     );
-    // Initially shows loading state, then switches to empty state after fetch
     await waitFor(() => {
       const text = document.body.textContent || "";
-      expect(text).toMatch(/Generating your calendar|transits are being calculated/i);
+      expect(text).toMatch(/transit_empty_title|transit_loading/i);
     });
   });
 });
