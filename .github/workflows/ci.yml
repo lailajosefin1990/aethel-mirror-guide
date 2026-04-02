@@ -26,8 +26,8 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
-      - name: Run tests
-        run: npx vitest run --exclude='src/test/oauth-roundtrip.test.tsx'
+      - name: Run tests with coverage
+        run: npx vitest run --coverage --exclude='src/test/oauth-roundtrip.test.tsx'
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
