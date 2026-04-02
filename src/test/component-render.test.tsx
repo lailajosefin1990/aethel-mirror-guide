@@ -480,7 +480,7 @@ describe("CrisisInterstitial", () => {
     const onReturn = vi.fn();
     const user = userEvent.setup();
     render(<CrisisInterstitial onReturn={onReturn} />);
-    const returnBtn = screen.getByText("Return to mirror");
+    const returnBtn = screen.getByText("crisis_return");
     await user.click(returnBtn);
     expect(onReturn).toHaveBeenCalledTimes(1);
   });
