@@ -1,5 +1,6 @@
 import { ReactNode, useState, useEffect } from "react";
 import BottomNav from "./BottomNav";
+import { useTranslation } from "react-i18next";
 
 interface AppLayoutProps {
   children: ReactNode;
