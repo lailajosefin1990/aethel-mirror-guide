@@ -33,7 +33,7 @@ export function useGoogleMaps() {
 
     const timeout = setTimeout(() => {
       if (!isLoaded) {
-        console.warn("Google Maps load timed out — using fallback geocoding");
+        Sentry.captureMessage("Google Maps load timed out — using fallback geocoding", "warning");
         hasFailed = true;
         setError(true);
       }
