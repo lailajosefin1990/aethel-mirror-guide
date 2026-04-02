@@ -195,9 +195,14 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
 
         {/* Mirror disclaimer */}
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.45 }}
-          className="font-body text-[12px] italic text-foreground/50 text-center mb-4">
+          className="font-body text-[12px] italic text-foreground/50 text-center mb-2">
           {t("reading_mirror_disclaimer")}
         </motion.p>
+
+        {/* Health disclaimer */}
+        <p className="font-body text-[11px] text-muted-foreground/50 text-center mb-4">
+          {t("reading_health_disclaimer")}
+        </p>
 
         {/* Fallback banner */}
         {reading.is_fallback && (

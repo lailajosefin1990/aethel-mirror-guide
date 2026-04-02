@@ -5,6 +5,7 @@ import { trackEvent, EVENTS } from "@/lib/analytics";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 export interface JournalEntry {
   id: string;
@@ -19,7 +20,7 @@ export interface JournalEntry {
   };
 }
 
-interface DecisionJournalProps {
+export interface DecisionJournalProps {
   entries: JournalEntry[];
   onUpdateEntry: (id: string, outcome: JournalEntry["outcome"], consentToShare?: boolean) => void;
   onDeleteEntry?: (id: string) => void;
@@ -69,7 +70,8 @@ const SAMPLE_ENTRIES: JournalEntry[] = [
 ];
 
 const FollowedBadge = ({ followed }: { followed: string }) => {
-  const label = followed === "yes" ? "Followed" : followed === "partially" ? "Partially followed" : "Didn't follow";
+  const { t } = useTranslation();
+  const label = followed === "yes" ? t("journal_followed") : followed === "partially" ? t("journal_partially") : t("journal_not_followed");
   return (
     <span className="inline-block px-2 py-0.5 rounded-sm bg-primary/10 font-body text-[11px] text-primary">
       {label}
@@ -78,6 +80,7 @@ const FollowedBadge = ({ followed }: { followed: string }) => {
 };
 
 const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, onStartReading, loading }: DecisionJournalProps) => {
+  const { t } = useTranslation();
   const entries = propEntries.length > 0 ? propEntries : SAMPLE_ENTRIES;
   const [tab, setTab] = useState<"open" | "closed">("open");
   const [filterDomain, setFilterDomain] = useState<string | null>(null);
@@ -90,7 +93,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
 
   const patternInsight = useMemo(() => {
     if (closedEntries.length < 3) {
-      return "Keep logging outcomes — after a few more, your patterns will emerge here.";
+      return t("journal_pattern_hint");
     }
 
     const closedByDomain: Record<string, number> = {};
@@ -111,7 +114,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
     }
 
     return `You tend to act quickly on ${topClosedDomain} readings and sit longer with ${topOpenDomain} ones.`;
-  }, [closedEntries, openEntries]);
+  }, [closedEntries, openEntries, t]);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [sheetEntryId, setSheetEntryId] = useState<string | null>(null);
   const [followedChoice, setFollowedChoice] = useState<"yes" | "no" | "partially" | null>(null);
@@ -164,7 +167,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
     <section className="pt-8 pb-4">
       {/* Header */}
       <p className="font-display text-[14px] tracking-[0.35em] text-primary mb-8">
-        Y O U R &nbsp; M I R R O R &nbsp; J O U R N E Y
+        {t("journal_heading")}
       </p>
 
       {/* Domain filter pills */}
@@ -173,7 +176,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
           <button onClick={() => setFilterDomain(null)}
             className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-body border transition-colors ${
               !filterDomain ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-primary/40"
-            }`}>All</button>
+            }`}>{t("journal_filter_all")}</button>
           {domains.map((d) => (
             <button key={d} onClick={() => setFilterDomain(d)}
               className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-body border transition-colors ${
@@ -185,19 +188,19 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
 
       {/* Tabs */}
       <div className="flex gap-1 mb-8">
-        {(["open", "closed"] as const).map((t) => (
+        {(["open", "closed"] as const).map((t_tab) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={t_tab}
+            onClick={() => setTab(t_tab)}
             className={`flex-1 py-2.5 rounded-sm font-body text-[13px] border transition-all duration-300 ${
-              tab === t
+              tab === t_tab
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-transparent text-foreground/60 border-border"
             }`}
           >
-            {t === "open" ? "Open" : "Closed"}
+            {t_tab === "open" ? t("journal_tab_open") : t("journal_tab_closed")}
             <span className="ml-1.5 text-[11px] opacity-60">
-              ({t === "open" ? openEntries.length : closedEntries.length})
+              ({t_tab === "open" ? openEntries.length : closedEntries.length})
             </span>
           </button>
         ))}
@@ -214,20 +217,20 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
               className="text-center py-16"
             >
               <p className="font-body text-[14px] text-muted-foreground mb-6">
-                No open decisions yet.
+                {t("journal_empty_open")}
               </p>
               <button
                 onClick={onStartReading}
                 className="h-[48px] px-8 rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] hover:brightness-110 transition-all duration-300"
               >
-                Start your first reading →
+                {t("journal_start_reading")}
               </button>
             </motion.div>
           )}
 
           {displayedEntries.length === 0 && tab === "closed" && (
             <motion.div key="empty-closed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-              <p className="font-body text-[14px] text-muted-foreground">No closed decisions yet.</p>
+              <p className="font-body text-[14px] text-muted-foreground">{t("journal_empty_closed")}</p>
             </motion.div>
           )}
 
@@ -250,7 +253,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
                   <div className="flex items-center gap-2">
                     {entry.createdAt && !entry.outcome && (() => {
                       const daysSince = Math.floor((Date.now() - new Date(entry.createdAt).getTime()) / (1000 * 60 * 60 * 24));
-                      const timeText = daysSince === 0 ? "Today" : daysSince === 1 ? "Yesterday" : `${daysSince}d ago`;
+                      const timeText = daysSince === 0 ? t("journal_today") : daysSince === 1 ? t("journal_yesterday") : t("journal_days_ago", { count: daysSince });
                       return <span className="font-body text-[11px] text-muted-foreground">{timeText}</span>;
                     })()}
                     <span className="font-body text-[11px] text-muted-foreground">
@@ -270,13 +273,13 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
                               onClick={() => { setMenuOpen(null); setSheetEntryId(entry.id); setFollowedChoice(entry.outcome!.followed); setOutcomeNote(entry.outcome!.note); }}
                               className="w-full text-left px-3 py-2 font-body text-[13px] text-foreground hover:bg-muted transition-colors"
                             >
-                              Edit outcome
+                              {t("journal_edit_outcome")}
                             </button>
                           )}
                           <button
                             onClick={async () => {
                               setMenuOpen(null);
-                              if (!confirm("Remove this entry?")) return;
+                              if (!confirm(t("journal_remove_confirm"))) return;
                               try {
                                 const { error } = await supabase.from("readings").delete().eq("id", entry.id);
                                 if (error) throw error;
@@ -289,7 +292,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
                             }}
                             className="w-full text-left px-3 py-2 font-body text-[13px] text-destructive hover:bg-muted transition-colors"
                           >
-                            Delete
+                            {t("journal_delete")}
                           </button>
                         </div>
                       )}
@@ -322,7 +325,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
                     onClick={() => { trackEvent(EVENTS.OUTCOME_LOG_OPENED, { reading_id: entry.id }); setSheetEntryId(entry.id); }}
                     className="mt-3 font-body text-[13px] text-primary hover:text-primary/80 transition-colors duration-300"
                   >
-                    Log what happened →
+                    {t("journal_log_outcome")}
                   </button>
                 )}
               </motion.div>
@@ -340,7 +343,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
           className="mt-8 bg-card border border-border rounded-md p-5"
         >
           <p className="font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3">
-            P A T T E R N
+            {t("journal_pattern_label")}
           </p>
           <p className="font-display text-[15px] leading-[1.6] text-card-foreground">
             {patternInsight}
@@ -373,7 +376,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
               </button>
 
               <p className="font-display text-[18px] text-card-foreground mb-5">
-                Did you follow the Third Way?
+                {t("journal_did_follow")}
               </p>
 
               <div className="flex gap-2 mb-5">
@@ -395,7 +398,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
               <textarea
                 value={outcomeNote}
                 onChange={(e) => setOutcomeNote(e.target.value)}
-                placeholder="What happened?"
+                placeholder={t("journal_outcome_placeholder")}
                 rows={3}
                 className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-3"
               />
@@ -408,7 +411,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
                   className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary shrink-0"
                 />
                 <span className="font-body text-[12px] text-muted-foreground leading-relaxed">
-                  Share this anonymously to help others trust their mirror
+                  {t("journal_consent_share")}
                 </span>
               </label>
 
@@ -417,7 +420,7 @@ const DecisionJournal = ({ entries: propEntries, onUpdateEntry, onDeleteEntry, o
                 disabled={!followedChoice}
                 className="w-full h-[48px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] hover:brightness-110 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Save outcome
+                {t("journal_save_outcome")}
               </button>
             </motion.div>
           </motion.div>

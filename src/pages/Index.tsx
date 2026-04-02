@@ -1,4 +1,4 @@
-import React, { Suspense, useReducer, useMemo, useCallback } from "react";
+import React, { Suspense, useReducer, useMemo, useCallback, useEffect } from "react";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { db } from "@/lib/db";
 import { useTranslation } from "react-i18next";
@@ -58,6 +58,19 @@ const Index = () => {
 
   const { view, activeTab, questionData, readingData, profileBirthData, journalEntries,
     regenerationCount, paywallOpen, pushSheetOpen, showConsentGate, showCrisis } = state;
+
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      home: "Aethel Mirror — Decision Clarity Through Six Ancient Systems",
+      question: "Ask Your Question | Aethel Mirror",
+      auth: "Sign In | Aethel Mirror",
+      birth: "Your Coordinates | Aethel Mirror",
+      loading: "Generating Your Reading | Aethel Mirror",
+      reading: "Your Third Way | Aethel Mirror",
+      dashboard: "Your Mirror | Aethel Mirror",
+    };
+    document.title = titles[view] || "Aethel Mirror";
+  }, [view]);
 
   const dashboardLoading = user && !authLoading && (!state.profileLoaded || (state.profileLoaded && view === "home" && journalEntries.length === 0 && !profileBirthData));
   const remainingReadings = Math.max(0, FREE_READING_LIMIT - monthlyReadingCount);
