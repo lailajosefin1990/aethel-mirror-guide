@@ -4,6 +4,7 @@ import { X, MoreHorizontal } from "lucide-react";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface JournalEntry {
   id: string;
