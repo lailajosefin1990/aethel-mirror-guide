@@ -710,6 +710,21 @@ describe("DrumRoller", () => {
     expect(screen.getByText("03")).toBeInTheDocument();
     expect(screen.getByText("04")).toBeInTheDocument();
     expect(screen.getByText("05")).toBeInTheDocument();
+  });
+
+  it("highlights the selected value", () => {
+    render(<DrumRoller items={items} value={3} onChange={vi.fn()} />);
+    const selected = screen.getByText("03");
+    expect(selected.className).toContain("font-display");
+  });
+
+  it("renders with correct selected styling", () => {
+    render(<DrumRoller items={items} value={1} onChange={vi.fn()} />);
+    const item1 = screen.getByText("01");
+    expect(item1.className).toContain("font-display");
+    const item5 = screen.getByText("05");
+    expect(item5.className).toContain("font-body");
+  });
 });
 
 // ─── SettingsScreen ───────────────────────────────────────────────
@@ -738,12 +753,6 @@ describe("SettingsScreen", () => {
 // ─── PractitionerPortal ───────────────────────────────────────────
 import PractitionerPortal from "@/pages/PractitionerPortal";
 
-vi.mock("@/lib/posthog", () => ({
-  track: vi.fn(),
-  identifyUser: vi.fn(),
-  resetUser: vi.fn(),
-}));
-
 describe("PractitionerPortal", () => {
   it("renders without crashing for non-practitioner users", () => {
     render(<MemoryRouter><PractitionerPortal /></MemoryRouter>);
@@ -754,20 +763,5 @@ describe("PractitionerPortal", () => {
   it("renders page structure", () => {
     render(<MemoryRouter><PractitionerPortal /></MemoryRouter>);
     expect(document.body.textContent?.length).toBeGreaterThan(0);
-  });
-});
-
-  it("highlights the selected value", () => {
-    render(<DrumRoller items={items} value={3} onChange={vi.fn()} />);
-    const selected = screen.getByText("03");
-    expect(selected.className).toContain("font-display");
-  });
-
-  it("renders with correct selected styling", () => {
-    render(<DrumRoller items={items} value={1} onChange={vi.fn()} />);
-    const item1 = screen.getByText("01");
-    expect(item1.className).toContain("font-display");
-    const item5 = screen.getByText("05");
-    expect(item5.className).toContain("font-body");
   });
 });
