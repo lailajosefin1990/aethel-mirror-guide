@@ -84,7 +84,7 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
   }
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center px-5">
+    <section className="min-h-screen flex flex-col items-center justify-center px-5" aria-label="Loading your reading">
       <motion.p
         animate={{ opacity: [0.4, 1, 0.4] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
