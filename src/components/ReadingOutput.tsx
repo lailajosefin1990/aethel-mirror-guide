@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import * as Sentry from "@sentry/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown, Download, Link2, Share2, X } from "lucide-react";
 import VoicePlayer from "./VoicePlayer";
