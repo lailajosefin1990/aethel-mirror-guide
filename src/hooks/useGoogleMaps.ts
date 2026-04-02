@@ -16,7 +16,7 @@ export function useGoogleMaps() {
 
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
-      console.warn("VITE_GOOGLE_MAPS_API_KEY not set — using fallback geocoding");
+      Sentry.captureMessage("VITE_GOOGLE_MAPS_API_KEY not set — using fallback geocoding", "warning");
       hasFailed = true;
       setError(true);
       return;
