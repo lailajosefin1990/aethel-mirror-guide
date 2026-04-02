@@ -25,6 +25,12 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/ask" element={<Index />} />
+            <Route path="/auth" element={<Index />} />
+            <Route path="/birth" element={<Index />} />
+            <Route path="/reading" element={<Index />} />
+            <Route path="/mirror" element={<Index />} />
+            <Route path="/mirror/:tab" element={<Index />} />
             <Route path="/practitioner" element={<PractitionerPortal />} />
             <Route path="/evidence" element={<Evidence />} />
             <Route path="/privacy" element={<Privacy />} />
