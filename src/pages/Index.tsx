@@ -19,6 +19,7 @@ import PushPermissionSheet from "@/components/PushPermissionSheet";
 import ConsentGate from "@/components/ConsentGate";
 import CrisisInterstitial from "@/components/CrisisInterstitial";
 import ViewErrorBoundary from "@/components/ViewErrorBoundary";
+import TransitPreview from "@/components/TransitPreview";
 import { subscribeToPush, dismissPushPrompt } from "@/lib/push";
 import { useAuth } from "@/hooks/useAuth";
 import { appReducer, initialState } from "@/context/appReducer";
@@ -169,6 +170,9 @@ const Index = () => {
         )}
         {view === "question" && (
           <motion.div key="question" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
+            {state.profileBirthData?.birth_date && (
+              <TransitPreview birthDate={new Date(state.profileBirthData.birth_date)} />
+            )}
             <QuestionInput onSubmit={handleQuestionSubmit} onBack={handleBack} />
           </motion.div>
         )}
@@ -188,6 +192,7 @@ const Index = () => {
         )}
         {view === "loading" && (
           <motion.div key="loading" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
+            <TransitPreview birthDate={state.profileBirthData?.birth_date ? new Date(state.profileBirthData.birth_date) : null} />
             <ViewErrorBoundary fallbackView="loading" onReset={resetToQuestion}>
               <ReadingLoader
                 onComplete={handleLoadingComplete}
