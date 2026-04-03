@@ -1,4 +1,4 @@
-import { useCallback, useEffect, Dispatch } from "react";
+import { useCallback, useEffect, useRef, Dispatch } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 import { db } from "@/lib/db";
@@ -42,40 +42,53 @@ export function useFlowNavigation(
   const location = useLocation();
   const { view, profileBirthData, profileLoaded, questionData, pendingSave, journalEntries } = state;
 
-  // Helper to dispatch view + navigate
+  // Guard against URL ↔ view sync infinite loop
+  const isSyncing = useRef(false);
+
+  // Helper to dispatch view + navigate — uses refs to avoid stale closures
   const setView = useCallback(
     (v: View) => {
+      isSyncing.current = true;
       dispatch({ type: "SET_VIEW", view: v });
       const path = VIEW_TO_PATH[v];
-      if (path && location.pathname !== path) {
+      if (path) {
         navigate(path, { replace: true });
       }
+      // Clear the sync guard after the current microtask
+      Promise.resolve().then(() => { isSyncing.current = false; });
     },
-    [dispatch, navigate, location.pathname]
+    [dispatch, navigate]
   );
 
-  // Sync URL → view on mount / popstate
+  // Sync URL → view on mount / popstate (browser back/forward)
   useEffect(() => {
+    if (isSyncing.current) return;
     const pathname = location.pathname;
     // Handle /mirror/:tab
     if (pathname.startsWith("/mirror")) {
       const tab = pathname.split("/")[2];
-      if (tab) {
+      if (tab && tab !== state.activeTab) {
         dispatch({ type: "SET_TAB", tab });
       }
       if (view !== "dashboard") {
+        isSyncing.current = true;
         dispatch({ type: "SET_VIEW", view: "dashboard" });
+        Promise.resolve().then(() => { isSyncing.current = false; });
       }
       return;
     }
     const mapped = PATH_TO_VIEW[pathname];
     if (mapped && mapped !== view) {
+      isSyncing.current = true;
       dispatch({ type: "SET_VIEW", view: mapped });
+      Promise.resolve().then(() => { isSyncing.current = false; });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  // Sync view → URL when view changes from reducer
+  // Sync view → URL when view changes from reducer (e.g. proceedAfterAuth)
   useEffect(() => {
+    if (isSyncing.current) return;
     let targetPath = VIEW_TO_PATH[view];
     if (view === "dashboard") {
       const tab = state.activeTab;
@@ -84,9 +97,12 @@ export function useFlowNavigation(
       }
     }
     if (targetPath && location.pathname !== targetPath) {
+      isSyncing.current = true;
       navigate(targetPath, { replace: true });
+      Promise.resolve().then(() => { isSyncing.current = false; });
     }
-  }, [view, state.activeTab, navigate, location.pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, state.activeTab]);
 
   const proceedAfterAuth = useCallback(() => {
     if (subscriptionTier === "free" && monthlyReadingCount >= FREE_READING_LIMIT) {
