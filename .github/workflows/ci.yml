@@ -33,3 +33,44 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  navigation-guard:
+    name: Navigation Sync Guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            navigation:
+              - 'src/hooks/useFlowNavigation.ts'
+              - 'src/pages/Index.tsx'
+              - 'src/context/appReducer.ts'
+              - 'src/App.tsx'
+
+      - uses: actions/setup-node@v4
+        if: steps.changes.outputs.navigation == 'true'
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.changes.outputs.navigation == 'true'
+        run: npm install --legacy-peer-deps
+
+      - name: Run navigation sync guard tests
+        if: steps.changes.outputs.navigation == 'true'
+        run: |
+          echo "🔒 Navigation files changed — running sync guard + hook integration tests"
+          npx vitest run src/test/flow-navigation-sync.test.tsx src/test/hooks-integration.test.tsx --reporter=verbose
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Skip — no navigation files changed
+        if: steps.changes.outputs.navigation != 'true'
+        run: echo "✅ No navigation files changed — guard tests skipped"
