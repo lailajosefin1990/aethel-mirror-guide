@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { track } from "@/lib/posthog";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import DrumRoller from "@/components/DrumRoller";
@@ -109,7 +109,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
     const date = new Date(year, month - 1, effectiveDay);
     const timeStr = unknownTime ? null : `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 
-    track("birth_data_submitted", { has_birth_time: !unknownTime });
+    trackEvent(EVENTS.BIRTH_DATA_SUBMITTED, { has_birth_time: !unknownTime });
 
     onSubmit({
       date,

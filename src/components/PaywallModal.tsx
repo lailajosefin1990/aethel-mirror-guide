@@ -5,7 +5,7 @@ import { X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_TIERS } from "@/lib/stripe";
-import { track } from "@/lib/posthog";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 
 interface PaywallModalProps {
   open: boolean;
@@ -18,12 +18,12 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (open) track("paywall_shown", { trigger: "fourth_reading" });
+    if (open) trackEvent(EVENTS.PAYWALL_SHOWN, { trigger: "fourth_reading" });
   }, [open]);
 
   const handleCheckout = async (priceId: string, tierName: string) => {
     setLoading(tierName);
-    track("paywall_upgrade_clicked", { tier: tierName });
+    trackEvent(EVENTS.PAYWALL_UPGRADE_CLICKED, { tier: tierName });
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: { priceId },
@@ -134,7 +134,7 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
             </div>
 
             <button
-              onClick={() => { track("paywall_dismissed"); onClose(); }}
+              onClick={() => { trackEvent(EVENTS.PAYWALL_DISMISSED); onClose(); }}
               className="w-full font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors mb-3"
             >
               Maybe later
