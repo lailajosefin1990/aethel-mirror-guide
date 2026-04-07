@@ -78,6 +78,14 @@ export function useFlowNavigation(
       return;
     }
     const mapped = PATH_TO_VIEW[pathname];
+    // Guard: if refreshing on /reading without question data, redirect to /ask
+    if (mapped === "reading" && !questionData) {
+      isSyncing.current = true;
+      dispatch({ type: "SET_VIEW", view: "question" });
+      navigate("/ask", { replace: true });
+      Promise.resolve().then(() => { isSyncing.current = false; });
+      return;
+    }
     if (mapped && mapped !== view) {
       isSyncing.current = true;
       dispatch({ type: "SET_VIEW", view: mapped });
@@ -129,10 +137,17 @@ export function useFlowNavigation(
     }
   }, [subscriptionTier, monthlyReadingCount, profileBirthData, dispatch, setView]);
 
-  // Auto-navigate to dashboard when user is loaded with readings
+  // Auto-navigate to dashboard when user is loaded with readings (initial load only)
+  const isInitialLoad = useRef(true);
+
   useEffect(() => {
+    if (!isInitialLoad.current) return;
     if (user && !authLoading && profileLoaded && view === "home" && journalEntries.length > 0) {
+      isInitialLoad.current = false;
       setView("dashboard");
+    }
+    if (!authLoading) {
+      isInitialLoad.current = false;
     }
   }, [user, authLoading, profileLoaded, journalEntries.length, view, setView]);
 

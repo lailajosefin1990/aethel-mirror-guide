@@ -80,7 +80,7 @@ const Index = () => {
     }
   }, [view]);
 
-  const dashboardLoading = user && !authLoading && (!state.profileLoaded || (state.profileLoaded && view === "home" && journalEntries.length === 0 && !profileBirthData));
+  
   const remainingReadings = Math.max(0, FREE_READING_LIMIT - monthlyReadingCount);
 
   const readingBackTarget = useMemo(() => {
@@ -158,12 +158,12 @@ const Index = () => {
       )}
       <div ref={mainRef} id="main-content" tabIndex={-1} className="outline-none">
       <AnimatePresence mode="wait">
-        {view === "home" && !dashboardLoading && (
+        {view === "home" && !user && !authLoading && (
           <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={slideTransition}>
             <HeroSection onStart={handleStartReading} />
           </motion.div>
         )}
-        {view === "home" && dashboardLoading && (
+        {view === "home" && (user || authLoading) && (
           <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={slideTransition}>
             <DashboardSkeleton />
           </motion.div>
