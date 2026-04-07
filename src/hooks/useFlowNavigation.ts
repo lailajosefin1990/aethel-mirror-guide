@@ -129,10 +129,17 @@ export function useFlowNavigation(
     }
   }, [subscriptionTier, monthlyReadingCount, profileBirthData, dispatch, setView]);
 
-  // Auto-navigate to dashboard when user is loaded with readings
+  // Auto-navigate to dashboard when user is loaded with readings (initial load only)
+  const isInitialLoad = useRef(true);
+
   useEffect(() => {
+    if (!isInitialLoad.current) return;
     if (user && !authLoading && profileLoaded && view === "home" && journalEntries.length > 0) {
+      isInitialLoad.current = false;
       setView("dashboard");
+    }
+    if (!authLoading) {
+      isInitialLoad.current = false;
     }
   }, [user, authLoading, profileLoaded, journalEntries.length, view, setView]);
 
