@@ -142,7 +142,7 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
 
             <button
               onClick={() => {
-                track("restore_purchase_tapped");
+                trackEvent(EVENTS.RESTORE_PURCHASE_TAPPED);
                 onClose();
                 onRestorePurchase?.();
               }}
@@ -153,7 +153,7 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
 
             <button
               onClick={() => {
-                track("paywall_practitioner_clicked");
+                trackEvent(EVENTS.PAYWALL_PRACTITIONER_CLICKED);
                 onClose();
                 navigate("/practitioner");
               }}
