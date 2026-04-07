@@ -62,7 +62,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
   };
 
   const inputClass =
-    "w-full h-12 px-4 rounded-sm bg-[hsl(228_30%_8%/0.5)] text-foreground font-body text-[14px] border border-foreground/15 placeholder:text-foreground/30 focus:outline-none focus:border-primary transition-colors duration-300";
+    "w-full h-12 px-4 rounded-sm bg-background/50 text-foreground font-body text-[14px] border border-foreground/15 placeholder:text-foreground/30 focus:outline-none focus:border-sea-depths transition-colors duration-300";
 
   if (showEmailConfirmation) {
     return (
@@ -190,7 +190,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           {isSignUp ? t("auth_already_account") : t("auth_no_account")}{" "}
           <button
             onClick={() => { setIsSignUp(!isSignUp); setError(""); }}
-            className="text-destructive font-medium hover:text-primary transition-colors"
+            className="text-terracotta font-medium hover:text-primary transition-colors"
           >
             {isSignUp ? t("auth_sign_in") : t("auth_sign_up")}
           </button>
