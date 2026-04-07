@@ -198,9 +198,10 @@ describe("useFlowNavigation — URL→view sync on mount", () => {
     expect(result.current.state.view).toBe("birth");
   });
 
-  it("mounting on /reading sets view to reading", () => {
+  it("mounting on /reading without question data redirects to question", () => {
+    // Fix 3: /reading with no questionData in state redirects to /ask
     const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/reading") });
-    expect(result.current.state.view).toBe("reading");
+    expect(result.current.state.view).toBe("question");
   });
 
   it("mounting on /mirror sets view to dashboard", () => {
