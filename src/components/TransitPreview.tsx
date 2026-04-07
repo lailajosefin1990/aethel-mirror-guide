@@ -43,9 +43,10 @@ function getTodayTransitEnergy(date: Date): string {
 
 interface TransitPreviewProps {
   birthDate?: Date | null;
+  compact?: boolean;
 }
 
-const TransitPreview = ({ birthDate }: TransitPreviewProps) => {
+const TransitPreview = ({ birthDate, compact = false }: TransitPreviewProps) => {
   const { t } = useTranslation();
   const today = new Date();
 
@@ -75,6 +76,53 @@ const TransitPreview = ({ birthDate }: TransitPreviewProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [birthDate]);
 
+  if (compact) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.05 }}
+        className="mb-10"
+      >
+        <p className="font-body text-[11px] uppercase tracking-[0.35em] text-muted-foreground mb-4">
+          {t("transit_preview_your_data", "Y O U R   D A T A")}
+        </p>
+
+        <div className="flex items-center gap-2 mb-4">
+          <span className="font-body text-[11px] text-muted-foreground/60">☉ Sun in</span>
+          <span className="font-display text-[14px] text-foreground">{data.currentSunSign}</span>
+        </div>
+
+        {data.personalised && (
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+            <div>
+              <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">Your sun sign</p>
+              <p className="font-display text-[16px] text-foreground">{data.sunSign}</p>
+            </div>
+            <div>
+              <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">Life path</p>
+              <p className="font-display text-[16px] text-foreground">{data.lifePath}</p>
+            </div>
+            <div>
+              <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">Personal year</p>
+              <p className="font-display text-[16px] text-foreground">{data.personalYear}</p>
+            </div>
+            <div>
+              <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">Gene Key gift</p>
+              <p className="font-display text-[16px] text-foreground">{data.geneKey?.gift}</p>
+            </div>
+          </div>
+        )}
+
+        {!data.personalised && (
+          <p className="font-body text-[13px] text-muted-foreground leading-relaxed italic">
+            {data.transitEnergy}
+          </p>
+        )}
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -94,12 +142,8 @@ const TransitPreview = ({ birthDate }: TransitPreviewProps) => {
         </p>
 
         <div className="flex items-center gap-2">
-          <span className="font-body text-[11px] text-muted-foreground/60">
-            ☉ Sun in
-          </span>
-          <span className="font-display text-[13px] text-foreground">
-            {data.currentSunSign}
-          </span>
+          <span className="font-body text-[11px] text-muted-foreground/60">☉ Sun in</span>
+          <span className="font-display text-[13px] text-foreground">{data.currentSunSign}</span>
         </div>
 
         {data.personalised && (
@@ -107,36 +151,20 @@ const TransitPreview = ({ birthDate }: TransitPreviewProps) => {
             <div className="h-px bg-border my-2" />
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">
-                  Your sun sign
-                </p>
-                <p className="font-display text-[14px] text-foreground">
-                  {data.sunSign}
-                </p>
+                <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">Your sun sign</p>
+                <p className="font-display text-[14px] text-foreground">{data.sunSign}</p>
               </div>
               <div>
-                <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">
-                  Life path
-                </p>
-                <p className="font-display text-[14px] text-foreground">
-                  {data.lifePath}
-                </p>
+                <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">Life path</p>
+                <p className="font-display text-[14px] text-foreground">{data.lifePath}</p>
               </div>
               <div>
-                <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">
-                  Personal year
-                </p>
-                <p className="font-display text-[14px] text-foreground">
-                  {data.personalYear}
-                </p>
+                <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">Personal year</p>
+                <p className="font-display text-[14px] text-foreground">{data.personalYear}</p>
               </div>
               <div>
-                <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">
-                  Gene Key gift
-                </p>
-                <p className="font-display text-[14px] text-foreground">
-                  {data.geneKey?.gift}
-                </p>
+                <p className="font-body text-[10px] text-muted-foreground/50 uppercase tracking-wider">Gene Key gift</p>
+                <p className="font-display text-[14px] text-foreground">{data.geneKey?.gift}</p>
               </div>
             </div>
             <p className="font-body text-[11px] text-muted-foreground/40 italic mt-1">
