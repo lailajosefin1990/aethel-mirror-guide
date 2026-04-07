@@ -80,7 +80,7 @@ const Index = () => {
     }
   }, [view]);
 
-  const dashboardLoading = user && !authLoading && (!state.profileLoaded || (state.profileLoaded && view === "home" && journalEntries.length === 0 && !profileBirthData));
+  
   const remainingReadings = Math.max(0, FREE_READING_LIMIT - monthlyReadingCount);
 
   const readingBackTarget = useMemo(() => {
