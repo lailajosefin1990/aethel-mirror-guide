@@ -78,6 +78,14 @@ export function useFlowNavigation(
       return;
     }
     const mapped = PATH_TO_VIEW[pathname];
+    // Guard: if refreshing on /reading without question data, redirect to /ask
+    if (mapped === "reading" && !questionData) {
+      isSyncing.current = true;
+      dispatch({ type: "SET_VIEW", view: "question" });
+      navigate("/ask", { replace: true });
+      Promise.resolve().then(() => { isSyncing.current = false; });
+      return;
+    }
     if (mapped && mapped !== view) {
       isSyncing.current = true;
       dispatch({ type: "SET_VIEW", view: mapped });
