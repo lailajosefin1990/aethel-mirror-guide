@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown, Download, Link2, Share2, X } from "lucide-react";
 import VoicePlayer from "./VoicePlayer";
+import TransitPreview from "./TransitPreview";
 import type { ReadingData } from "@/lib/reading";
 import { CONFIDENCE_MESSAGES } from "@/lib/reading";
 import { generateThirdWayCard } from "@/lib/cardGenerator";
@@ -21,6 +22,7 @@ interface ReadingOutputProps {
   onRegenerate?: (feedbackText?: string) => void;
   regenerationCount?: number;
   birthTimeUnknown?: boolean;
+  birthDate?: Date | null;
 }
 
 const ExpandableText = ({ text }: { text: string }) => (
@@ -36,7 +38,7 @@ const ExpandableBullet = ({ text }: { text: string }) => (
   </div>
 );
 
-const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate, regenerationCount = 0, birthTimeUnknown = false }: ReadingOutputProps) => {
+const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate, regenerationCount = 0, birthTimeUnknown = false, birthDate }: ReadingOutputProps) => {
   const { t } = useTranslation();
   const { subscriptionTier } = useAuth();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -150,6 +152,9 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
           className="font-body text-[11px] uppercase tracking-[0.2em] text-primary mb-10">
           {domain}
         </motion.p>
+
+        {/* Your Data */}
+        <TransitPreview birthDate={birthDate} compact />
 
         {/* Stars section */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="mb-10" aria-label="Astrology reading">

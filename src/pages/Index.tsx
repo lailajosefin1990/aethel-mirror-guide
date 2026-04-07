@@ -192,7 +192,6 @@ const Index = () => {
         )}
         {view === "loading" && (
           <motion.div key="loading" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={slideTransition}>
-            <TransitPreview birthDate={state.profileBirthData?.birth_date ? new Date(state.profileBirthData.birth_date) : null} />
             <ViewErrorBoundary fallbackView="loading" onReset={resetToQuestion}>
               <ReadingLoader
                 onComplete={handleLoadingComplete}
@@ -214,6 +213,7 @@ const Index = () => {
                 regenerationCount={regenerationCount}
                 birthTimeUnknown={birthTimeUnknown}
                 onRegenerate={handleRegenerate}
+                birthDate={state.birthData?.date || (state.profileBirthData?.birth_date ? new Date(state.profileBirthData.birth_date) : null)}
               />
             </ViewErrorBoundary>
           </motion.div>
