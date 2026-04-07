@@ -54,6 +54,15 @@ export default {
         gold: {
           DEFAULT: "hsl(var(--gold))",
         },
+        terracotta: {
+          DEFAULT: "hsl(var(--terracotta))",
+        },
+        "sea-depths": {
+          DEFAULT: "hsl(var(--sea-depths))",
+        },
+        "rose-veil": {
+          DEFAULT: "hsl(var(--rose-veil))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

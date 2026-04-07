@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { track } from "@/lib/posthog";
+import { trackEvent, EVENTS } from "@/lib/analytics";
 
 const phrases = [
   "Reading your chart...",
@@ -26,7 +26,7 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    track("reading_generating");
+    trackEvent(EVENTS.READING_GENERATING);
     generateReading()
       .then(() => setApiDone(true))
       .catch(() => {
@@ -117,7 +117,7 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
       </div>
 
       <button
-        onClick={() => { track("reading_wait_cancelled"); onError?.(); }}
+        onClick={() => { trackEvent(EVENTS.READING_WAIT_CANCELLED); onError?.(); }}
         className="font-body text-[12px] text-muted-foreground/50 hover:text-muted-foreground mt-8 transition-colors"
       >
         Cancel
