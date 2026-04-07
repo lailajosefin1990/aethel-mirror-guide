@@ -5,7 +5,7 @@ interface ProgressStepperProps {
   totalSteps?: number;
 }
 
-const STEP_LABELS = ["Ask", "Anchor", "Generate", "Your Third Way"];
+const STEP_LABELS = ["Ask", "Anchor", "Generate", "Third Way"];
 
 const ProgressStepper = ({ currentStep, totalSteps = 4 }: ProgressStepperProps) => (
   <div className="w-full max-w-app mx-auto px-5 pt-4 pb-2">

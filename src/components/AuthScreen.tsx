@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useTranslation } from "react-i18next";
@@ -61,16 +62,19 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
   };
 
   const inputClass =
-    "w-full h-12 px-4 rounded-sm bg-card text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300";
+    "w-full h-12 px-4 rounded-sm bg-[hsl(228_30%_8%/0.5)] text-foreground font-body text-[14px] border border-foreground/15 placeholder:text-foreground/30 focus:outline-none focus:border-primary transition-colors duration-300";
 
   if (showEmailConfirmation) {
     return (
-      <section className="min-h-screen px-5 py-8 flex items-center justify-center">
+      <section className="min-h-screen px-5 pt-4 pb-8 flex flex-col">
+        <button onClick={onBack} className="mb-8 text-foreground/40 hover:text-foreground/70 transition-colors duration-300">
+          <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+        </button>
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-app text-center py-8"
+          className="w-full max-w-app mx-auto text-center py-8"
         >
           <p className="font-display text-[14px] tracking-[0.4em] text-primary mb-6">
             A E T H E L &nbsp; M I R R O R
@@ -85,91 +89,38 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           >
             {t("auth_already_confirmed")}
           </button>
-          <button
-            onClick={onBack}
-            className="block mx-auto mt-4 font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors"
-          >
-            ← Back
-          </button>
         </motion.div>
       </section>
     );
   }
 
   return (
-    <section className="min-h-screen px-5 py-8 flex items-center justify-center">
+    <section className="min-h-screen px-5 pt-4 pb-8 flex flex-col">
+      <button onClick={onBack} className="mb-8 text-foreground/40 hover:text-foreground/70 transition-colors duration-300">
+        <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+      </button>
+
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-app"
+        className="w-full max-w-app mx-auto"
       >
         <p className="font-display text-[14px] tracking-[0.4em] text-primary mb-4 text-center">
           A E T H E L &nbsp; M I R R O R
         </p>
 
         <h2 className="font-display text-[24px] leading-[1.3] text-foreground text-center mb-2">
-          {t("auth_save_mirror")}
+          Keep your reading
         </h2>
-        <p className="font-body text-[14px] text-muted-foreground text-center mb-8">
-          {t("auth_create_account")}
+        <p className="font-body text-[14px] text-foreground/60 text-center mb-8">
+          Create a <span className="text-primary font-medium">free</span> account to keep your readings
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t("auth_email")}
-            required
-            className={inputClass}
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={t("auth_password")}
-            required
-            minLength={6}
-            className={inputClass}
-          />
-
-          {error && (
-            <p className="font-body text-[13px] text-destructive">{error}</p>
-          )}
-
-          {isSignUp && (
-            <p className="font-body text-[11px] text-muted-foreground -mt-2">{t("auth_password_hint")}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300 disabled:opacity-50"
-          >
-            {loading ? (
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                <span>Signing in...</span>
-              </div>
-            ) : "Continue"}
-          </button>
-        </form>
-
-        <div className="relative mb-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center">
-            <span className="px-3 bg-background font-body text-[12px] text-muted-foreground">
-              {t("auth_or_continue")}
-            </span>
-          </div>
-        </div>
-
+        {/* Google button — primary action */}
         <button
           onClick={handleGoogle}
-          className="w-full h-[48px] rounded-sm border border-border bg-card text-foreground font-body text-[14px] hover:border-foreground/30 transition-all duration-300 flex items-center justify-center gap-2"
+          className="w-full h-[52px] rounded-sm border border-foreground/30 bg-transparent text-foreground font-body text-[14px] flex items-center justify-center gap-3 hover:border-primary/60 hover:bg-foreground/5 transition-all duration-300 mb-6"
         >
           <svg width="18" height="18" viewBox="0 0 18 18">
             <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" />
@@ -180,22 +131,70 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           Google
         </button>
 
-        <p className="font-body text-[13px] text-muted-foreground text-center mt-6">
+        {/* Divider */}
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-foreground/15" />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="px-3 bg-background text-foreground/40 font-body text-[12px]">
+              {t("auth_or_continue")}
+            </span>
+          </div>
+        </div>
+
+        {/* Email form */}
+        <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t("auth_email")}
+            required
+            className={inputClass}
+          />
+          <div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t("auth_password")}
+              required
+              minLength={6}
+              className={inputClass}
+            />
+            {isSignUp && (
+              <p className="font-body text-[11px] text-destructive/60 mt-1">{t("auth_password_hint")}</p>
+            )}
+          </div>
+
+          {error && (
+            <p className="font-body text-[13px] text-destructive">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300 disabled:opacity-30"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                <span>Signing in...</span>
+              </div>
+            ) : "Continue"}
+          </button>
+        </form>
+
+        <p className="font-body text-[13px] text-muted-foreground text-center">
           {isSignUp ? t("auth_already_account") : t("auth_no_account")}{" "}
           <button
             onClick={() => { setIsSignUp(!isSignUp); setError(""); }}
-            className="text-primary hover:text-primary/80 transition-colors"
+            className="text-destructive font-medium hover:text-primary transition-colors"
           >
             {isSignUp ? t("auth_sign_in") : t("auth_sign_up")}
           </button>
         </p>
-
-        <button
-          onClick={onBack}
-          className="w-full mt-4 font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors"
-        >
-          ← Back
-        </button>
       </motion.div>
     </section>
   );
