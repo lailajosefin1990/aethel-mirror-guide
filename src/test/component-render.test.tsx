@@ -330,7 +330,7 @@ describe("DecisionJournal", () => {
 describe("ProgressStepper", () => {
   it("renders 4 step labels", () => {
     render(<ProgressStepper currentStep={1} />);
-    const labels = ["Ask", "Anchor", "Generate", "Your Third Way"];
+    const labels = ["Ask", "Anchor", "Generate", "Third Way"];
     labels.forEach((label) => {
       expect(screen.getByText(label)).toBeInTheDocument();
     });
