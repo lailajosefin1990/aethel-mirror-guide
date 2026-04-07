@@ -11,6 +11,7 @@ export const EVENTS = {
   READING_VOICE_PLAYED: "reading_voice_played",
   READING_WAIT_COMPLETED: "reading_wait_completed",
   READING_WAIT_CANCELLED: "reading_wait_cancelled",
+  READING_GENERATING: "reading_generating",
 
   // Anonymous
   ANONYMOUS_READING_STARTED: "anonymous_reading_started",

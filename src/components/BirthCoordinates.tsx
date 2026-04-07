@@ -236,7 +236,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                     <path
                       d="M2 5L4 7L8 3"
-                      stroke="hsl(226,50%,7%)"
+                      stroke="hsl(260,10%,8%)"
                       strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
