@@ -29,6 +29,37 @@ const PATH_TO_VIEW: Record<string, View> = {
   "/mirror": "dashboard",
 };
 
+// ─── SessionStorage helpers for OAuth round-trip ───────────────────
+const BIRTH_STORAGE_KEY = "aethel_pending_birth";
+
+function persistBirth(data: BirthData) {
+  sessionStorage.setItem(
+    BIRTH_STORAGE_KEY,
+    JSON.stringify({
+      date: data.date instanceof Date ? data.date.toISOString() : data.date,
+      time: data.time,
+      unknownTime: data.unknownTime,
+      birthPlace: data.birthPlace,
+      birthLat: data.birthLat,
+      birthLng: data.birthLng,
+      birthTimezone: data.birthTimezone,
+    })
+  );
+}
+
+function restoreBirth(): BirthData | null {
+  try {
+    const raw = sessionStorage.getItem(BIRTH_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return { ...parsed, date: new Date(parsed.date) };
+  } catch {
+    return null;
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────
+
 export function useFlowNavigation(
   state: AppState,
   dispatch: Dispatch<AppAction>,
@@ -78,11 +109,11 @@ export function useFlowNavigation(
       return;
     }
     const mapped = PATH_TO_VIEW[pathname];
-    // Guard: if refreshing on /reading without question data, redirect to /ask
+    // Guard: if refreshing on /reading without question data, redirect to /birth (start of flow)
     if (mapped === "reading" && !questionData) {
       isSyncing.current = true;
-      dispatch({ type: "SET_VIEW", view: "question" });
-      navigate("/ask", { replace: true });
+      dispatch({ type: "SET_VIEW", view: "birth" });
+      navigate("/birth", { replace: true });
       Promise.resolve().then(() => { isSyncing.current = false; });
       return;
     }
@@ -112,30 +143,39 @@ export function useFlowNavigation(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, state.activeTab]);
 
+  // ─── proceedAfterAuth ────────────────────────────────────────────
+  // Called after auth succeeds. Birth data should already be in state
+  // (collected at step 1), so we go straight to loading.
   const proceedAfterAuth = useCallback(() => {
     if (subscriptionTier === "free" && monthlyReadingCount >= FREE_READING_LIMIT) {
       dispatch({ type: "SET_PAYWALL", open: true });
       return;
     }
-    if (profileBirthData?.birth_date) {
-      dispatch({
-        type: "SET_BIRTH_DATA",
-        data: {
-          date: new Date(profileBirthData.birth_date),
-          time: profileBirthData.birth_time,
-          unknownTime: !profileBirthData.birth_time,
-          birthPlace: profileBirthData.birth_place || "",
-          birthLat: profileBirthData.birth_lat ?? undefined,
-          birthLng: profileBirthData.birth_lng ?? undefined,
-          birthTimezone: profileBirthData.birth_timezone ?? undefined,
-        },
-      });
-      dispatch({ type: "SET_LOADING_ERROR", error: null });
-      setView("loading");
-    } else {
-      setView("birth");
+
+    // Restore birth data from sessionStorage if lost during OAuth redirect
+    if (!state.birthData) {
+      const restored = restoreBirth();
+      if (restored) {
+        dispatch({ type: "SET_BIRTH_DATA", data: restored });
+      } else if (profileBirthData?.birth_date) {
+        dispatch({
+          type: "SET_BIRTH_DATA",
+          data: {
+            date: new Date(profileBirthData.birth_date),
+            time: profileBirthData.birth_time,
+            unknownTime: !profileBirthData.birth_time,
+            birthPlace: profileBirthData.birth_place || "",
+            birthLat: profileBirthData.birth_lat ?? undefined,
+            birthLng: profileBirthData.birth_lng ?? undefined,
+            birthTimezone: profileBirthData.birth_timezone ?? undefined,
+          },
+        });
+      }
     }
-  }, [subscriptionTier, monthlyReadingCount, profileBirthData, dispatch, setView]);
+
+    dispatch({ type: "SET_LOADING_ERROR", error: null });
+    setView("loading");
+  }, [subscriptionTier, monthlyReadingCount, profileBirthData, state.birthData, dispatch, setView]);
 
   // Auto-navigate to dashboard when user is loaded with readings (initial load only)
   const isInitialLoad = useRef(true);
@@ -151,7 +191,7 @@ export function useFlowNavigation(
     }
   }, [user, authLoading, profileLoaded, journalEntries.length, view, setView]);
 
-  // OAuth return flow
+  // OAuth return flow — user lands back on home with question + birth in sessionStorage
   useEffect(() => {
     if (user && !authLoading && questionData && view === "home") {
       proceedAfterAuth();
@@ -170,41 +210,19 @@ export function useFlowNavigation(
     return () => navigator.serviceWorker?.removeEventListener("message", handler);
   }, [dispatch, setView]);
 
-  const handleQuestionSubmit = useCallback(
-    (data: QuestionData) => {
-      dispatch({ type: "SET_QUESTION", data });
-      sessionStorage.setItem("aethel_pending_question", JSON.stringify(data));
-      if (!user) {
-        trackEvent(EVENTS.ANONYMOUS_READING_STARTED);
-        dispatch({ type: "SET_LOADING_ERROR", error: null });
-        setView("loading");
-        return;
-      }
-      proceedAfterAuth();
-    },
-    [user, dispatch, setView, proceedAfterAuth]
-  );
+  // ─── Step 1: Start → Birth ──────────────────────────────────────
+  const handleStartReading = useCallback(() => {
+    setView("birth");
+  }, [setView]);
 
-  const handleAuthSuccess = useCallback(() => {
-    if (pendingSave && profileLoaded && profileBirthData?.birth_date) {
-      dispatch({ type: "SET_PENDING_SAVE", pending: false });
-      handleSave();
-      return;
-    }
-    if (pendingSave) {
-      setView("birth");
-      return;
-    }
-    if (profileLoaded && profileBirthData?.birth_date) {
-      proceedAfterAuth();
-    } else {
-      setView("birth");
-    }
-  }, [pendingSave, profileLoaded, profileBirthData, proceedAfterAuth, handleSave, dispatch, setView]);
-
+  // ─── Step 1→2: Birth submit → Question ──────────────────────────
   const handleBirthSubmit = useCallback(
     async (data: BirthData) => {
       dispatch({ type: "SET_BIRTH_DATA", data });
+      // Persist to sessionStorage so it survives the OAuth redirect
+      persistBirth(data);
+
+      // If user is already logged in, save to DB immediately
       if (user) {
         await db.profiles.updateBirth(user.id, {
           birth_date: data.date.toISOString().split("T")[0],
@@ -227,17 +245,60 @@ export function useFlowNavigation(
         });
       }
 
+      // Handle save-pending flow (user came back to add birth data to save a reading)
       if (pendingSave && state.readingData) {
         dispatch({ type: "SET_PENDING_SAVE", pending: false });
         setTimeout(() => handleSave(), 0);
         return;
       }
 
-      dispatch({ type: "SET_LOADING_ERROR", error: null });
-      setView("loading");
+      // Normal flow: proceed to question
+      setView("question");
     },
     [user, pendingSave, state.readingData, handleSave, dispatch, setView]
   );
+
+  // ─── Step 2→3: Question submit → Auth (or Loading if already signed in) ──
+  const handleQuestionSubmit = useCallback(
+    (data: QuestionData) => {
+      dispatch({ type: "SET_QUESTION", data });
+      sessionStorage.setItem("aethel_pending_question", JSON.stringify(data));
+
+      if (!user) {
+        trackEvent(EVENTS.ANONYMOUS_READING_STARTED);
+        // Not signed in → go to auth (step 3)
+        setView("auth");
+        return;
+      }
+
+      // Already signed in → skip auth, go to loading
+      proceedAfterAuth();
+    },
+    [user, dispatch, setView, proceedAfterAuth]
+  );
+
+  // ─── Step 3→4: Auth success → Loading ───────────────────────────
+  const handleAuthSuccess = useCallback(() => {
+    // Handle save-pending flow
+    if (pendingSave && profileLoaded && profileBirthData?.birth_date) {
+      dispatch({ type: "SET_PENDING_SAVE", pending: false });
+      handleSave();
+      return;
+    }
+    if (pendingSave) {
+      setView("birth");
+      return;
+    }
+
+    // Save birth data to DB now that we have a user
+    const birthFromSession = restoreBirth();
+    if (birthFromSession) {
+      dispatch({ type: "SET_BIRTH_DATA", data: birthFromSession });
+    }
+
+    // Birth data was collected in step 1 → go straight to loading
+    proceedAfterAuth();
+  }, [pendingSave, profileLoaded, profileBirthData, proceedAfterAuth, handleSave, dispatch, setView]);
 
   const handleLoadingComplete = useCallback(() => {
     setView("reading");
@@ -247,10 +308,6 @@ export function useFlowNavigation(
     dispatch({ type: "SET_LOADING_ERROR", error: "Something went wrong. Please try again." });
     setView("question");
   }, [dispatch, setView]);
-
-  const handleStartReading = useCallback(() => {
-    setView("question");
-  }, [setView]);
 
   return {
     setView,

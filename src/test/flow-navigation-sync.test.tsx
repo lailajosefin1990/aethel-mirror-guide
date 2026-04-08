@@ -198,10 +198,9 @@ describe("useFlowNavigation — URL→view sync on mount", () => {
     expect(result.current.state.view).toBe("birth");
   });
 
-  it("mounting on /reading without question data redirects to question", () => {
-    // Fix 3: /reading with no questionData in state redirects to /ask
+  it("mounting on /reading without question data redirects to /birth", () => {
     const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/reading") });
-    expect(result.current.state.view).toBe("question");
+    expect(result.current.state.view).toBe("birth");
   });
 
   it("mounting on /mirror sets view to dashboard", () => {
@@ -232,12 +231,68 @@ describe("useFlowNavigation — URL→view sync on mount", () => {
   });
 });
 
-describe("useFlowNavigation — handleQuestionSubmit", () => {
+// ─── New flow: Birth → Question → Auth → Reading ──────────────────
+
+describe("useFlowNavigation — new flow order", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionStorage.clear();
   });
 
-  it("anonymous user: sets question data and navigates to loading", () => {
+  it("handleStartReading navigates to birth (step 1)", () => {
+    const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/") });
+
+    act(() => {
+      result.current.handleStartReading();
+    });
+
+    expect(result.current.state.view).toBe("birth");
+    expect(mockNavigate).toHaveBeenCalledWith("/birth", { replace: true });
+  });
+
+  it("handleBirthSubmit navigates to question (step 2)", async () => {
+    const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/birth") });
+
+    await act(async () => {
+      await result.current.handleBirthSubmit({
+        date: new Date("1990-06-15"),
+        time: "14:30",
+        unknownTime: false,
+        birthPlace: "Barcelona",
+        birthLat: 41.387,
+        birthLng: 2.168,
+        birthTimezone: "Europe/Madrid",
+      });
+    });
+
+    expect(result.current.state.view).toBe("question");
+    expect(mockNavigate).toHaveBeenCalledWith("/ask", { replace: true });
+  });
+
+  it("handleBirthSubmit persists birth data to sessionStorage", async () => {
+    const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/birth") });
+
+    await act(async () => {
+      await result.current.handleBirthSubmit({
+        date: new Date("1990-06-15"),
+        time: "14:30",
+        unknownTime: false,
+        birthPlace: "Barcelona",
+        birthLat: 41.387,
+        birthLng: 2.168,
+        birthTimezone: "Europe/Madrid",
+      });
+    });
+
+    const stored = sessionStorage.getItem("aethel_pending_birth");
+    expect(stored).not.toBeNull();
+    const parsed = JSON.parse(stored!);
+    expect(parsed.birthPlace).toBe("Barcelona");
+    expect(parsed.birthLat).toBe(41.387);
+    expect(parsed.birthTimezone).toBe("Europe/Madrid");
+  });
+
+  it("anonymous handleQuestionSubmit navigates to auth (step 3)", () => {
     const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/ask") });
 
     act(() => {
@@ -253,11 +308,11 @@ describe("useFlowNavigation — handleQuestionSubmit", () => {
       question: "Should I quit?",
       mode: "Coach me",
     });
-    expect(result.current.state.view).toBe("loading");
-    expect(mockNavigate).toHaveBeenCalledWith("/reading", { replace: true });
+    expect(result.current.state.view).toBe("auth");
+    expect(mockNavigate).toHaveBeenCalledWith("/auth", { replace: true });
   });
 
-  it("persists question to sessionStorage", () => {
+  it("handleQuestionSubmit persists question to sessionStorage", () => {
     const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/ask") });
 
     act(() => {
@@ -272,8 +327,46 @@ describe("useFlowNavigation — handleQuestionSubmit", () => {
     expect(stored).not.toBeNull();
     const parsed = JSON.parse(stored!);
     expect(parsed.domain).toBe("Love & people");
+  });
 
-    sessionStorage.removeItem("aethel_pending_question");
+  it("full anonymous flow: birth → question → auth", async () => {
+    const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/") });
+
+    // Step 0: Start
+    act(() => {
+      result.current.handleStartReading();
+    });
+    expect(result.current.state.view).toBe("birth");
+
+    // Step 1: Birth submit → question
+    await act(async () => {
+      await result.current.handleBirthSubmit({
+        date: new Date("1990-06-15"),
+        time: "14:30",
+        unknownTime: false,
+        birthPlace: "Barcelona",
+        birthLat: 41.387,
+        birthLng: 2.168,
+        birthTimezone: "Europe/Madrid",
+      });
+    });
+    expect(result.current.state.view).toBe("question");
+    expect(result.current.state.birthData).toBeDefined();
+    expect(result.current.state.birthData?.birthPlace).toBe("Barcelona");
+
+    // Step 2: Question submit → auth (anonymous)
+    act(() => {
+      result.current.handleQuestionSubmit({
+        domain: "Work & money",
+        question: "Should I quit?",
+        mode: "Coach me",
+      });
+    });
+    expect(result.current.state.view).toBe("auth");
+
+    // Both birth and question data persisted for OAuth round-trip
+    expect(sessionStorage.getItem("aethel_pending_birth")).not.toBeNull();
+    expect(sessionStorage.getItem("aethel_pending_question")).not.toBeNull();
   });
 });
 

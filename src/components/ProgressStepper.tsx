@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 
 interface ProgressStepperProps {
-  currentStep: number; // 1-based: 1=Ask, 2=Anchor, 3=Generate, 4=Your Third Way
+  currentStep: number; // 1-based: 1=Anchor, 2=Ask, 3=Sign in, 4=Your Third Way
   totalSteps?: number;
 }
 
-const STEP_LABELS = ["Ask", "Anchor", "Generate", "Third Way"];
+const STEP_LABELS = ["Anchor", "Ask", "Sign in", "Third Way"];
 
 const ProgressStepper = ({ currentStep, totalSteps = 4 }: ProgressStepperProps) => (
   <div className="w-full max-w-app mx-auto px-5 pt-4 pb-2">

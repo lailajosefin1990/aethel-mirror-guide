@@ -151,8 +151,9 @@ const Index = () => {
       {showCrisis && <CrisisInterstitial onReturn={handleCrisisReturn} />}
       {["question", "auth", "birth", "loading", "reading"].includes(view) && (
         <ProgressStepper currentStep={
-          view === "question" ? 1 :
-          view === "auth" || view === "birth" ? 2 :
+          view === "birth" ? 1 :
+          view === "question" ? 2 :
+          view === "auth" ? 3 :
           view === "loading" ? 3 : 4
         } />
       )}

@@ -330,7 +330,7 @@ describe("DecisionJournal", () => {
 describe("ProgressStepper", () => {
   it("renders 4 step labels", () => {
     render(<ProgressStepper currentStep={1} />);
-    const labels = ["Ask", "Anchor", "Generate", "Third Way"];
+    const labels = ["Anchor", "Ask", "Sign in", "Third Way"];
     labels.forEach((label) => {
       expect(screen.getByText(label)).toBeInTheDocument();
     });
@@ -338,16 +338,16 @@ describe("ProgressStepper", () => {
 
   it("highlights the current step", () => {
     render(<ProgressStepper currentStep={2} />);
-    const anchorLabel = screen.getByText("Anchor");
-    expect(anchorLabel.className).toContain("text-primary");
+    const askLabel = screen.getByText("Ask");
+    expect(askLabel.className).toContain("text-primary");
   });
 
   it("shows completed steps differently from pending", () => {
     render(<ProgressStepper currentStep={3} />);
-    const askLabel = screen.getByText("Ask");
-    const generateLabel = screen.getByText("Generate");
-    expect(askLabel.className).toContain("primary/50");
-    expect(generateLabel.className).toContain("text-primary");
+    const anchorLabel = screen.getByText("Anchor");
+    const signInLabel = screen.getByText("Sign in");
+    expect(anchorLabel.className).toContain("primary/50");
+    expect(signInLabel.className).toContain("text-primary");
   });
 });
 
