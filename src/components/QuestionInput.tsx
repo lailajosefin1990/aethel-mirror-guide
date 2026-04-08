@@ -212,9 +212,9 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
               onChange={handleTextChange}
               placeholder={t("question_placeholder")}
               rows={4}
-              className="w-full px-4 py-3 bg-transparent text-foreground font-body text-[14px] leading-[1.8] border border-border placeholder:text-foreground/20 focus:outline-none focus:border-foreground/30 transition-colors duration-300 resize-none"
+              className="w-full px-4 py-3 bg-transparent text-foreground font-body text-[14px] leading-[1.8] border border-border placeholder:text-foreground/30 focus:outline-none focus:border-foreground/30 transition-colors duration-300 resize-none"
             />
-            <span className="absolute bottom-3 right-3 font-body text-[11px] text-foreground/20">
+            <span className="absolute bottom-3 right-3 font-body text-[11px] text-foreground/35">
               {question.length}/{MAX_CHARS}
             </span>
           </div>

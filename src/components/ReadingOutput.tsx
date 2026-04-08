@@ -197,7 +197,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
           {t("reading_mirror_disclaimer")}
         </motion.p>
 
-        <p className="font-body text-[11px] text-foreground/20 text-center mb-4">
+        <p className="font-body text-[11px] text-foreground/40 text-center mb-4">
           {t("reading_health_disclaimer")}
         </p>
 
@@ -341,7 +341,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
               <p className="font-body text-[13px] text-muted-foreground mb-4">{t("reading_feedback_subtitle")}</p>
               <textarea value={feedbackText} onChange={(e) => setFeedbackText(e.target.value)}
                 placeholder={t("reading_feedback_placeholder")} rows={3}
-                className="w-full px-4 py-3 bg-background text-foreground font-body text-[14px] border border-border placeholder:text-foreground/20 focus:outline-none focus:border-foreground/30 transition-colors duration-300 resize-none mb-4" />
+                className="w-full px-4 py-3 bg-background text-foreground font-body text-[14px] border border-border placeholder:text-foreground/30 focus:outline-none focus:border-foreground/30 transition-colors duration-300 resize-none mb-4" />
               <button onClick={() => { 
                   const feedback = feedbackText;
                   trackEvent(EVENTS.READING_REGENERATED, { regeneration_number: (regenerationCount || 0) + 1 }); 

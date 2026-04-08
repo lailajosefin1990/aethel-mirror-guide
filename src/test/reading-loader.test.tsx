@@ -52,10 +52,11 @@ describe("ReadingLoader", () => {
     expect(screen.getByLabelText("Loading your reading")).toBeInTheDocument();
   });
 
-  it("renders the brand name", () => {
+  it("renders the expanding progress line", () => {
     const props = defaultProps();
-    render(<ReadingLoader {...props} />);
-    expect(screen.getByText(/A E T H E L/)).toBeInTheDocument();
+    const { container } = render(<ReadingLoader {...props} />);
+    // Expanding line replaces the old brand text
+    expect(container.querySelector(".bg-border")).toBeInTheDocument();
   });
 
   it("shows the first phrase on load", () => {
@@ -64,11 +65,11 @@ describe("ReadingLoader", () => {
     expect(screen.getByText("Reading your chart...")).toBeInTheDocument();
   });
 
-  it("renders 4 progress dots", () => {
+  it("renders the progress bar fill element", () => {
     const props = defaultProps();
     const { container } = render(<ReadingLoader {...props} />);
-    const dots = container.querySelectorAll(".rounded-full.w-1\\.5");
-    expect(dots.length).toBe(4);
+    // Progress bar fill inside the line container
+    expect(container.querySelector(".bg-foreground\\/60")).toBeInTheDocument();
   });
 
   it("renders a cancel button", () => {
@@ -239,8 +240,8 @@ describe("ReadingLoader", () => {
       fireEvent.click(screen.getByText("Retry"));
     });
 
-    // Should show loading UI again (brand name visible, error text gone)
-    expect(screen.getByText(/A E T H E L/)).toBeInTheDocument();
+    // Should show loading UI again (expanding line visible, error text gone)
+    expect(screen.getByLabelText("Loading your reading")).toBeInTheDocument();
     expect(screen.queryByText("Your mirror needs a moment.")).not.toBeInTheDocument();
   });
 

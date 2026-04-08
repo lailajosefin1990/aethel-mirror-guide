@@ -107,7 +107,7 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
 
       <button
         onClick={() => { trackEvent(EVENTS.READING_WAIT_CANCELLED); onError?.(); }}
-        className="font-body text-[12px] text-foreground/20 hover:text-foreground/40 mt-8 transition-colors"
+        className="font-body text-[12px] text-foreground/40 hover:text-foreground/60 mt-8 transition-colors"
       >
         Cancel
       </button>

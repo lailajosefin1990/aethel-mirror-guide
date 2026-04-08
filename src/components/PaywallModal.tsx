@@ -121,7 +121,7 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
                       {loading === tier.name ? "..." : isPro ? `Start ${tier.name} — ${tier.price}` : "Start 7-day free trial"}
                     </button>
                     {!isPro && (
-                      <p className="font-body text-[11px] text-foreground/20 mt-1.5 text-center">
+                      <p className="font-body text-[11px] text-foreground/40 mt-1.5 text-center">
                         Cancel anytime during trial — you won't be charged.
                       </p>
                     )}
@@ -139,7 +139,7 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
 
             <button
               onClick={() => { trackEvent(EVENTS.RESTORE_PURCHASE_TAPPED); onClose(); onRestorePurchase?.(); }}
-              className="font-body text-[12px] text-foreground/20 underline underline-offset-2 hover:text-foreground/40 transition-colors mb-3"
+              className="font-body text-[12px] text-foreground/40 underline underline-offset-2 hover:text-foreground/40 transition-colors mb-3"
             >
               Already subscribed? Restore
             </button>
@@ -151,7 +151,7 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
               For practitioners →
             </button>
 
-            <p className="font-body text-[11px] text-foreground/20 text-center">
+            <p className="font-body text-[11px] text-foreground/40 text-center">
               Cancel anytime. No hidden fees.
             </p>
           </motion.div>

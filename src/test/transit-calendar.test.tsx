@@ -190,9 +190,10 @@ describe("TransitCalendar", () => {
   it("renders traffic light dots with correct colors", async () => {
     const { container } = renderCalendar();
     await waitFor(() => {
-      expect(container.querySelector(".bg-emerald-400")).toBeInTheDocument();
-      expect(container.querySelector(".bg-amber-400")).toBeInTheDocument();
-      expect(container.querySelector(".bg-red-400")).toBeInTheDocument();
+      // After restyle, traffic dots use /70 opacity suffix
+      expect(container.querySelector(".bg-emerald-400\\/70")).toBeInTheDocument();
+      expect(container.querySelector(".bg-amber-400\\/70")).toBeInTheDocument();
+      expect(container.querySelector(".bg-red-400\\/70")).toBeInTheDocument();
     });
   });
 

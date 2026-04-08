@@ -142,7 +142,7 @@ describe("DailyNudge", () => {
     render(
       <MemoryRouter><DailyNudge journalEntries={[]} onNewReading={vi.fn()} onRevisitDecision={vi.fn()} /></MemoryRouter>
     );
-    expect(screen.getByText(/A E T H E L/)).toBeInTheDocument();
+    expect(screen.getByText(/AETHEL MIRROR.*TODAY/)).toBeInTheDocument();
     expect(screen.getByText("nudge_new_reading_btn")).toBeInTheDocument();
     expect(screen.getByText("nudge_todays_energy")).toBeInTheDocument();
     expect(screen.getByText("nudge_little_nudge")).toBeInTheDocument();
@@ -339,15 +339,15 @@ describe("ProgressStepper", () => {
   it("highlights the current step", () => {
     render(<ProgressStepper currentStep={2} />);
     const askLabel = screen.getByText("Ask");
-    expect(askLabel.className).toContain("text-primary");
+    expect(askLabel.className).toContain("text-foreground");
   });
 
   it("shows completed steps differently from pending", () => {
     render(<ProgressStepper currentStep={3} />);
     const anchorLabel = screen.getByText("Anchor");
     const signInLabel = screen.getByText("Sign in");
-    expect(anchorLabel.className).toContain("primary/50");
-    expect(signInLabel.className).toContain("text-primary");
+    expect(anchorLabel.className).toContain("foreground/50");
+    expect(signInLabel.className).toContain("text-foreground");
   });
 });
 
@@ -413,7 +413,7 @@ describe("HeroSection", () => {
     render(
       <MemoryRouter><HeroSection onStart={vi.fn()} /></MemoryRouter>
     );
-    expect(screen.getByText("hero_get_third_way")).toBeInTheDocument();
+    expect(screen.getByText("BEGIN")).toBeInTheDocument();
     expect(screen.getByText("hero_free_tag")).toBeInTheDocument();
   });
 
@@ -423,7 +423,7 @@ describe("HeroSection", () => {
     render(
       <MemoryRouter><HeroSection onStart={onStart} /></MemoryRouter>
     );
-    await user.click(screen.getByText("hero_get_third_way"));
+    await user.click(screen.getByText("BEGIN"));
     expect(onStart).toHaveBeenCalledTimes(1);
   });
 

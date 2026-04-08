@@ -197,7 +197,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         </div>
 
         {!isPersonalised && !hasBirthTime && (
-          <p className="font-body text-[11px] text-foreground/20 italic mt-2">
+          <p className="font-body text-[11px] text-foreground/45 italic mt-2">
             {t("nudge_birth_hint")}
           </p>
         )}
@@ -278,7 +278,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
               {t("nudge_upgrade")}
             </button>
           </p>
-          <p className="font-body text-[11px] text-foreground/20 mt-0.5 text-center">{t("nudge_resets_monthly")}</p>
+          <p className="font-body text-[11px] text-foreground/40 mt-0.5 text-center">{t("nudge_resets_monthly")}</p>
         </motion.div>
       )}
 

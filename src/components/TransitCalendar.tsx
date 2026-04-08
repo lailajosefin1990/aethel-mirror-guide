@@ -92,7 +92,7 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
       <section className="pt-8 pb-4 flex flex-col items-center justify-center min-h-[60vh]">
         <Loader2 className="w-6 h-6 text-foreground/40 animate-spin mb-4" />
         <p className="font-body text-[14px] text-muted-foreground mb-1">{t("transit_loading")}</p>
-        <p className="font-body text-[12px] text-foreground/20">{t("transit_loading_detail")}</p>
+        <p className="font-body text-[12px] text-foreground/40">{t("transit_loading_detail")}</p>
       </section>
     );
   }

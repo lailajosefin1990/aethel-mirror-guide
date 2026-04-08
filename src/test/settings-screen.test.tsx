@@ -223,10 +223,11 @@ describe("SettingsScreen", () => {
 
   // ── Structure ──
 
-  it("renders at least 7 card sections", () => {
+  it("renders at least 7 bordered sections", () => {
     const { container } = renderSettings();
-    const cards = container.querySelectorAll(".bg-card");
-    expect(cards.length).toBeGreaterThanOrEqual(7);
+    // After restyle, sections use border-border instead of bg-card
+    const sections = container.querySelectorAll(".border-border");
+    expect(sections.length).toBeGreaterThanOrEqual(7);
   });
 
   it("all settings sections animate in", () => {

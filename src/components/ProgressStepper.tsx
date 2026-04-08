@@ -15,12 +15,12 @@ const ProgressStepper = ({ currentStep, totalSteps = 4 }: ProgressStepperProps) 
         return (
           <div key={step} className="flex items-center">
             <span className={`font-body text-[10px] tracking-[0.15em] uppercase transition-colors duration-300 ${
-              isActive ? "text-foreground" : isCompleted ? "text-foreground/50" : "text-foreground/20"
+              isActive ? "text-foreground" : isCompleted ? "text-foreground/50" : "text-foreground/35"
             }`}>
               {STEP_LABELS[i]}
             </span>
             {i < totalSteps - 1 && (
-              <span className="mx-2 text-foreground/20 font-body text-[10px]">—</span>
+              <span className="mx-2 text-foreground/30 font-body text-[10px]">—</span>
             )}
           </div>
         );

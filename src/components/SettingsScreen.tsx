@@ -194,7 +194,7 @@ const SettingsScreen = () => {
               <div className="relative">
                 <input type="date" value={birthDateValue} onChange={(e) => setBirthDateValue(e.target.value)}
                   className="w-full h-10 px-3 pr-10 bg-transparent text-foreground font-body text-[14px] border-0 border-b border-border focus:outline-none focus:border-foreground/30 transition-colors" />
-                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/20 pointer-events-none" />
+                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/35 pointer-events-none" />
               </div>
             </div>
             <div>
@@ -202,7 +202,7 @@ const SettingsScreen = () => {
               <div className="relative">
                 <input type="time" value={birthTimeValue} onChange={(e) => setBirthTimeValue(e.target.value)}
                   className="w-full h-10 px-3 pr-10 bg-transparent text-foreground font-body text-[14px] border-0 border-b border-border focus:outline-none focus:border-foreground/30 transition-colors" />
-                <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/20 pointer-events-none" />
+                <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/35 pointer-events-none" />
               </div>
             </div>
             <div>
@@ -210,8 +210,8 @@ const SettingsScreen = () => {
               <div className="relative">
                 <input type="text" value={birthPlaceValue} onChange={(e) => setBirthPlaceValue(e.target.value)}
                   placeholder="City, Country"
-                  className="w-full h-10 px-3 pr-10 bg-transparent text-foreground font-body text-[14px] border-0 border-b border-border focus:outline-none focus:border-foreground/30 transition-colors placeholder:text-foreground/20" />
-                <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/20 pointer-events-none" />
+                  className="w-full h-10 px-3 pr-10 bg-transparent text-foreground font-body text-[14px] border-0 border-b border-border focus:outline-none focus:border-foreground/30 transition-colors placeholder:text-foreground/30" />
+                <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/35 pointer-events-none" />
               </div>
             </div>
             <div className="flex gap-2">
@@ -298,7 +298,7 @@ const SettingsScreen = () => {
             const remaining = Math.max(1, nextThreshold - referralCount);
             const friendText = remaining === 1 ? "friend" : "friends";
             return (
-              <p className="font-body text-[12px] text-foreground/20">
+              <p className="font-body text-[12px] text-foreground/40">
                 Next reward: refer {remaining} more {friendText}
               </p>
             );
