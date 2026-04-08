@@ -295,7 +295,7 @@ export function useFlowNavigation(
   );
 
   // ─── Step 3→4: Auth success → Loading ───────────────────────────
-  const handleAuthSuccess = useCallback(() => {
+  const handleAuthSuccess = useCallback(async () => {
     // Handle save-pending flow
     if (pendingSave && profileLoaded && profileBirthData?.birth_date) {
       dispatch({ type: "SET_PENDING_SAVE", pending: false });
@@ -307,15 +307,41 @@ export function useFlowNavigation(
       return;
     }
 
-    // Save birth data to DB now that we have a user
+    // Restore birth data from sessionStorage (collected before OAuth redirect)
     const birthFromSession = restoreBirth();
     if (birthFromSession) {
       dispatch({ type: "SET_BIRTH_DATA", data: birthFromSession });
+
+      // Persist to DB now that we have an authenticated user
+      if (user) {
+        const isoDate = birthFromSession.date instanceof Date
+          ? birthFromSession.date.toISOString().split("T")[0]
+          : new Date(birthFromSession.date).toISOString().split("T")[0];
+        db.profiles.updateBirth(user.id, {
+          birth_date: isoDate,
+          birth_time: birthFromSession.unknownTime ? null : birthFromSession.time,
+          birth_place: birthFromSession.birthPlace,
+          birth_lat: birthFromSession.birthLat ?? null,
+          birth_lng: birthFromSession.birthLng ?? null,
+          birth_timezone: birthFromSession.birthTimezone ?? null,
+        }).catch((err: any) => console.warn("Failed to save birth data after auth:", err));
+        dispatch({
+          type: "SET_PROFILE_BIRTH",
+          data: {
+            birth_date: isoDate,
+            birth_time: birthFromSession.unknownTime ? null : birthFromSession.time || null,
+            birth_place: birthFromSession.birthPlace,
+            birth_lat: birthFromSession.birthLat ?? null,
+            birth_lng: birthFromSession.birthLng ?? null,
+            birth_timezone: birthFromSession.birthTimezone ?? null,
+          },
+        });
+      }
     }
 
     // Birth data was collected in step 1 → go straight to loading
     proceedAfterAuth();
-  }, [pendingSave, profileLoaded, profileBirthData, proceedAfterAuth, handleSave, dispatch, setView]);
+  }, [user, pendingSave, profileLoaded, profileBirthData, proceedAfterAuth, handleSave, dispatch, setView]);
 
   const handleLoadingComplete = useCallback(() => {
     setView("reading");
