@@ -62,7 +62,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
   };
 
   const inputClass =
-    "w-full h-12 px-4 rounded-sm bg-background/50 text-foreground font-body text-[14px] border border-foreground/15 placeholder:text-foreground/30 focus:outline-none focus:border-sea-depths transition-colors duration-300";
+    "w-full h-12 px-0 bg-transparent text-foreground font-body text-[14px] border-0 border-b border-foreground/15 placeholder:text-foreground/30 focus:outline-none focus:border-foreground/40 transition-colors duration-300";
 
   if (showEmailConfirmation) {
     return (
@@ -76,8 +76,8 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           transition={{ duration: 0.5 }}
           className="w-full max-w-app mx-auto text-center py-8"
         >
-          <p className="font-display text-[14px] tracking-[0.4em] text-primary mb-6">
-            A E T H E L &nbsp; M I R R O R
+          <p className="font-display text-[28px] tracking-[0.25em] text-foreground uppercase mb-6">
+            AETHEL MIRROR
           </p>
           <p className="font-display text-[18px] text-foreground mb-2">{t("auth_check_email")}</p>
           <p className="font-body text-[13px] text-muted-foreground mb-6">
@@ -85,7 +85,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           </p>
           <button
             onClick={() => { setShowEmailConfirmation(false); setIsSignUp(false); }}
-            className="font-body text-[13px] text-primary hover:text-primary/80 transition-colors"
+            className="font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors"
           >
             {t("auth_already_confirmed")}
           </button>
@@ -106,21 +106,21 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
         transition={{ duration: 0.5 }}
         className="w-full max-w-app mx-auto"
       >
-        <p className="font-display text-[14px] tracking-[0.4em] text-primary mb-4 text-center">
-          A E T H E L &nbsp; M I R R O R
+        <p className="font-display text-[28px] tracking-[0.25em] text-foreground uppercase mb-4 text-center">
+          AETHEL MIRROR
         </p>
 
         <h2 className="font-display text-[24px] leading-[1.3] text-foreground text-center mb-2">
           Keep your reading
         </h2>
-        <p className="font-body text-[14px] text-foreground/60 text-center mb-8">
-          Create a <span className="text-primary font-medium">free</span> account to keep your readings
+        <p className="font-body text-[14px] text-foreground/50 text-center mb-8">
+          Create a free account to keep your readings
         </p>
 
-        {/* Google button — primary action */}
+        {/* Google button */}
         <button
           onClick={handleGoogle}
-          className="w-full h-[52px] rounded-sm border border-foreground/30 bg-transparent text-foreground font-body text-[14px] flex items-center justify-center gap-3 hover:border-primary/60 hover:bg-foreground/5 transition-all duration-300 mb-6"
+          className="w-full h-[48px] bg-foreground text-background font-body text-[13px] uppercase tracking-[0.15em] flex items-center justify-center gap-3 hover:opacity-85 transition-opacity duration-300 mb-6"
         >
           <svg width="18" height="18" viewBox="0 0 18 18">
             <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" />
@@ -134,17 +134,17 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
         {/* Divider */}
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-foreground/15" />
+            <div className="w-full border-t border-foreground/10" />
           </div>
           <div className="relative flex justify-center">
-            <span className="px-3 bg-background text-foreground/40 font-body text-[12px]">
+            <span className="px-3 bg-background text-foreground/30 font-body text-[12px]">
               {t("auth_or_continue")}
             </span>
           </div>
         </div>
 
         {/* Email form */}
-        <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+        <form onSubmit={handleSubmit} className="space-y-6 mb-6">
           <input
             type="email"
             value={email}
@@ -164,7 +164,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
               className={inputClass}
             />
             {isSignUp && (
-              <p className="font-body text-[11px] text-destructive/60 mt-1">{t("auth_password_hint")}</p>
+              <p className="font-body text-[11px] text-foreground/30 mt-1">{t("auth_password_hint")}</p>
             )}
           </div>
 
@@ -175,14 +175,14 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300 disabled:opacity-30"
+            className="w-full h-[48px] bg-foreground text-background font-body font-medium text-[13px] uppercase tracking-[0.15em] hover:opacity-85 transition-opacity duration-300 disabled:opacity-30"
           >
             {loading ? (
               <div className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
                 <span>Signing in...</span>
               </div>
-            ) : "Continue"}
+            ) : "CONTINUE"}
           </button>
         </form>
 
@@ -190,7 +190,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           {isSignUp ? t("auth_already_account") : t("auth_no_account")}{" "}
           <button
             onClick={() => { setIsSignUp(!isSignUp); setError(""); }}
-            className="text-terracotta font-medium hover:text-primary transition-colors"
+            className="text-foreground/70 font-medium hover:text-foreground transition-colors"
           >
             {isSignUp ? t("auth_sign_in") : t("auth_sign_up")}
           </button>
