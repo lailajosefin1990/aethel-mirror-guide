@@ -55,7 +55,6 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
 
   const maxDay = daysInMonth(month, year);
 
-  // Day items
   const dayItems = useMemo(() => {
     return Array.from({ length: 31 }, (_, i) => ({
       value: i + 1,
@@ -64,7 +63,6 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
     }));
   }, [maxDay]);
 
-  // Month items
   const monthItems = useMemo(() => {
     return MONTHS.map((name, i) => ({
       value: i + 1,
@@ -72,7 +70,6 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
     }));
   }, []);
 
-  // Year items
   const yearItems = useMemo(() => {
     const items = [];
     for (let y = 1920; y <= currentYear; y++) {
@@ -81,7 +78,6 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
     return items;
   }, [currentYear]);
 
-  // Hour items
   const hourItems = useMemo(() => {
     return Array.from({ length: 24 }, (_, i) => ({
       value: i,
@@ -89,7 +85,6 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
     }));
   }, []);
 
-  // Minute items (1-min intervals)
   const minuteItems = useMemo(() => {
     return Array.from({ length: 60 }, (_, i) => ({
       value: i,
@@ -97,9 +92,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
     }));
   }, []);
 
-  // Clamp day if month/year changes
   const effectiveDay = Math.min(day, maxDay);
-
   const isValid = location !== null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -144,7 +137,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="font-display text-[14px] tracking-[0.4em] text-primary mb-4"
+          className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground/40 mb-4"
         >
           {t("birth_heading")}
         </motion.p>
@@ -153,7 +146,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="font-body text-[14px] text-muted-foreground leading-relaxed mb-10"
+          className="font-body text-[14px] text-muted-foreground leading-[1.8] mb-10"
         >
           {t("birth_subtitle")}
         </motion.p>
@@ -165,56 +158,34 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
           onSubmit={handleSubmit}
           className="space-y-6"
         >
-          {/* Date of birth — Drum Roller */}
+          {/* Date of birth */}
           <div className="space-y-2">
-            <label className="font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
+            <label className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground/40">
               {t("birth_date_label")}
             </label>
-            <div className="bg-card border border-border rounded-md overflow-hidden">
+            <div className="border-b border-border">
               <div className="grid grid-cols-3 divide-x divide-border">
-                <DrumRoller
-                  items={dayItems}
-                  value={effectiveDay}
-                  onChange={(v) => setDay(v as number)}
-                />
-                <DrumRoller
-                  items={monthItems}
-                  value={month}
-                  onChange={(v) => setMonth(v as number)}
-                />
-                <DrumRoller
-                  items={yearItems}
-                  value={year}
-                  onChange={(v) => setYear(v as number)}
-                />
+                <DrumRoller items={dayItems} value={effectiveDay} onChange={(v) => setDay(v as number)} />
+                <DrumRoller items={monthItems} value={month} onChange={(v) => setMonth(v as number)} />
+                <DrumRoller items={yearItems} value={year} onChange={(v) => setYear(v as number)} />
               </div>
             </div>
           </div>
 
-          {/* Time of birth — Drum Roller */}
+          {/* Time of birth */}
           <div className="space-y-2">
-            <label className="font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
+            <label className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground/40">
               {t("birth_time_label")}
             </label>
             <div
               className={cn(
-                "bg-card border border-border rounded-md overflow-hidden transition-opacity duration-300",
+                "border-b border-border transition-opacity duration-300",
                 unknownTime && "opacity-30 pointer-events-none"
               )}
             >
               <div className="grid grid-cols-2 divide-x divide-border">
-                <DrumRoller
-                  items={hourItems}
-                  value={hour}
-                  onChange={(v) => setHour(v as number)}
-                  height={160}
-                />
-                <DrumRoller
-                  items={minuteItems}
-                  value={minute}
-                  onChange={(v) => setMinute(v as number)}
-                  height={160}
-                />
+                <DrumRoller items={hourItems} value={hour} onChange={(v) => setHour(v as number)} height={160} />
+                <DrumRoller items={minuteItems} value={minute} onChange={(v) => setMinute(v as number)} height={160} />
               </div>
             </div>
 
@@ -226,25 +197,19 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
             >
               <div
                 className={cn(
-                  "w-4 h-4 rounded-sm border transition-all duration-300 flex items-center justify-center",
+                  "w-4 h-4 border transition-all duration-300 flex items-center justify-center",
                   unknownTime
-                    ? "bg-primary border-primary"
+                    ? "bg-foreground border-foreground"
                     : "border-border bg-transparent"
                 )}
               >
                 {unknownTime && (
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                    <path
-                      d="M2 5L4 7L8 3"
-                      stroke="hsl(260,10%,8%)"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                    <path d="M2 5L4 7L8 3" stroke="hsl(0,0%,2%)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </div>
-              <span className="font-body text-[13px] text-foreground/60">
+              <span className="font-body text-[13px] text-foreground/50">
                 {t("birth_unknown_time")}
               </span>
             </button>
@@ -259,22 +224,22 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <p className="font-body text-[12px] text-muted-foreground ml-6.5 italic mb-2">
+                  <p className="font-body text-[12px] text-foreground/50 ml-6.5 italic mb-2">
                     {t("birth_solar_noon")}
                   </p>
 
-                  <div className="border border-amber-500/40 bg-amber-500/5 rounded-md p-4 ml-0">
+                  <div className="border border-foreground/15 p-4 ml-0">
                     <button
                       type="button"
                       onClick={() => setWarningExpanded(!warningExpanded)}
                       className="flex items-center justify-between w-full text-left"
                     >
-                      <span className="font-body text-[13px] text-amber-400/90 font-medium">
+                      <span className="font-body text-[13px] text-foreground/50 font-medium">
                         ⚠ {t("birth_time_why") || "Why birth time matters"}
                       </span>
                       <ChevronDown
                         className={cn(
-                          "w-4 h-4 text-amber-400/70 transition-transform duration-200",
+                          "w-4 h-4 text-foreground/30 transition-transform duration-200",
                           warningExpanded && "rotate-180"
                         )}
                         strokeWidth={1.5}
@@ -288,7 +253,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <p className="font-body text-[12px] text-foreground/60 leading-relaxed mt-3 whitespace-pre-line">
+                          <p className="font-body text-[12px] text-foreground/50 leading-[1.8] mt-3 whitespace-pre-line">
                             {t("birth_time_warning")}
                           </p>
                         </motion.div>
@@ -304,7 +269,7 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
                         href={helpLink.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 mt-3 ml-0 font-body text-[13px] text-primary hover:text-primary/80 transition-colors"
+                        className="flex items-center gap-1.5 mt-3 ml-0 font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors"
                       >
                         {helpLink.text}
                         <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -316,15 +281,12 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
             </AnimatePresence>
           </div>
 
-          {/* Birth place — Smart Autocomplete */}
+          {/* Birth place */}
           <div className="space-y-2">
-            <label className="font-body text-[12px] uppercase tracking-[0.15em] text-muted-foreground">
+            <label className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground/40">
               {t("birth_place_label")}
             </label>
-            <LocationAutocomplete
-              value={locationName}
-              onChange={handleLocationChange}
-            />
+            <LocationAutocomplete value={locationName} onChange={handleLocationChange} />
           </div>
 
           {/* CTA */}
@@ -332,13 +294,13 @@ const BirthCoordinates = ({ onSubmit, onBack }: BirthCoordinatesProps) => {
             <button
               type="submit"
               disabled={!isValid}
-              className="w-full h-[52px] rounded-sm font-body font-medium text-[14px] tracking-wide transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed bg-primary text-primary-foreground hover:brightness-110"
+              className="w-full h-[48px] font-body font-medium text-[13px] uppercase tracking-[0.15em] transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed bg-foreground text-background hover:opacity-85"
             >
               {t("birth_cta")}
             </button>
           </div>
 
-          <p className="font-body text-[12px] text-foreground/50 text-center pt-2">
+          <p className="font-body text-[12px] text-foreground/30 text-center pt-2">
             {t("birth_privacy")}
           </p>
         </motion.form>

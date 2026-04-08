@@ -22,9 +22,9 @@ interface TransitCalendarProps {
 }
 
 const TRAFFIC_DOTS: Record<string, string> = {
-  green: "bg-emerald-400",
-  amber: "bg-amber-400",
-  red: "bg-red-400",
+  green: "bg-emerald-400/70",
+  amber: "bg-amber-400/70",
+  red: "bg-red-400/70",
 };
 
 const MOON_EMOJI: Record<string, string> = {
@@ -90,9 +90,9 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
   if (loading) {
     return (
       <section className="pt-8 pb-4 flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-6 h-6 text-primary animate-spin mb-4" />
+        <Loader2 className="w-6 h-6 text-foreground/40 animate-spin mb-4" />
         <p className="font-body text-[14px] text-muted-foreground mb-1">{t("transit_loading")}</p>
-        <p className="font-body text-[12px] text-muted-foreground/60">{t("transit_loading_detail")}</p>
+        <p className="font-body text-[12px] text-foreground/20">{t("transit_loading_detail")}</p>
       </section>
     );
   }
@@ -100,7 +100,7 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
   if (transits.length === 0) {
     return (
       <section className="pt-8 pb-4 text-center py-12">
-        <p className="font-display text-[16px] text-foreground/70 mb-2">{t("transit_empty_title")}</p>
+        <p className="font-display text-[16px] text-foreground/50 mb-2">{t("transit_empty_title")}</p>
         <p className="font-body text-[13px] text-muted-foreground">{t("transit_empty_detail")}</p>
       </section>
     );
@@ -108,14 +108,13 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
 
   return (
     <section className="pt-8 pb-4">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="mb-6"
       >
-        <p className="font-display text-[14px] tracking-[0.35em] text-primary mb-2">
+        <p className="font-body text-[11px] uppercase tracking-[0.3em] text-foreground/40 mb-2">
           {t("transit_heading")}
         </p>
         <p className="font-body text-[13px] text-muted-foreground">
@@ -143,25 +142,25 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
               <button
                 key={tr.date}
                 onClick={() => scrollToCard(tr.date)}
-                className={`shrink-0 flex flex-col items-center gap-1 rounded-md px-2.5 py-2 transition-all duration-200 ${
+                className={`shrink-0 flex flex-col items-center gap-1 px-2.5 py-2 transition-all duration-200 ${
                   isToday
-                    ? "bg-primary/15 border border-primary/30 min-w-[48px]"
+                    ? "border-b border-foreground"
                     : isSelected
-                    ? "bg-card border border-border"
-                    : "bg-transparent border border-transparent hover:bg-card/50"
+                    ? "border-b border-foreground/30"
+                    : "border-b border-transparent hover:border-foreground/10"
                 }`}
               >
-                <span className="font-body text-[10px] text-muted-foreground uppercase">
+                <span className="font-body text-[10px] text-foreground/30 uppercase">
                   {d.toLocaleDateString("en-GB", { weekday: "short" })}
                 </span>
                 <span
                   className={`font-body text-[14px] ${
-                    isToday ? "text-primary font-semibold" : "text-foreground"
+                    isToday ? "text-foreground font-semibold" : "text-foreground/60"
                   }`}
                 >
                   {d.getDate()}
                 </span>
-                <span className={`w-2 h-2 rounded-full ${TRAFFIC_DOTS[tr.traffic_light]}`} />
+                <span className={`w-1.5 h-1.5 rounded-full ${TRAFFIC_DOTS[tr.traffic_light]}`} />
               </button>
             );
           })}
@@ -182,11 +181,10 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: Math.min(i * 0.03, 0.5) }}
-              className={`bg-card border rounded-md p-5 ${
-                isToday ? "border-primary/40" : "border-border"
+              className={`border p-5 ${
+                isToday ? "border-foreground/30" : "border-border"
               }`}
             >
-              {/* Date line */}
               <div className="flex items-center justify-between mb-3">
                 <p className="font-body text-[13px] text-foreground font-medium">
                   {d.toLocaleDateString("en-GB", {
@@ -196,45 +194,41 @@ const TransitCalendar = ({ onRevisitDecision }: TransitCalendarProps) => {
                   })}
                 </p>
                 {isToday && (
-                  <span className="px-2 py-0.5 rounded-sm bg-primary/15 font-body text-[10px] uppercase tracking-wider text-primary">
+                  <span className="px-2 py-0.5 border border-foreground/20 font-body text-[10px] uppercase tracking-[0.15em] text-foreground/60">
                     {t("transit_today")}
                   </span>
                 )}
               </div>
 
-              {/* Moon phase */}
-              <span className="inline-block px-2.5 py-1 rounded-full bg-muted font-body text-[11px] text-muted-foreground mb-3">
+              <span className="inline-block px-2.5 py-1 border border-border font-body text-[11px] text-foreground/40 mb-3">
                 {moonEmoji} {tr.moon_phase}
               </span>
 
-              {/* Traffic light + headline */}
               <div className="flex items-start gap-2.5 mb-2">
                 <span
-                  className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${TRAFFIC_DOTS[tr.traffic_light]}`}
+                  className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 ${TRAFFIC_DOTS[tr.traffic_light]}`}
                 />
-                <p className="font-display text-[15px] leading-[1.5] text-card-foreground font-medium">
+                <p className="font-display text-[15px] leading-[1.5] text-foreground font-medium">
                   {tr.transit_headline}
                 </p>
               </div>
 
-              {/* Detail */}
-              <p className="font-body text-[13px] leading-[1.6] text-muted-foreground mb-3 pl-5">
+              <p className="font-body text-[13px] leading-[1.8] text-foreground/50 mb-3 pl-4">
                 {tr.transit_detail}
               </p>
 
-              {/* Linked decision */}
               {tr.linked_domain && (
                 <button
                   onClick={() => {
                     trackEvent(EVENTS.CALENDAR_DECISION_LINK_TAPPED);
                     onRevisitDecision?.(tr.linked_domain!);
                   }}
-                  className="flex items-center gap-2 pl-5"
+                  className="flex items-center gap-2 pl-4"
                 >
-                  <span className="px-2 py-0.5 rounded-sm bg-primary/15 font-body text-[11px] uppercase tracking-wider text-primary">
+                  <span className="px-2 py-0.5 border border-foreground/15 font-body text-[11px] uppercase tracking-[0.15em] text-foreground/40">
                     {t("transit_relevant", { domain: tr.linked_domain })}
                   </span>
-                  <span className="font-body text-[12px] text-primary hover:text-primary/80 transition-colors">
+                  <span className="font-body text-[12px] text-foreground/40 hover:text-foreground/60 transition-colors">
                     {t("transit_revisit")}
                   </span>
                 </button>
