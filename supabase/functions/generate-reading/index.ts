@@ -254,7 +254,7 @@ serve(async (req) => {
       ? `\n\nREGENERATION CONTEXT: The user received a previous reading and felt it didn't fit. Their feedback: "${regenerationFeedback}"\nYou MUST take this feedback seriously. Generate a substantially different reading that addresses what they flagged. Do NOT repeat the same Third Way or similar phrasing. Shift your angle, explore a different transit emphasis, and offer a fresh perspective that directly responds to their concern.`
       : "";
 
-    // ─── Real Astrology API (astrology-api.io) ─────────────────────────
+    // ─── Real Astrology API (astrology-api.io v3) ────────────────────────
     const ASTROLOGY_API_KEY = Deno.env.get("ASTROLOGY_API_KEY");
     let chartContext = "";
 
@@ -278,106 +278,154 @@ serve(async (req) => {
           bHour = parseInt(tp[0], 10); bMinute = parseInt(tp[1], 10);
         }
 
+        const BASE_URL = "https://api.astrology-api.io/api/v3";
         const apiHeaders = {
           "Authorization": `Bearer ${ASTROLOGY_API_KEY}`,
           "Content-Type": "application/json",
         };
 
-        const birthBody = {
-          day: bDay, month: bMonth, year: bYear,
-          hour: bHour, minute: bMinute,
-          latitude: parseFloat(String(birthLat)), longitude: parseFloat(String(birthLng)),
+        // astrology-api.io v3 wraps birth data in subject.birth_data
+        const birthData = {
+          year: bYear, month: bMonth, day: bDay,
+          hour: bHour, minute: bMinute, second: 0,
+          latitude: parseFloat(String(birthLat)),
+          longitude: parseFloat(String(birthLng)),
           timezone: birthTimezone || "UTC",
         };
 
         const now = new Date();
-        const transitBody = {
-          ...birthBody,
-          transit_day: now.getDate(), transit_month: now.getMonth() + 1, transit_year: now.getFullYear(),
-          transit_hour: now.getHours(), transit_minute: now.getMinutes(),
+        // Transit uses transit_time.datetime with year/month/day/hour + lat/lng/timezone
+        const transitDateTime = {
+          year: now.getUTCFullYear(),
+          month: now.getUTCMonth() + 1,
+          day: now.getUTCDate(),
+          hour: now.getUTCHours(),
+          minute: now.getUTCMinutes(),
+          latitude: parseFloat(String(birthLat)),
+          longitude: parseFloat(String(birthLng)),
+          timezone: "UTC",
         };
 
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 7000);
+        const apiController = new AbortController();
+        const apiTimeout = setTimeout(() => apiController.abort(), 8000);
 
         // Call natal chart + transits + Human Design in parallel
         const [natalRes, transitRes, hdRes] = await Promise.allSettled([
-          fetch("https://astrology-api.io/api/v1/natal-chart", {
+          fetch(`${BASE_URL}/charts/natal`, {
             method: "POST", headers: apiHeaders,
-            body: JSON.stringify(birthBody),
-            signal: controller.signal,
+            body: JSON.stringify({ subject: { name: "user", birth_data: birthData } }),
+            signal: apiController.signal,
           }),
-          fetch("https://astrology-api.io/api/v1/transits", {
+          fetch(`${BASE_URL}/charts/transit`, {
             method: "POST", headers: apiHeaders,
-            body: JSON.stringify(transitBody),
-            signal: controller.signal,
+            body: JSON.stringify({
+              subject: { name: "user", birth_data: birthData },
+              transit_time: { datetime: transitDateTime },
+            }),
+            signal: apiController.signal,
           }),
-          fetch("https://astrology-api.io/api/v1/human-design", {
+          fetch(`${BASE_URL}/human-design/bodygraph`, {
             method: "POST", headers: apiHeaders,
-            body: JSON.stringify(birthBody),
-            signal: controller.signal,
+            body: JSON.stringify({ subject: { name: "user", birth_data: birthData } }),
+            signal: apiController.signal,
           }),
         ]);
 
-        clearTimeout(timeout);
+        clearTimeout(apiTimeout);
 
         let natalData: any = null, transitData: any = null, hdData: any = null;
 
         if (natalRes.status === "fulfilled" && natalRes.value.ok) {
           natalData = await natalRes.value.json();
+        } else if (natalRes.status === "fulfilled") {
+          console.warn("natal-chart API error:", natalRes.value.status, await natalRes.value.text());
         }
         if (transitRes.status === "fulfilled" && transitRes.value.ok) {
           transitData = await transitRes.value.json();
+        } else if (transitRes.status === "fulfilled") {
+          console.warn("transit API error:", transitRes.value.status, await transitRes.value.text());
         }
         if (hdRes.status === "fulfilled" && hdRes.value.ok) {
           hdData = await hdRes.value.json();
+        } else if (hdRes.status === "fulfilled") {
+          console.warn("human-design API error:", hdRes.value.status, await hdRes.value.text());
         }
 
-        if (natalData) {
-          // Build natal planet lines from response
-          const planets = natalData.planets || natalData.natal_planets || [];
-          const natalLines = planets.map((p: any) => {
-            const retro = p.is_retrograde ? " [RETROGRADE]" : "";
-            return `${p.name}: ${p.degree?.toFixed(1) || p.longitude?.toFixed(1)}° ${p.sign || p.zodiac_sign} (${p.house || ""}h)${retro}`;
-          }).join("\n");
+        // ── Response shape: natal uses subject_data.<planet_name> objects ──
+        // e.g. subject_data.sun = { name, sign, position, abs_pos, house, retrograde }
+        if (natalData?.subject_data) {
+          const sd = natalData.subject_data;
+          const PLANET_KEYS = ["sun","moon","mercury","venus","mars","jupiter","saturn","uranus","neptune","pluto","mean_node","chiron"];
+          const natalLines = PLANET_KEYS
+            .filter(k => sd[k])
+            .map(k => {
+              const p = sd[k];
+              const retro = p.retrograde ? " [RETROGRADE]" : "";
+              const house = p.house ? ` (${p.house.replace("_House","")} house)` : "";
+              return `${p.name}: ${p.position?.toFixed(1)}° ${p.sign}${house}${retro}`;
+            }).join("\n");
 
-          const ascendant = natalData.ascendant || natalData.rising_sign || "";
-          const midheaven = natalData.midheaven || natalData.mc || "";
+          const asc = sd.first_house;
+          const mc = sd.tenth_house;
+          const ascLine = asc ? `Ascendant: ${asc.position?.toFixed(1)}° ${asc.sign}` : "";
+          const mcLine = mc ? `Midheaven: ${mc.position?.toFixed(1)}° ${mc.sign}` : "";
 
-          // Build transit lines
+          // ── Transit: chart_data.planetary_positions (name ends in _transit) + aspects ──
           let transitLines = "";
-          if (transitData) {
-            const transits = transitData.planets || transitData.transit_planets || [];
-            transitLines = transits.map((p: any) => {
-              const retro = p.is_retrograde ? " [R]" : "";
-              return `${p.name}: ${p.sign || p.zodiac_sign}${retro}`;
-            }).join(", ");
-          }
-
-          // Build Human Design context
-          let hdContext = "";
-          if (hdData) {
-            const type = hdData.type || hdData.human_design_type || "";
-            const profile = hdData.profile || "";
-            const authority = hdData.authority || hdData.inner_authority || "";
-            const gates = (hdData.active_gates || hdData.defined_gates || []).slice(0, 6).join(", ");
-            hdContext = `\nHuman Design type: ${type}\nProfile: ${profile}\nAuthority: ${authority}\nActive gates: ${gates}`;
-          }
-
-          // Build key aspects (transit to natal)
           let aspectLines = "";
-          if (transitData?.aspects || transitData?.transit_aspects) {
-            const aspects = transitData.aspects || transitData.transit_aspects || [];
-            aspectLines = aspects.slice(0, 8).map((a: any) =>
-              `${a.transit_planet || a.transiting_planet} ${a.aspect_type || a.aspect} natal ${a.natal_planet || a.natal_body}`
+          if (transitData?.chart_data) {
+            const positions: any[] = transitData.chart_data.planetary_positions || [];
+            const transitPlanets = positions
+              .filter((p: any) => p.name?.endsWith("_transit"))
+              .map((p: any) => {
+                const retro = p.is_retrograde ? " [R]" : "";
+                return `${p.name.replace("_transit","")}: ${p.degree?.toFixed(1)}° ${p.sign}${retro}`;
+              });
+            transitLines = transitPlanets.join("\n");
+
+            const aspects: any[] = (transitData.chart_data.aspects || []).slice(0, 10);
+            aspectLines = aspects.map((a: any) =>
+              `${a.point1.replace("_transit"," transit")} ${a.aspect_type} ${a.point2.replace("_natal"," natal")} (orb ${a.orb?.toFixed(1)}°, ${a.aspect_direction})`
             ).join("\n");
           }
 
-          chartContext = `\n\nREAL CALCULATED CHART DATA (computed from Swiss Ephemeris — use these exact values, do not guess):\n\nNATAL PLANETS:\n${natalLines}\n${ascendant ? `Ascendant: ${ascendant}` : ""}\n${midheaven ? `Midheaven: ${midheaven}` : ""}${hdContext}\n\nTODAY'S TRANSITS (current planetary positions):\n${transitLines}\n\n${aspectLines ? `KEY TRANSIT ASPECTS TO YOUR NATAL CHART:\n${aspectLines}` : ""}\n\nIMPORTANT: Reference these EXACT planetary positions and aspects in your astrology_reading. Mention specific planets by name, their signs, and relevant aspects. Do NOT fabricate or approximate — use only the data above.`;
+          // ── Human Design: data.bodygraph ──
+          let hdContext = "";
+          if (hdData?.data?.bodygraph) {
+            const bg = hdData.data.bodygraph;
+            const pgates = (bg.personality_gates || []).slice(0, 6).map((g: any) => `${g.gate}.${g.line}`).join(", ");
+            const dgates = (bg.design_gates || []).slice(0, 6).map((g: any) => `${g.gate}.${g.line}`).join(", ");
+            hdContext = `
+
+HUMAN DESIGN (from Swiss Ephemeris):
+Type: ${bg.type}
+Profile: ${bg.profile}
+Authority: ${bg.authority}
+Definition: ${bg.definition}
+Incarnation Cross: ${bg.incarnation_cross || ""}
+Personality gates: ${pgates}
+Design gates: ${dgates}`;
+          }
+
+          chartContext = `
+
+REAL CALCULATED CHART DATA (Swiss Ephemeris — use these exact values, do not guess or approximate):
+
+NATAL PLANETS:
+${natalLines}
+${ascLine}
+${mcLine}${hdContext}
+
+TODAY'S TRANSITS (current sky, ${now.toISOString().slice(0,10)}):
+${transitLines}
+
+${aspectLines ? `KEY TRANSIT ASPECTS TO NATAL CHART:\n${aspectLines}` : ""}
+
+IMPORTANT: Reference these EXACT planetary positions, signs, houses, and aspects in your astrology_reading. Name specific planets with their signs and relevant aspects. Do NOT fabricate or approximate any chart data — use only the values above.`;
         }
       } catch (chartError: any) {
         console.warn("Astrology API call failed, proceeding without chart data:", chartError.message);
-        // Fallback gracefully — the reading continues without real chart data
+        // Graceful fallback — reading continues without real chart data
       }
     }
 
