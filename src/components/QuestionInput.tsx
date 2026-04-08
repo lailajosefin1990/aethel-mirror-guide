@@ -85,18 +85,16 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
   return (
     <section className="min-h-screen px-5 py-8">
       <div className="w-full max-w-app mx-auto">
-        {/* Back */}
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
           onClick={onBack}
-          className="mb-10 text-foreground/50 hover:text-foreground/70 transition-colors duration-300"
+          className="mb-10 text-foreground/30 hover:text-foreground/50 transition-colors duration-300"
         >
           <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
         </motion.button>
 
-        {/* Heading */}
         <motion.h1
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -110,7 +108,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.25 }}
-          className="font-body text-[14px] text-muted-foreground leading-relaxed mb-10"
+          className="font-body text-[14px] text-muted-foreground leading-[1.8] mb-10"
         >
           {t("question_subtitle")}
         </motion.p>
@@ -122,7 +120,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
           onSubmit={handleSubmit}
           className="space-y-8"
         >
-          {/* Domain tiles — 2-column grid */}
+          {/* Domain tiles */}
           <motion.div
             className="grid grid-cols-2 gap-3"
             role="radiogroup"
@@ -151,10 +149,10 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
                        setSelectedDomain(prev.value);
                      }
                    }}
-                  className={`px-4 py-3.5 rounded-sm font-body text-[13px] border transition-all duration-300 text-left ${
+                  className={`px-4 py-3.5 font-body text-[13px] border transition-all duration-300 text-left ${
                     isSelected
-                      ? "border-primary text-primary bg-primary/5"
-                      : "border-border text-foreground/70 bg-card hover:border-foreground/30"
+                      ? "border-foreground text-foreground bg-foreground/5"
+                      : "border-border text-foreground/50 bg-transparent hover:border-foreground/20"
                   }`}
                 >
                   {t(key)}
@@ -186,7 +184,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <p className="font-body text-[11px] text-muted-foreground mb-2">{t("question_try_example")}</p>
+                <p className="font-body text-[11px] text-foreground/30 mb-2">{t("question_try_example")}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {examplePrompts.map((prompt) => (
                     <button
@@ -196,7 +194,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
                         setQuestion(prompt);
                         textareaRef.current?.focus();
                       }}
-                      className="px-3 py-1.5 rounded-full border border-border text-[13px] font-body text-muted-foreground hover:border-primary/40 hover:text-foreground transition-all duration-200 cursor-pointer text-left"
+                      className="px-3 py-1.5 border border-border text-[13px] font-body text-foreground/40 hover:border-foreground/20 hover:text-foreground/60 transition-all duration-200 cursor-pointer text-left"
                     >
                       {prompt}
                     </button>
@@ -214,9 +212,9 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
               onChange={handleTextChange}
               placeholder={t("question_placeholder")}
               rows={4}
-              className="w-full px-4 py-3 rounded-sm bg-card text-foreground font-body text-[14px] leading-relaxed border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none"
+              className="w-full px-4 py-3 bg-transparent text-foreground font-body text-[14px] leading-[1.8] border border-border placeholder:text-foreground/20 focus:outline-none focus:border-foreground/30 transition-colors duration-300 resize-none"
             />
-            <span className="absolute bottom-3 right-3 font-body text-[11px] text-muted-foreground">
+            <span className="absolute bottom-3 right-3 font-body text-[11px] text-foreground/20">
               {question.length}/{MAX_CHARS}
             </span>
           </div>
@@ -250,10 +248,10 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
                       setSelectedMode(modeKeys[(idx - 1 + modeKeys.length) % modeKeys.length].value);
                     }
                   }}
-                  className={`flex-1 py-2.5 rounded-sm font-body text-[12px] sm:text-[13px] border transition-all duration-300 ${
+                  className={`flex-1 py-2.5 font-body text-[12px] sm:text-[13px] border transition-all duration-300 ${
                     isSelected
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-transparent text-foreground/60 border-border hover:border-foreground/30"
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-transparent text-foreground/40 border-border hover:border-foreground/20"
                   }`}
                 >
                   {t(key)}
@@ -279,7 +277,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
           {/* CTA */}
           <button
             type="submit"
-            className={`w-full h-[52px] rounded-sm font-body font-medium text-[14px] tracking-wide transition-all duration-300 bg-primary text-primary-foreground hover:brightness-110 ${
+            className={`w-full h-[48px] font-body font-medium text-[13px] uppercase tracking-[0.15em] transition-all duration-300 bg-foreground text-background hover:opacity-85 ${
               !isValid ? "opacity-30 cursor-not-allowed" : ""
             }`}
           >
@@ -292,7 +290,7 @@ const QuestionInput = ({ onSubmit, onBack }: QuestionInputProps) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="font-body text-[12px] text-primary text-center -mt-4"
+                className="font-body text-[12px] text-foreground/50 text-center -mt-4"
               >
                 {t("question_pick_domain")}
               </motion.p>

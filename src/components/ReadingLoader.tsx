@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { trackEvent, EVENTS } from "@/lib/analytics";
 
 const phrases = [
@@ -22,7 +22,6 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
   const [error, setError] = useState(false);
   const started = useRef(false);
 
-  // Start API call
   useEffect(() => {
     if (started.current) return;
     started.current = true;
@@ -35,7 +34,6 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
       });
   }, [generateReading, onError]);
 
-  // Animate phrases
   useEffect(() => {
     const interval = setInterval(() => {
       setPhraseIndex((prev) => {
@@ -50,21 +48,22 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
     return () => clearInterval(interval);
   }, []);
 
-  // Complete when both API and animation are done
   useEffect(() => {
     if (apiDone && animDone && !error) {
       onComplete();
     }
   }, [apiDone, animDone, error, onComplete]);
 
+  const progress = ((phraseIndex + 1) / phrases.length) * 100;
+
   if (error) {
     return (
       <section className="min-h-screen flex flex-col items-center justify-center px-5">
-        <div className="w-full max-w-md bg-card border border-border rounded-md p-6 text-center">
-          <p className="font-display text-[18px] text-card-foreground mb-3">
+        <div className="w-full max-w-md border border-border p-6 text-center">
+          <p className="font-display text-[18px] text-foreground mb-3">
             Your mirror needs a moment.
           </p>
-          <p className="font-body text-[14px] text-muted-foreground mb-6">
+          <p className="font-body text-[13px] text-muted-foreground mb-6">
             Try again.
           </p>
           <button
@@ -74,7 +73,7 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
               setPhraseIndex(0);
               started.current = false;
             }}
-            className="h-[48px] px-8 rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] hover:brightness-110 transition-all duration-300"
+            className="h-[48px] px-8 bg-foreground text-background font-body font-medium text-[13px] uppercase tracking-[0.15em] hover:opacity-85 transition-opacity duration-300"
           >
             Retry
           </button>
@@ -85,40 +84,30 @@ const ReadingLoader = ({ onComplete, onError, generateReading }: ReadingLoaderPr
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center px-5" aria-label="Loading your reading">
-      <motion.p
-        animate={{ opacity: [0.4, 1, 0.4] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        className="font-display text-[14px] tracking-[0.45em] text-primary mb-12"
-      >
-        A E T H E L &nbsp; M I R R O R
-      </motion.p>
-
-      <div className="h-6 relative" role="status" aria-live="polite">
-        <AnimatePresence mode="wait">
-          <motion.p
-            key={phraseIndex}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.4 }}
-            className="font-body text-[14px] text-muted-foreground"
-          >
-            {phrases[phraseIndex]}
-          </motion.p>
-        </AnimatePresence>
+      {/* Expanding line */}
+      <div className="w-64 h-px bg-border mb-12 overflow-hidden">
+        <motion.div
+          className="h-full bg-foreground/60"
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        />
       </div>
 
-      <div className="flex items-center justify-center gap-2 mt-6">
-        {phrases.map((_, i) => (
-          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
-            i <= phraseIndex ? "bg-primary" : "bg-border"
-          }`} />
-        ))}
+      <div className="h-6 relative" role="status" aria-live="polite">
+        <motion.p
+          key={phraseIndex}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="font-body text-[13px] text-foreground/60"
+        >
+          {phrases[phraseIndex]}
+        </motion.p>
       </div>
 
       <button
         onClick={() => { trackEvent(EVENTS.READING_WAIT_CANCELLED); onError?.(); }}
-        className="font-body text-[12px] text-muted-foreground/50 hover:text-muted-foreground mt-8 transition-colors"
+        className="font-body text-[12px] text-foreground/20 hover:text-foreground/40 mt-8 transition-colors"
       >
         Cancel
       </button>

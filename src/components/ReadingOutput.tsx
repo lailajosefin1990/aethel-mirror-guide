@@ -26,13 +26,13 @@ interface ReadingOutputProps {
 }
 
 const ExpandableText = ({ text }: { text: string }) => (
-  <p className="font-display text-[16px] leading-[1.6] text-foreground">{text}</p>
+  <p className="font-body text-[14px] leading-[1.8] text-foreground/85">{text}</p>
 );
 
 const ExpandableBullet = ({ text }: { text: string }) => (
   <div className="flex items-start gap-3">
-    <span className="text-primary mt-1 shrink-0">—</span>
-    <span className="font-display text-[16px] leading-[1.6] text-foreground">
+    <span className="text-foreground/40 mt-1 shrink-0">—</span>
+    <span className="font-body text-[14px] leading-[1.8] text-foreground/85">
       {text.replace(/^—\s*/, "")}
     </span>
   </div>
@@ -53,14 +53,12 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
 
   const isPro = subscriptionTier === "mirror_pro" || subscriptionTier === "practitioner";
 
-  // Track reading loaded
   useEffect(() => {
     if (reading) {
       trackEvent(EVENTS.READING_LOADED, { confidence_level: reading.confidence_level });
     }
   }, [reading]);
 
-  // Track Third Way scroll into view
   useEffect(() => {
     const el = thirdWayRef.current;
     if (!el) return;
@@ -77,10 +75,9 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
     return () => observer.disconnect();
   }, [reading]);
 
-  // Set OG image meta tags for social sharing
   useOgImage({ thirdWay: reading?.third_way || "", domain });
 
-  const sectionLabel = "font-body text-[11px] uppercase tracking-[0.35em] text-muted-foreground mb-4";
+  const sectionLabel = "font-body text-[11px] uppercase tracking-[0.3em] text-foreground/40 mb-4";
 
   const handleShare = useCallback(async () => {
     if (!reading) return;
@@ -130,7 +127,6 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
         files: [file],
       });
     } catch {
-      // User cancelled or not supported — fall back to download
       handleDownload();
     }
   }, [cardBlob, reading, handleDownload]);
@@ -142,18 +138,15 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
   return (
     <section className="min-h-screen px-5 py-8" role="article" aria-label="Your reading">
       <div className="w-full max-w-app mx-auto">
-        {/* Back */}
-        <button onClick={onBack} className="mb-8 text-foreground/50 hover:text-foreground/70 transition-colors duration-300" aria-label="Go back">
+        <button onClick={onBack} className="mb-8 text-foreground/30 hover:text-foreground/50 transition-colors duration-300" aria-label="Go back">
           <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
         </button>
 
-        {/* Domain breadcrumb */}
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
-          className="font-body text-[11px] uppercase tracking-[0.2em] text-primary mb-10">
+          className="font-body text-[11px] uppercase tracking-[0.3em] text-foreground/40 mb-10">
           {domain}
         </motion.p>
 
-        {/* Your Data */}
         <TransitPreview birthDate={birthDate} compact />
 
         {/* Stars section */}
@@ -171,7 +164,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
             ))}
           </div>
           {birthTimeUnknown && (
-            <p className="font-body text-[12px] italic text-muted-foreground mt-4">
+            <p className="font-body text-[12px] italic text-foreground/30 mt-4">
               {t("birth_time_disclaimer")}
             </p>
           )}
@@ -179,38 +172,35 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
 
         {/* Confidence */}
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.3 }}
-          className="font-body text-[13px] italic text-primary/80 mb-10" aria-live="polite">
+          className="font-body text-[13px] italic text-foreground/50 mb-10" aria-live="polite">
           {confidenceText}
         </motion.p>
 
-        {/* Divider + Third Way */}
+        {/* Third Way */}
         <motion.div ref={thirdWayRef} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}
-          className="border-t-2 border-primary/40 pt-8 mb-10" aria-label="Your Third Way">
+          className="border-t border-foreground/15 pt-8 mb-10" aria-label="Your Third Way">
           <p className={`${sectionLabel} text-center`}>{t("reading_third_way_label")}</p>
-          <p className="font-display text-[22px] sm:text-[24px] leading-[1.4] text-foreground text-center font-medium">
+          <p className="font-display text-[20px] leading-[1.5] text-foreground text-center italic">
             {reading.third_way}
           </p>
         </motion.div>
 
         {/* Journal prompt */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}
-          className="bg-card border border-border rounded-md p-5 mb-6" aria-label="Journal prompt">
-          <p className="font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3">{t("reading_journal_label")}</p>
-          <p className="font-display text-[16px] leading-[1.6] text-card-foreground">{reading.journal_prompt}</p>
+          className="border border-border p-5 mb-6" aria-label="Journal prompt">
+          <p className="font-body text-[11px] uppercase tracking-[0.3em] text-foreground/40 mb-3">{t("reading_journal_label")}</p>
+          <p className="font-body text-[14px] leading-[1.8] text-foreground/85">{reading.journal_prompt}</p>
         </motion.div>
 
-        {/* Mirror disclaimer */}
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.45 }}
-          className="font-body text-[12px] italic text-foreground/50 text-center mb-2">
+          className="font-body text-[12px] italic text-foreground/30 text-center mb-2">
           {t("reading_mirror_disclaimer")}
         </motion.p>
 
-        {/* Health disclaimer */}
-        <p className="font-body text-[11px] text-muted-foreground/50 text-center mb-4">
+        <p className="font-body text-[11px] text-foreground/20 text-center mb-4">
           {t("reading_health_disclaimer")}
         </p>
 
-        {/* Fallback banner */}
         {reading.is_fallback && (
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.48 }}
             className="font-body text-[11px] text-muted-foreground text-center mb-8">
@@ -223,15 +213,15 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
           className="flex items-center justify-center gap-4 mb-6">
           <button
             onClick={() => { trackEvent(EVENTS.READING_REACTION, { reaction: "positive" }); setReaction("positive"); }}
-            className={`p-2 rounded-full border transition-all duration-200 ${
-              reaction === "positive" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
+            className={`p-2 border transition-all duration-200 ${
+              reaction === "positive" ? "border-foreground text-foreground" : "border-border text-foreground/30 hover:border-foreground/30"
             }`}>
             <span className="text-[16px]">👍</span>
           </button>
           <button
             onClick={() => { trackEvent(EVENTS.READING_REACTION, { reaction: "negative" }); setReaction("negative"); }}
-            className={`p-2 rounded-full border transition-all duration-200 ${
-              reaction === "negative" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
+            className={`p-2 border transition-all duration-200 ${
+              reaction === "negative" ? "border-foreground text-foreground" : "border-border text-foreground/30 hover:border-foreground/30"
             }`}>
             <span className="text-[16px]">👎</span>
           </button>
@@ -251,10 +241,10 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
               onSave();
             }}
             disabled={saved}
-            className={`w-full h-[52px] rounded-sm font-body font-medium text-[14px] tracking-wide transition-all duration-300 ${
+            className={`w-full h-[48px] font-body font-medium text-[13px] uppercase tracking-[0.15em] transition-all duration-300 ${
               saved
-                ? "bg-primary/60 text-primary-foreground cursor-default"
-                : "bg-primary text-primary-foreground hover:brightness-110"
+                ? "bg-foreground/60 text-background cursor-default"
+                : "bg-foreground text-background hover:opacity-85"
             }`}>
             {saved ? t("reading_saved_btn") : t("reading_save")}
           </button>
@@ -264,7 +254,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={onBack}
-              className="w-full h-[48px] rounded-sm border border-primary text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300">
+              className="w-full h-[48px] border border-foreground/20 text-foreground font-body text-[13px] uppercase tracking-[0.15em] hover:opacity-85 transition-all duration-300">
               {t("reading_go_mirror")}
             </motion.button>
           )}
@@ -273,20 +263,19 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
             text={`${reading.astrology_reading}\n\n${reading.design_insights.join("\n")}\n\nYour Third Way: ${reading.third_way}\n\nJournal prompt: ${reading.journal_prompt}`}
           />
 
-          {/* Share Third Way button */}
           <button onClick={handleShare} disabled={generating}
-            className="w-full h-[48px] rounded-sm border border-primary text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50">
+            className="w-full h-[48px] border border-foreground/20 text-foreground font-body text-[13px] uppercase tracking-[0.15em] hover:opacity-85 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50">
             <Share2 className="w-4 h-4" strokeWidth={1.5} />
             {generating ? "Generating..." : t("reading_share")}
           </button>
 
           {regenerationCount >= 3 ? (
-            <p className="font-body text-[13px] italic text-primary text-center py-3">
+            <p className="font-body text-[13px] italic text-foreground/50 text-center py-3">
               {t("reading_regen_cap")}
             </p>
           ) : (
             <button onClick={() => setFeedbackOpen(true)}
-              className="w-full h-[48px] rounded-sm bg-transparent border border-border text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300">
+              className="w-full h-[48px] bg-transparent border border-border text-foreground/50 font-body text-[13px] uppercase tracking-[0.15em] hover:border-foreground/20 transition-all duration-300">
               {t("reading_doesnt_fit")}
             </button>
           )}
@@ -300,35 +289,33 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
             className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 backdrop-blur-sm">
             <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="w-full max-w-app bg-card border-t border-border rounded-t-lg p-6 relative">
+              className="w-full max-w-app bg-card border-t border-border p-6 relative">
               <button onClick={() => { setShareOpen(false); if (cardUrl) URL.revokeObjectURL(cardUrl); }}
-                className="absolute top-4 right-4 text-foreground/50 hover:text-foreground/70 transition-colors">
+                className="absolute top-4 right-4 text-foreground/30 hover:text-foreground/50 transition-colors">
                 <X className="w-4 h-4" strokeWidth={1.5} />
               </button>
 
-              <p className="font-display text-[18px] text-card-foreground mb-4">{t("reading_your_card")}</p>
+              <p className="font-display text-[18px] text-foreground mb-4">{t("reading_your_card")}</p>
 
-              {/* Card preview */}
-              <div className="mb-5 rounded-md overflow-hidden border border-border">
+              <div className="mb-5 overflow-hidden border border-border">
                 <img src={cardUrl} alt="Third Way card" className="w-full h-auto" />
               </div>
 
-              {/* Actions */}
               <div className="flex gap-3">
                 <button onClick={handleDownload}
-                  className="flex-1 h-[48px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-2">
+                  className="flex-1 h-[48px] bg-foreground text-background font-body font-medium text-[13px] uppercase tracking-[0.15em] hover:opacity-85 transition-all duration-300 flex items-center justify-center gap-2">
                   <Download className="w-4 h-4" strokeWidth={1.5} />
                   Download
                 </button>
                 {typeof navigator.share === "function" ? (
                   <button onClick={handleNativeShare}
-                    className="flex-1 h-[48px] rounded-sm border border-primary text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300 flex items-center justify-center gap-2">
+                    className="flex-1 h-[48px] border border-foreground/20 text-foreground font-body text-[13px] uppercase tracking-[0.15em] hover:opacity-85 transition-all duration-300 flex items-center justify-center gap-2">
                     <Share2 className="w-4 h-4" strokeWidth={1.5} />
                     Share
                   </button>
                 ) : (
                   <button onClick={handleCopyLink}
-                    className="flex-1 h-[48px] rounded-sm border border-primary text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300 flex items-center justify-center gap-2">
+                    className="flex-1 h-[48px] border border-foreground/20 text-foreground font-body text-[13px] uppercase tracking-[0.15em] hover:opacity-85 transition-all duration-300 flex items-center justify-center gap-2">
                     <Link2 className="w-4 h-4" strokeWidth={1.5} />
                     Copy link
                   </button>
@@ -345,16 +332,16 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm px-5">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }} className="w-full max-w-app bg-card border border-border rounded-md p-6 relative">
+              transition={{ duration: 0.2 }} className="w-full max-w-app border border-border bg-card p-6 relative">
               <button onClick={() => setFeedbackOpen(false)}
-                className="absolute top-4 right-4 text-foreground/50 hover:text-foreground/70 transition-colors">
+                className="absolute top-4 right-4 text-foreground/30 hover:text-foreground/50 transition-colors">
                 <ChevronDown className="w-4 h-4 rotate-45" strokeWidth={1.5} />
               </button>
-              <p className="font-display text-[18px] text-card-foreground mb-2">{t("reading_feedback_title")}</p>
+              <p className="font-display text-[18px] text-foreground mb-2">{t("reading_feedback_title")}</p>
               <p className="font-body text-[13px] text-muted-foreground mb-4">{t("reading_feedback_subtitle")}</p>
               <textarea value={feedbackText} onChange={(e) => setFeedbackText(e.target.value)}
                 placeholder={t("reading_feedback_placeholder")} rows={3}
-                className="w-full px-4 py-3 rounded-sm bg-background text-foreground font-body text-[14px] border border-border placeholder:text-muted-foreground focus:outline-none focus:border-primary/60 transition-colors duration-300 resize-none mb-4" />
+                className="w-full px-4 py-3 bg-background text-foreground font-body text-[14px] border border-border placeholder:text-foreground/20 focus:outline-none focus:border-foreground/30 transition-colors duration-300 resize-none mb-4" />
               <button onClick={() => { 
                   const feedback = feedbackText;
                   trackEvent(EVENTS.READING_REGENERATED, { regeneration_number: (regenerationCount || 0) + 1 }); 
@@ -362,7 +349,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
                   setFeedbackText(""); 
                   onRegenerate?.(feedback); 
                 }}
-                className="w-full h-[48px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] hover:brightness-110 transition-all duration-300">
+                className="w-full h-[48px] bg-foreground text-background font-body font-medium text-[13px] uppercase tracking-[0.15em] hover:opacity-85 transition-all duration-300">
                 {t("reading_regenerate")}
               </button>
             </motion.div>

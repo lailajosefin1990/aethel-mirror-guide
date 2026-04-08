@@ -25,7 +25,6 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
   const paddingItems = Math.floor(VISIBLE_ITEMS / 2);
   const paddingHeight = paddingItems * itemHeight;
 
-  // Scroll to value on mount / value change
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -62,7 +61,6 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
     rafId.current = requestAnimationFrame(decelerate);
   }, [snapToNearest]);
 
-  // Prevent native touch scrolling on the drum container
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -122,7 +120,6 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
     cancelAnimationFrame(rafId.current);
     el.scrollTop += e.deltaY;
     setIsScrolling(true);
-    // Debounce snap
     clearTimeout((el as any)._wheelTimer);
     (el as any)._wheelTimer = setTimeout(() => {
       setIsScrolling(false);
@@ -130,7 +127,6 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
     }, 150);
   }, [snapToNearest]);
 
-  // Click on an item to select it
   const handleItemClick = (idx: number) => {
     const el = containerRef.current;
     if (!el || isScrolling) return;
@@ -147,23 +143,23 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
       className="relative overflow-hidden select-none"
       style={{ height }}
     >
-      {/* Gold selection indicator lines */}
+      {/* Selection indicator lines */}
       <div
         className="absolute left-0 right-0 pointer-events-none z-10"
         style={{ top: paddingHeight - 1 }}
       >
-        <div className="h-px bg-primary/60" />
+        <div className="h-px bg-foreground/20" />
       </div>
       <div
         className="absolute left-0 right-0 pointer-events-none z-10"
         style={{ top: paddingHeight + itemHeight }}
       >
-        <div className="h-px bg-primary/60" />
+        <div className="h-px bg-foreground/20" />
       </div>
 
-      {/* Fade gradients top/bottom */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-card to-transparent z-[5] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-card to-transparent z-[5] pointer-events-none" />
+      {/* Fade gradients */}
+      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-background to-transparent z-[5] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent z-[5] pointer-events-none" />
 
       <div
         ref={containerRef}
@@ -189,7 +185,6 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
             }
           } else if (e.key === "Enter") {
             e.preventDefault();
-            // confirm current selection — already selected via onChange
           }
         }}
         onPointerDown={handlePointerDown}
@@ -211,7 +206,7 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
                   ? "opacity-20 cursor-not-allowed"
                   : isSelected
                     ? "opacity-100"
-                    : "opacity-40 hover:opacity-60"
+                    : "opacity-30 hover:opacity-50"
               )}
               style={{ height: itemHeight }}
               onClick={() => handleItemClick(idx)}
@@ -221,7 +216,7 @@ const DrumRoller = ({ items, value, onChange, height = 200, itemHeight = 40 }: D
                   "transition-all duration-150",
                   isSelected
                     ? "font-display text-[20px] text-foreground"
-                    : "font-body text-[14px] text-muted-foreground"
+                    : "font-body text-[14px] text-foreground/50"
                 )}
               >
                 {item.label}

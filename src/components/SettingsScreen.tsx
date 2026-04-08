@@ -58,18 +58,9 @@ const SettingsScreen = () => {
         .eq("user_id", user.id)
         .single();
       if (profile?.referral_code) setReferralCode(profile.referral_code);
-      if (profile?.birth_time) {
-        setCurrentBirthTime(profile.birth_time);
-        setBirthTimeValue(profile.birth_time);
-      }
-      if (profile?.birth_date) {
-        setCurrentBirthDate(profile.birth_date);
-        setBirthDateValue(profile.birth_date);
-      }
-      if (profile?.birth_place_name) {
-        setCurrentBirthPlace(profile.birth_place_name);
-        setBirthPlaceValue(profile.birth_place_name);
-      }
+      if (profile?.birth_time) { setCurrentBirthTime(profile.birth_time); setBirthTimeValue(profile.birth_time); }
+      if (profile?.birth_date) { setCurrentBirthDate(profile.birth_date); setBirthDateValue(profile.birth_date); }
+      if (profile?.birth_place_name) { setCurrentBirthPlace(profile.birth_place_name); setBirthPlaceValue(profile.birth_place_name); }
 
       const { data: referrals } = await supabase
         .from("referrals")
@@ -157,7 +148,7 @@ const SettingsScreen = () => {
     }
   };
 
-  const sectionLabel = "font-body text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-3";
+  const sectionLabel = "font-body text-[11px] uppercase tracking-[0.2em] text-foreground/40 mb-3";
 
   return (
     <section className="pt-8 pb-4">
@@ -165,101 +156,71 @@ const SettingsScreen = () => {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="font-display text-[14px] tracking-[0.35em] text-primary mb-8"
+        className="font-body text-[11px] uppercase tracking-[0.3em] text-foreground/40 mb-8"
       >
         {t("settings_title")}
       </motion.p>
 
       {/* Account */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="bg-card border border-border rounded-md p-5 mb-5"
-      >
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
+        className="border border-border p-5 mb-5">
         <p className={sectionLabel}>{t("settings_account")}</p>
         <div className="flex items-center gap-3 mb-1">
-          <p className="font-body text-[14px] text-card-foreground">{user?.email}</p>
+          <p className="font-body text-[14px] text-foreground">{user?.email}</p>
           {subscriptionTier !== "free" && (
             <Badge variant="default" className="font-body text-[10px] uppercase tracking-wider">
               {tierLabels[subscriptionTier]}
             </Badge>
           )}
         </div>
-        <p className="font-body text-[12px] text-muted-foreground">
-          {tierLabels[subscriptionTier]} plan
-        </p>
+        <p className="font-body text-[12px] text-foreground/30">{tierLabels[subscriptionTier]} plan</p>
       </motion.div>
 
       {/* Language */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.12 }}
-        className="bg-card border border-border rounded-md p-5 mb-5"
-      >
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 }}
+        className="border border-border p-5 mb-5">
         <p className={sectionLabel}>{t("settings_language")}</p>
         <LanguageSelector onLanguageChange={handleLanguageChange} />
       </motion.div>
 
       {/* Birth details */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.13 }}
-        className="bg-card border border-border rounded-md p-5 mb-5"
-      >
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.13 }}
+        className="border border-border p-5 mb-5">
         <p className={sectionLabel}>{t("settings_birth_time")}</p>
         {editingBirth ? (
           <div className="space-y-3">
             <div>
-              <label className="font-body text-[12px] text-muted-foreground mb-1 block">Birth date</label>
+              <label className="font-body text-[12px] text-foreground/30 mb-1 block">Birth date</label>
               <div className="relative">
-                <input
-                  type="date"
-                  value={birthDateValue}
-                  onChange={(e) => setBirthDateValue(e.target.value)}
-                  className="w-full h-10 px-3 pr-10 rounded-sm bg-background text-foreground font-body text-[14px] border border-border focus:outline-none focus:border-primary/60 transition-colors"
-                />
-                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <input type="date" value={birthDateValue} onChange={(e) => setBirthDateValue(e.target.value)}
+                  className="w-full h-10 px-3 pr-10 bg-transparent text-foreground font-body text-[14px] border-0 border-b border-border focus:outline-none focus:border-foreground/30 transition-colors" />
+                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/20 pointer-events-none" />
               </div>
             </div>
             <div>
-              <label className="font-body text-[12px] text-muted-foreground mb-1 block">Birth time</label>
+              <label className="font-body text-[12px] text-foreground/30 mb-1 block">Birth time</label>
               <div className="relative">
-                <input
-                  type="time"
-                  value={birthTimeValue}
-                  onChange={(e) => setBirthTimeValue(e.target.value)}
-                  className="w-full h-10 px-3 pr-10 rounded-sm bg-background text-foreground font-body text-[14px] border border-border focus:outline-none focus:border-primary/60 transition-colors"
-                />
-                <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <input type="time" value={birthTimeValue} onChange={(e) => setBirthTimeValue(e.target.value)}
+                  className="w-full h-10 px-3 pr-10 bg-transparent text-foreground font-body text-[14px] border-0 border-b border-border focus:outline-none focus:border-foreground/30 transition-colors" />
+                <Clock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/20 pointer-events-none" />
               </div>
             </div>
             <div>
-              <label className="font-body text-[12px] text-muted-foreground mb-1 block">Birth place</label>
+              <label className="font-body text-[12px] text-foreground/30 mb-1 block">Birth place</label>
               <div className="relative">
-                <input
-                  type="text"
-                  value={birthPlaceValue}
-                  onChange={(e) => setBirthPlaceValue(e.target.value)}
+                <input type="text" value={birthPlaceValue} onChange={(e) => setBirthPlaceValue(e.target.value)}
                   placeholder="City, Country"
-                  className="w-full h-10 px-3 pr-10 rounded-sm bg-background text-foreground font-body text-[14px] border border-border focus:outline-none focus:border-primary/60 transition-colors placeholder:text-muted-foreground"
-                />
-                <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                  className="w-full h-10 px-3 pr-10 bg-transparent text-foreground font-body text-[14px] border-0 border-b border-border focus:outline-none focus:border-foreground/30 transition-colors placeholder:text-foreground/20" />
+                <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/20 pointer-events-none" />
               </div>
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={handleSaveBirthDetails}
-                className="flex-1 h-10 rounded-sm bg-primary text-primary-foreground font-body text-[13px] hover:brightness-110 transition-all"
-              >
+              <button onClick={handleSaveBirthDetails}
+                className="flex-1 h-10 bg-foreground text-background font-body text-[13px] uppercase tracking-[0.15em] hover:opacity-85 transition-all">
                 Save
               </button>
-              <button
-                onClick={() => setEditingBirth(false)}
-                className="h-10 px-4 rounded-sm border border-border text-foreground/60 font-body text-[13px] hover:border-foreground/30 transition-all"
-              >
+              <button onClick={() => setEditingBirth(false)}
+                className="h-10 px-4 border border-border text-foreground/40 font-body text-[13px] hover:border-foreground/20 transition-all">
                 Cancel
               </button>
             </div>
@@ -268,79 +229,68 @@ const SettingsScreen = () => {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-body text-[12px] text-muted-foreground">Date</p>
-                <p className="font-body text-[14px] text-card-foreground">{currentBirthDate || "Not set"}</p>
+                <p className="font-body text-[12px] text-foreground/30">Date</p>
+                <p className="font-body text-[14px] text-foreground">{currentBirthDate || "Not set"}</p>
               </div>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-body text-[12px] text-muted-foreground">Time</p>
-                <p className="font-body text-[14px] text-card-foreground">{currentBirthTime || "Not set"}</p>
+                <p className="font-body text-[12px] text-foreground/30">Time</p>
+                <p className="font-body text-[14px] text-foreground">{currentBirthTime || "Not set"}</p>
               </div>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-body text-[12px] text-muted-foreground">Place</p>
-                <p className="font-body text-[14px] text-card-foreground">{currentBirthPlace || "Not set"}</p>
+                <p className="font-body text-[12px] text-foreground/30">Place</p>
+                <p className="font-body text-[14px] text-foreground">{currentBirthPlace || "Not set"}</p>
               </div>
             </div>
-            <button
-              onClick={() => setEditingBirth(true)}
-              className="font-body text-[13px] text-primary hover:text-primary/80 transition-colors mt-1"
-            >
+            <button onClick={() => setEditingBirth(true)}
+              className="font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors mt-1">
               Edit birth details →
             </button>
           </div>
         )}
       </motion.div>
 
-      {/* Push notifications toggle */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.15 }}
-        className="bg-card border border-border rounded-md p-5 mb-5"
-      >
+      {/* Divider */}
+      <div className="h-px bg-foreground/10 my-5" />
+
+      {/* Push notifications */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
+        className="border border-border p-5 mb-5">
         <p className={sectionLabel}>{t("settings_notifications")}</p>
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-body text-[14px] text-card-foreground">{t("settings_push")}</p>
-            <p className="font-body text-[12px] text-muted-foreground">{t("settings_push_detail")}</p>
+            <p className="font-body text-[14px] text-foreground">{t("settings_push")}</p>
+            <p className="font-body text-[12px] text-foreground/30">{t("settings_push_detail")}</p>
           </div>
           <Switch checked={pushEnabled} onCheckedChange={handlePushToggle} disabled={pushLoading} />
         </div>
       </motion.div>
 
-      {/* Referral programme */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.17 }}
-        className="bg-card border border-border rounded-md p-5 mb-5"
-      >
+      {/* Referral */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.17 }}
+        className="border border-border p-5 mb-5">
         <p className={sectionLabel}>{t("settings_referral_title")}</p>
-        <p className="font-body text-[13px] text-muted-foreground mb-4">
-          {t("settings_referral_body")}
-        </p>
+        <p className="font-body text-[13px] text-muted-foreground mb-4">{t("settings_referral_body")}</p>
         {referralCode && (
           <div className="flex items-center gap-2 mb-3">
-            <div className="flex-1 bg-background border border-border rounded-sm px-3 py-2 font-body text-[13px] text-foreground/80 truncate">
+            <div className="flex-1 bg-transparent border-b border-border px-0 py-2 font-body text-[13px] text-foreground/60 truncate">
               {window.location.origin}/?ref={referralCode}
             </div>
-            <button
-              onClick={handleCopyReferral}
-              className="h-[36px] w-[36px] rounded-sm border border-border flex items-center justify-center text-foreground/60 hover:text-primary hover:border-primary/30 transition-colors"
-            >
-              {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
+            <button onClick={handleCopyReferral}
+              className="h-[36px] w-[36px] border border-border flex items-center justify-center text-foreground/40 hover:text-foreground/60 hover:border-foreground/20 transition-colors">
+              {copied ? <Check className="w-4 h-4 text-foreground" /> : <Copy className="w-4 h-4" />}
             </button>
           </div>
         )}
         <div className="flex gap-4">
-          <p className="font-body text-[12px] text-muted-foreground">
+          <p className="font-body text-[12px] text-foreground/30">
             You've referred <span className="text-foreground">{referralCount}</span> friend{referralCount !== 1 ? "s" : ""}
           </p>
           {rewardsEarned > 0 ? (
-            <p className="font-body text-[12px] text-primary">
+            <p className="font-body text-[12px] text-foreground/50">
               Free month{rewardsEarned !== 1 ? "s" : ""} earned: {rewardsEarned}
             </p>
           ) : (() => {
@@ -348,7 +298,7 @@ const SettingsScreen = () => {
             const remaining = Math.max(1, nextThreshold - referralCount);
             const friendText = remaining === 1 ? "friend" : "friends";
             return (
-              <p className="font-body text-[12px] text-muted-foreground">
+              <p className="font-body text-[12px] text-foreground/20">
                 Next reward: refer {remaining} more {friendText}
               </p>
             );
@@ -356,85 +306,64 @@ const SettingsScreen = () => {
         </div>
       </motion.div>
 
+      {/* Divider */}
+      <div className="h-px bg-foreground/10 my-5" />
+
       {/* Subscription management */}
       {subscriptionTier !== "free" && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mb-5"
-        >
-          <button
-            onClick={handleManageSubscription}
-            disabled={portalLoading}
-            className="w-full h-[48px] rounded-sm border border-border bg-card text-foreground/70 font-body text-[14px] hover:border-foreground/30 transition-all duration-300 disabled:opacity-50"
-          >
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
+          className="mb-5">
+          <button onClick={handleManageSubscription} disabled={portalLoading}
+            className="w-full h-[48px] border border-border text-foreground/50 font-body text-[13px] uppercase tracking-[0.15em] hover:border-foreground/20 transition-all duration-300 disabled:opacity-50">
             {portalLoading ? "..." : t("settings_manage_sub")}
           </button>
         </motion.div>
       )}
 
-      {/* Practitioner Portal link */}
+      {/* Practitioner Portal */}
       {subscriptionTier === "practitioner" && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.25 }}
-          className="mb-5"
-        >
-          <button
-            onClick={() => navigate("/practitioner")}
-            className="w-full h-[48px] rounded-sm border border-primary bg-primary/5 text-primary font-body text-[14px] hover:bg-primary/10 transition-all duration-300"
-          >
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.25 }}
+          className="mb-5">
+          <button onClick={() => navigate("/practitioner")}
+            className="w-full h-[48px] border border-foreground/20 text-foreground/60 font-body text-[13px] uppercase tracking-[0.15em] hover:border-foreground/30 transition-all duration-300">
             {t("settings_practitioner")}
           </button>
         </motion.div>
       )}
 
       {/* About */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.28 }}
-        className="bg-card border border-border rounded-md p-5 mb-5"
-      >
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.28 }}
+        className="border border-border p-5 mb-5">
         <p className={sectionLabel}>{t("settings_about")}</p>
-        <button
-          onClick={() => navigate("/evidence")}
-          className="font-body text-[14px] text-primary hover:text-primary/80 transition-colors"
-        >
+        <button onClick={() => navigate("/evidence")}
+          className="font-body text-[14px] text-foreground/50 hover:text-foreground/70 transition-colors">
           {t("settings_evidence")}
         </button>
       </motion.div>
 
       {/* Legal */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="bg-card border border-border rounded-md p-5 mb-5"
-      >
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
+        className="border border-border p-5 mb-5">
         <p className={sectionLabel}>{t("settings_legal")}</p>
         <div className="space-y-2">
-          <button onClick={() => navigate("/privacy")} className="block font-body text-[14px] text-primary hover:text-primary/80 transition-colors">
+          <button onClick={() => navigate("/privacy")} className="block font-body text-[14px] text-foreground/50 hover:text-foreground/70 transition-colors">
             {t("settings_privacy")}
           </button>
-          <button onClick={() => navigate("/terms")} className="block font-body text-[14px] text-primary hover:text-primary/80 transition-colors">
+          <button onClick={() => navigate("/terms")} className="block font-body text-[14px] text-foreground/50 hover:text-foreground/70 transition-colors">
             {t("settings_terms")}
           </button>
-          <button onClick={() => navigate("/cookies")} className="block font-body text-[14px] text-primary hover:text-primary/80 transition-colors">
+          <button onClick={() => navigate("/cookies")} className="block font-body text-[14px] text-foreground/50 hover:text-foreground/70 transition-colors">
             {t("settings_cookies")}
           </button>
         </div>
       </motion.div>
 
+      {/* Divider */}
+      <div className="h-px bg-foreground/10 my-5" />
+
       {/* Data & Privacy */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.32 }}
-        className="bg-card border border-border rounded-md p-5 mb-5"
-      >
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.32 }}
+        className="border border-border p-5 mb-5">
         <p className={sectionLabel}>{t("settings_data_privacy")}</p>
         <div className="space-y-3">
           <button
@@ -452,29 +381,20 @@ const SettingsScreen = () => {
               URL.revokeObjectURL(url);
               toast.success("Your data has been exported");
             }}
-            className="w-full py-3 rounded-sm border border-border text-foreground/70 font-body text-[13px] hover:border-foreground/30 transition-all"
-          >
+            className="w-full py-3 border border-border text-foreground/50 font-body text-[13px] hover:border-foreground/20 transition-all">
             {t("settings_export")}
           </button>
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="w-full py-3 rounded-sm border border-destructive/30 text-destructive font-body text-[13px] hover:bg-destructive/5 transition-all"
-          >
+          <button onClick={() => setShowDeleteConfirm(true)}
+            className="w-full py-3 border border-destructive/30 text-destructive font-body text-[13px] hover:bg-destructive/5 transition-all">
             {t("settings_delete_account")}
           </button>
         </div>
       </motion.div>
 
       {/* Sign out */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.35 }}
-      >
-        <button
-          onClick={signOut}
-          className="w-full h-[48px] rounded-sm border border-destructive/30 text-destructive font-body text-[14px] hover:bg-destructive/10 transition-all duration-300"
-        >
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }}>
+        <button onClick={signOut}
+          className="w-full h-[48px] border border-destructive/30 text-destructive font-body text-[13px] uppercase tracking-[0.15em] hover:bg-destructive/10 transition-all duration-300">
           {t("settings_sign_out")}
         </button>
       </motion.div>
@@ -482,14 +402,12 @@ const SettingsScreen = () => {
       {/* Delete confirmation modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm px-5">
-          <div className="bg-card border border-border rounded-md p-6 max-w-sm w-full">
+          <div className="border border-border bg-card p-6 max-w-sm w-full">
             <p className="font-display text-[18px] text-foreground mb-2">{t("settings_delete_confirm_title")}</p>
-            <p className="font-body text-[13px] text-muted-foreground mb-4">
-              {t("settings_delete_confirm_body")}
-            </p>
+            <p className="font-body text-[13px] text-muted-foreground mb-4">{t("settings_delete_confirm_body")}</p>
             <div className="flex gap-3">
               <button onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 py-2.5 rounded-sm border border-border font-body text-[13px] text-foreground/70 hover:border-foreground/30 transition-all">
+                className="flex-1 py-2.5 border border-border font-body text-[13px] text-foreground/50 hover:border-foreground/20 transition-all">
                 Cancel
               </button>
               <button
@@ -507,7 +425,7 @@ const SettingsScreen = () => {
                     toast.error("Couldn't delete account. Please contact support.");
                   }
                 }}
-                className="flex-1 py-2.5 rounded-sm bg-destructive text-destructive-foreground font-body text-[13px] hover:brightness-110 transition-all">
+                className="flex-1 py-2.5 bg-destructive text-destructive-foreground font-body text-[13px] hover:brightness-110 transition-all">
                 Delete
               </button>
             </div>

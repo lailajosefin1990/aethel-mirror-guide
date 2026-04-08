@@ -49,11 +49,9 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Hidden SEO content */}
       <p className="sr-only">
         Aethel Mirror helps you make decisions using astrology, Human Design, numerology, Gene Keys, and Destiny Matrix. Get your Third Way — one specific action you can take in the next 48 hours.
       </p>
-      {/* Main content */}
       <section className="flex-1 flex flex-col items-center justify-center px-5 py-16">
         <div className="w-full max-w-app flex flex-col items-center">
           {/* Logo */}
@@ -61,9 +59,9 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="font-display text-[14px] tracking-[0.45em] text-primary mb-14"
+            className="font-display text-[28px] tracking-[0.25em] text-foreground uppercase mb-14"
           >
-            A E T H E L &nbsp; M I R R O R
+            AETHEL MIRROR
           </motion.p>
 
           {/* Sample reading card */}
@@ -71,29 +69,29 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="w-full rounded-md border border-border bg-card p-6 mb-6"
+            className="w-full border border-border p-6 mb-6"
           >
             <p className="font-body text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-4">
               Work & Money · Sample Reading
             </p>
 
-            <p className="font-display text-[16px] leading-[1.6] text-card-foreground mb-5">
+            <p className="font-body text-[14px] leading-[1.8] text-foreground/85 mb-5">
               Mercury stationing direct clears the fog around your career
               decision this week. Your energy for earning is high — but it wants
               a focused channel, not a scatter. The timing isn't perfect, but
               it's ripe.
             </p>
 
-            <p className="font-display text-[13px] uppercase tracking-[0.15em] text-primary font-semibold mb-2">
+            <p className="font-body text-[11px] uppercase tracking-[0.3em] text-foreground/40 mb-2">
               Your Third Way
             </p>
 
-            <p className="font-display text-[18px] leading-[1.5] font-semibold text-card-foreground mb-5">
+            <p className="font-display text-[20px] leading-[1.5] text-foreground italic mb-5">
               Send the counter-offer by Friday. Name your non-negotiable and one
               thing you'll let go of. That's the move.
             </p>
 
-            <p className="font-body text-[12px] italic text-card-foreground/50">
+            <p className="font-body text-[12px] italic text-foreground/30">
               {t("reading_mirror_disclaimer")}
             </p>
           </motion.div>
@@ -114,11 +112,11 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
                 transition={{ duration: 0.4 }}
                 className="flex flex-col items-center text-center"
               >
-                <p className="font-display text-[13px] leading-[1.6] text-foreground/70 mb-2">
+                <p className="font-display text-[13px] leading-[1.6] text-foreground/50 mb-2">
                   "{TESTIMONIALS[testimonialIndex].text}"
                 </p>
                 <p className="font-body text-[12px] text-muted-foreground">
-                  — {TESTIMONIALS[testimonialIndex].author} · <span className="inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[11px] font-body">{TESTIMONIALS[testimonialIndex].domain}</span>
+                  — {TESTIMONIALS[testimonialIndex].author} · <span className="text-foreground/40 text-[11px] font-body">{TESTIMONIALS[testimonialIndex].domain}</span>
                 </p>
               </motion.div>
             </AnimatePresence>
@@ -133,22 +131,22 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
           >
             <button
               onClick={() => { trackEvent(EVENTS.CTA_GET_THIRD_WAY_CLICKED); onStart(); }}
-              className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-sm tracking-wide hover:brightness-110 transition-all duration-300"
+              className="w-[200px] h-[48px] bg-foreground text-background font-body font-medium text-[13px] uppercase tracking-[0.15em] hover:opacity-85 transition-opacity duration-300"
             >
-              {t("hero_get_third_way")}
+              BEGIN
             </button>
 
             <p className="font-body text-[12px] text-muted-foreground mt-2 text-center">
               {t("hero_free_tag")}
             </p>
 
-            <a href="/evidence" onClick={() => trackEvent(EVENTS.EVIDENCE_LINK_HERO_CLICKED)} className="block font-body text-[13px] text-primary/70 hover:text-primary underline underline-offset-2 mt-3 text-center transition-colors">
+            <a href="/evidence" onClick={() => trackEvent(EVENTS.EVIDENCE_LINK_HERO_CLICKED)} className="block font-body text-[13px] text-foreground/40 hover:text-foreground/60 underline underline-offset-2 mt-3 text-center transition-colors">
               {t("hero_see_outcomes")}
             </a>
 
             <button
               onClick={scrollToHow}
-              className="font-body text-[13px] text-foreground/50 hover:text-foreground/70 transition-colors duration-300 bg-transparent border-none cursor-pointer mt-2"
+              className="font-body text-[13px] text-foreground/30 hover:text-foreground/50 transition-colors duration-300 bg-transparent border-none cursor-pointer mt-2"
             >
               {t("hero_how_it_works")}
             </button>
@@ -173,10 +171,10 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
                       key={i}
                       className="flex gap-3 items-start"
                     >
-                      <span className="font-body text-[12px] text-primary/60 mt-0.5 shrink-0">
+                      <span className="font-body text-[12px] text-foreground/30 mt-0.5 shrink-0">
                         0{i + 1}
                       </span>
-                      <p className="font-display text-[15px] leading-[1.6] text-foreground">
+                      <p className="font-body text-[14px] leading-[1.8] text-foreground/85">
                         {item}
                       </p>
                     </div>
@@ -186,10 +184,10 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
                     onClick={() => { trackEvent(EVENTS.EVIDENCE_LINK_CLICKED); navigate("/evidence"); }}
                     className="flex gap-3 items-start group mt-2"
                   >
-                    <span className="font-body text-[12px] text-primary/60 mt-0.5 shrink-0">
+                    <span className="font-body text-[12px] text-foreground/30 mt-0.5 shrink-0">
                       04
                     </span>
-                    <p className="font-display text-[15px] leading-[1.6] text-primary group-hover:text-primary/80 transition-colors">
+                    <p className="font-body text-[14px] leading-[1.8] text-foreground/60 group-hover:text-foreground/80 transition-colors">
                       {t("hero_see_outcomes")}
                     </p>
                   </button>

@@ -324,7 +324,7 @@ export function useFlowNavigation(
           birth_lat: birthFromSession.birthLat ?? null,
           birth_lng: birthFromSession.birthLng ?? null,
           birth_timezone: birthFromSession.birthTimezone ?? null,
-        }).catch((err: any) => console.warn("Failed to save birth data after auth:", err));
+        }).then(({ error: e }) => { if (e) console.warn("Failed to save birth data after auth:", e); });
         dispatch({
           type: "SET_PROFILE_BIRTH",
           data: {
