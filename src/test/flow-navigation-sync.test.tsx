@@ -30,6 +30,7 @@ import { useFlowNavigation } from "@/hooks/useFlowNavigation";
 
 // ─── Test wrapper ──────────────────────────────────────────────────
 const mockUser = null; // anonymous user for these tests
+const mockLoggedInUser = { id: "user-123", email: "test@example.com" } as any;
 const mockHandleSave = vi.fn(() => Promise.resolve());
 
 function createWrapper(initialPath: string = "/") {
@@ -47,6 +48,20 @@ function useTestHook(initialState_: AppState = initialState) {
     false, // authLoading
     "free",
     0, // monthlyReadingCount
+    mockHandleSave
+  );
+  return { state, dispatch, ...nav };
+}
+
+function useLoggedInHook(initialState_: AppState) {
+  const [state, dispatch] = useReducer(appReducer, initialState_);
+  const nav = useFlowNavigation(
+    state,
+    dispatch,
+    mockLoggedInUser,
+    false,
+    "free",
+    0,
     mockHandleSave
   );
   return { state, dispatch, ...nav };
@@ -397,5 +412,181 @@ describe("useFlowNavigation — handleLoadingComplete and handleLoadingError", (
     expect(result.current.state.view).toBe("question");
     expect(result.current.state.loadingError).toBe("Something went wrong. Please try again.");
     expect(mockNavigate).toHaveBeenCalledWith("/ask", { replace: true });
+  });
+});
+
+// ─── Returning user: saved birth data → skip Anchor ─────────────────────
+
+const SAVED_BIRTH = {
+  birth_date: "1990-06-15",
+  birth_time: "14:30",
+  birth_place: "Barcelona",
+  birth_lat: 41.387,
+  birth_lng: 2.168,
+  birth_timezone: "Europe/Madrid",
+};
+
+const returningUserState: AppState = {
+  ...initialState,
+  profileBirthData: SAVED_BIRTH,
+  profileLoaded: true,
+};
+
+describe("useFlowNavigation — returning user with saved birth data", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    sessionStorage.clear();
+  });
+
+  it("handleStartReading skips birth and goes to question", () => {
+    const { result } = renderHook(
+      () => useLoggedInHook(returningUserState),
+      { wrapper: createWrapper("/") }
+    );
+
+    act(() => {
+      result.current.handleStartReading();
+    });
+
+    expect(result.current.state.view).toBe("question");
+    expect(mockNavigate).toHaveBeenCalledWith("/ask", { replace: true });
+  });
+
+  it("hydrates birthData state from profileBirthData on start", () => {
+    const { result } = renderHook(
+      () => useLoggedInHook(returningUserState),
+      { wrapper: createWrapper("/") }
+    );
+
+    act(() => {
+      result.current.handleStartReading();
+    });
+
+    const bd = result.current.state.birthData;
+    expect(bd).toBeDefined();
+    expect(bd?.birthPlace).toBe("Barcelona");
+    expect(bd?.birthLat).toBe(41.387);
+    expect(bd?.birthLng).toBe(2.168);
+    expect(bd?.birthTimezone).toBe("Europe/Madrid");
+    expect(bd?.time).toBe("14:30");
+    expect(bd?.unknownTime).toBe(false);
+  });
+
+  it("hydrates birthData with unknownTime when birth_time is null", () => {
+    const noTimeState: AppState = {
+      ...returningUserState,
+      profileBirthData: { ...SAVED_BIRTH, birth_time: null },
+    };
+    const { result } = renderHook(
+      () => useLoggedInHook(noTimeState),
+      { wrapper: createWrapper("/") }
+    );
+
+    act(() => {
+      result.current.handleStartReading();
+    });
+
+    expect(result.current.state.birthData?.unknownTime).toBe(true);
+    expect(result.current.state.birthData?.time).toBeNull();
+  });
+
+  it("question submit goes straight to loading (skips auth)", () => {
+    const { result } = renderHook(
+      () => useLoggedInHook(returningUserState),
+      { wrapper: createWrapper("/") }
+    );
+
+    // Start → question (skips birth)
+    act(() => {
+      result.current.handleStartReading();
+    });
+    expect(result.current.state.view).toBe("question");
+
+    // Question → loading (skips auth because already logged in)
+    act(() => {
+      result.current.handleQuestionSubmit({
+        domain: "Work & money",
+        question: "Should I take the offer?",
+        mode: "Coach me",
+      });
+    });
+
+    expect(result.current.state.view).toBe("loading");
+    expect(mockNavigate).toHaveBeenCalledWith("/reading", { replace: true });
+  });
+
+  it("full returning-user flow: start → question → loading (2 steps, not 4)", () => {
+    const { result } = renderHook(
+      () => useLoggedInHook(returningUserState),
+      { wrapper: createWrapper("/") }
+    );
+
+    // Collect navigate calls to verify only question + loading navigations happen
+    const navCalls: string[] = [];
+    mockNavigate.mockImplementation((path: string) => navCalls.push(path));
+
+    act(() => {
+      result.current.handleStartReading();
+    });
+    act(() => {
+      result.current.handleQuestionSubmit({
+        domain: "Love & people",
+        question: "Is this the right person?",
+        mode: "Reflect with me",
+      });
+    });
+
+    // Should navigate to /ask then /reading — never /birth or /auth
+    expect(navCalls).toContain("/ask");
+    expect(navCalls).toContain("/reading");
+    expect(navCalls).not.toContain("/birth");
+    expect(navCalls).not.toContain("/auth");
+  });
+
+  it("new user without birth data still goes to birth first", () => {
+    const newUserState: AppState = {
+      ...initialState,
+      profileBirthData: null,
+      profileLoaded: true,
+    };
+    const { result } = renderHook(
+      () => useLoggedInHook(newUserState),
+      { wrapper: createWrapper("/") }
+    );
+
+    act(() => {
+      result.current.handleStartReading();
+    });
+
+    expect(result.current.state.view).toBe("birth");
+    expect(mockNavigate).toHaveBeenCalledWith("/birth", { replace: true });
+  });
+
+  it("birth data reaches the reading flow after skip", () => {
+    const { result } = renderHook(
+      () => useLoggedInHook(returningUserState),
+      { wrapper: createWrapper("/") }
+    );
+
+    act(() => {
+      result.current.handleStartReading();
+    });
+    act(() => {
+      result.current.handleQuestionSubmit({
+        domain: "Visibility",
+        question: "Should I post it?",
+        mode: "Coach me",
+      });
+    });
+
+    // birthData should be hydrated and available for the edge function
+    const bd = result.current.state.birthData;
+    expect(bd).toBeDefined();
+    expect(bd?.birthPlace).toBe("Barcelona");
+    expect(bd?.birthLat).toBe(41.387);
+
+    // questionData also set
+    expect(result.current.state.questionData?.domain).toBe("Visibility");
+    expect(result.current.state.view).toBe("loading");
   });
 });

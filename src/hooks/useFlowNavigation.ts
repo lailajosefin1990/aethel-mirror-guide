@@ -210,10 +210,27 @@ export function useFlowNavigation(
     return () => navigator.serviceWorker?.removeEventListener("message", handler);
   }, [dispatch, setView]);
 
-  // ─── Step 1: Start → Birth ──────────────────────────────────────
+  // ─── Step 1: Start → Birth (or skip to Question if birth data exists) ──
   const handleStartReading = useCallback(() => {
-    setView("birth");
-  }, [setView]);
+    if (profileBirthData?.birth_date) {
+      // Returning user with saved birth data → hydrate state and skip to Ask
+      dispatch({
+        type: "SET_BIRTH_DATA",
+        data: {
+          date: new Date(profileBirthData.birth_date),
+          time: profileBirthData.birth_time,
+          unknownTime: !profileBirthData.birth_time,
+          birthPlace: profileBirthData.birth_place || "",
+          birthLat: profileBirthData.birth_lat ?? undefined,
+          birthLng: profileBirthData.birth_lng ?? undefined,
+          birthTimezone: profileBirthData.birth_timezone ?? undefined,
+        },
+      });
+      setView("question");
+    } else {
+      setView("birth");
+    }
+  }, [profileBirthData, dispatch, setView]);
 
   // ─── Step 1→2: Birth submit → Question ──────────────────────────
   const handleBirthSubmit = useCallback(
