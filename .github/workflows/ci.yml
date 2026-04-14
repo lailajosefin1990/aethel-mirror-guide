@@ -115,9 +115,9 @@ jobs:
       - name: Run OAuth round-trip tests
         run: |
           echo "🔐 Running OAuth round-trip simulation (6 tests)"
-          npx vitest run src/test/oauth-roundtrip.test.tsx --reporter=verbose
+          npx vitest run src/test/oauth-roundtrip.test.tsx --reporter=verbose --pool=forks
         env:
-          NODE_OPTIONS: --max-old-space-size=4096
+          NODE_OPTIONS: --max-old-space-size=6144
 
   deploy:
     name: Deploy to Vercel
