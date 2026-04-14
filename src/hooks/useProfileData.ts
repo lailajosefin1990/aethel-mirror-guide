@@ -73,54 +73,65 @@ export function useProfileData(
     let cancelled = false;
 
     const loadData = async () => {
-      const { data: profile } = await db.profiles.get(user.id);
+      try {
+        const { data: profile } = await db.profiles.get(user.id);
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (profile) {
-        dispatch({ type: "SET_PROFILE_BIRTH", data: profile });
-        if (profile.preferred_language && profile.preferred_language !== i18n.language) {
-          i18n.changeLanguage(profile.preferred_language);
+        if (profile) {
+          dispatch({ type: "SET_PROFILE_BIRTH", data: profile });
+          if (profile.preferred_language && profile.preferred_language !== i18n.language) {
+            i18n.changeLanguage(profile.preferred_language);
+          }
+          if (!profile.consent_accepted) {
+            dispatch({ type: "SET_CONSENT_GATE", show: true });
+          } else {
+            dispatch({ type: "CONSENT_ACCEPTED" });
+          }
         }
-        if (!profile.consent_accepted) {
-          dispatch({ type: "SET_CONSENT_GATE", show: true });
-        } else {
-          dispatch({ type: "CONSENT_ACCEPTED" });
-        }
+      } catch (err) {
+        console.warn("[profile] Failed to load profile:", err);
       }
-      dispatch({ type: "SET_PROFILE_LOADED", loaded: true });
 
-      const { data: readings } = await db.readings.getByUser(user.id);
+      // Always mark profile as loaded — even on error — so the UI is never stuck
+      if (!cancelled) {
+        dispatch({ type: "SET_PROFILE_LOADED", loaded: true });
+      }
 
-      if (cancelled) return;
-      if (!readings) return;
+      try {
+        const { data: readings } = await db.readings.getByUser(user.id);
 
-      const { data: outcomes } = await db.outcomes.getByUser(user.id);
+        if (cancelled || !readings) return;
 
-      if (cancelled) return;
+        const { data: outcomes } = await db.outcomes.getByUser(user.id);
 
-      const outcomeMap = new Map(
-        (outcomes ?? []).map((o: any) => [
-          o.reading_id,
-          { followed: o.followed, note: o.outcome_text },
-        ])
-      );
+        if (cancelled) return;
 
-      const entries: JournalEntry[] = readings.map((r: any) => ({
-        id: r.id,
-        domain: r.domain,
-        date: new Date(r.created_at).toLocaleDateString("en-GB", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        }),
-        createdAt: r.created_at,
-        thirdWay: r.third_way_text || "",
-        question: r.question,
-        outcome: outcomeMap.get(r.id) as JournalEntry["outcome"] | undefined,
-      }));
+        const outcomeMap = new Map(
+          (outcomes ?? []).map((o: any) => [
+            o.reading_id,
+            { followed: o.followed, note: o.outcome_text },
+          ])
+        );
 
-      dispatch({ type: "SET_JOURNAL_ENTRIES", entries });
+        const entries: JournalEntry[] = readings.map((r: any) => ({
+          id: r.id,
+          domain: r.domain,
+          date: new Date(r.created_at).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }),
+          createdAt: r.created_at,
+          thirdWay: r.third_way_text || "",
+          question: r.question,
+          outcome: outcomeMap.get(r.id) as JournalEntry["outcome"] | undefined,
+        }));
+
+        dispatch({ type: "SET_JOURNAL_ENTRIES", entries });
+      } catch (err) {
+        console.warn("[profile] Failed to load readings:", err);
+      }
     };
 
     loadData();
