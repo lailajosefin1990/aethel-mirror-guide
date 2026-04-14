@@ -27,9 +27,14 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run tests with coverage
-        run: npx vitest run --coverage
+        run: npx vitest run --coverage --exclude='src/test/oauth-roundtrip.test.tsx'
         env:
           NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Run OAuth round-trip tests (isolated — heavy full-page render)
+        run: npx vitest run src/test/oauth-roundtrip.test.tsx --reporter=verbose --pool=forks --poolOptions.forks.singleFork
+        env:
+          NODE_OPTIONS: --max-old-space-size=7168
 
       - name: Build
         run: npm run build
