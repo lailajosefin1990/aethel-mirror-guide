@@ -179,7 +179,7 @@ const Index = () => {
             <HeroSection onStart={handleStartReading} />
           </motion.div>
         )}
-        {view === "home" && (authLoading || (user && !state.profileLoaded)) && (
+        {view === "home" && (authLoading || user) && (
           <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={slideTransition}>
             <DashboardSkeleton />
           </motion.div>
