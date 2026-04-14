@@ -42,20 +42,14 @@ describe("AuthScreen — visual regression", () => {
       </MemoryRouter>
     );
 
-    // Find the Google button and the email input
     const googleButton = screen.getByText("Google").closest("button")!;
     const emailInput = screen.getByPlaceholderText("auth_email");
 
-    // Verify both exist
     expect(googleButton).not.toBeNull();
     expect(emailInput).toBeInTheDocument();
 
-    // Verify DOM order: Google button comes BEFORE email input
-    // compareDocumentPosition returns a bitmask; bit 4 (DOCUMENT_POSITION_FOLLOWING) means
-    // the argument follows the reference node in the DOM
     const position = googleButton.compareDocumentPosition(emailInput);
-    const FOLLOWING = Node.DOCUMENT_POSITION_FOLLOWING;
-    expect(position & FOLLOWING).toBe(FOLLOWING);
+    expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it("renders the divider between Google button and email form", () => {
@@ -68,7 +62,6 @@ describe("AuthScreen — visual regression", () => {
     const dividerText = screen.getByText("auth_or_continue");
     expect(dividerText).toBeInTheDocument();
 
-    // Divider should be between Google and email
     const googleButton = screen.getByText("Google").closest("button")!;
     const emailInput = screen.getByPlaceholderText("auth_email");
 
@@ -78,23 +71,22 @@ describe("AuthScreen — visual regression", () => {
     expect(emailPosition & Node.DOCUMENT_POSITION_FOLLOWING).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("renders the Continue button with primary/gold background", () => {
+  it("renders the CONTINUE button with foreground/background colors", () => {
     render(
       <MemoryRouter>
         <AuthScreen onSuccess={vi.fn()} onBack={vi.fn()} />
       </MemoryRouter>
     );
 
-    const continueButton = screen.getByText("Continue");
+    const continueButton = screen.getByText("CONTINUE");
     expect(continueButton).toBeInTheDocument();
 
-    // The button should have bg-primary class (which maps to the gold colour)
-    expect(continueButton.className).toMatch(/bg-primary/);
-    // And primary-foreground text (dark text on gold)
-    expect(continueButton.className).toMatch(/text-primary-foreground/);
+    // White bg on dark text — monochrome style
+    expect(continueButton.className).toMatch(/bg-foreground/);
+    expect(continueButton.className).toMatch(/text-background/);
   });
 
-  it("renders 'Keep your reading' heading, not 'Save your mirror'", () => {
+  it("renders 'Keep your reading' heading", () => {
     render(
       <MemoryRouter>
         <AuthScreen onSuccess={vi.fn()} onBack={vi.fn()} />
@@ -102,46 +94,38 @@ describe("AuthScreen — visual regression", () => {
     );
 
     expect(screen.getByText("Keep your reading")).toBeInTheDocument();
-    expect(screen.queryByText("Save your mirror")).not.toBeInTheDocument();
   });
 
-  it("renders 'free' highlighted in the subtitle", () => {
+  it("renders the free account subtitle", () => {
     render(
       <MemoryRouter>
         <AuthScreen onSuccess={vi.fn()} onBack={vi.fn()} />
       </MemoryRouter>
     );
 
-    const freeSpan = screen.getByText("free");
-    expect(freeSpan).toBeInTheDocument();
-    // "free" should be styled with primary colour and medium weight
-    expect(freeSpan.className).toMatch(/text-primary/);
-    expect(freeSpan.className).toMatch(/font-medium/);
+    expect(screen.getByText(/free account/i)).toBeInTheDocument();
   });
 
-  it("renders back arrow at top of the page, not at the bottom", () => {
+  it("renders back arrow at top of the page", () => {
     const { container } = render(
       <MemoryRouter>
         <AuthScreen onSuccess={vi.fn()} onBack={vi.fn()} />
       </MemoryRouter>
     );
 
-    // Find all buttons — the back arrow should be the first button in the DOM
     const allButtons = container.querySelectorAll("button");
     expect(allButtons.length).toBeGreaterThan(0);
 
-    // The first button should be the back arrow (it contains an ArrowLeft SVG)
     const firstButton = allButtons[0];
     const svg = firstButton.querySelector("svg");
     expect(svg).not.toBeNull();
 
-    // The Google button should come after the back arrow
     const googleButton = screen.getByText("Google").closest("button")!;
     const position = firstButton.compareDocumentPosition(googleButton);
     expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("renders email and password input fields with visible borders", () => {
+  it("renders email and password input fields with border styling", () => {
     render(
       <MemoryRouter>
         <AuthScreen onSuccess={vi.fn()} onBack={vi.fn()} />
@@ -154,7 +138,6 @@ describe("AuthScreen — visual regression", () => {
     expect(emailInput).toBeInTheDocument();
     expect(passwordInput).toBeInTheDocument();
 
-    // Inputs should have border classes for visibility
     expect(emailInput.className).toMatch(/border/);
     expect(passwordInput.className).toMatch(/border/);
   });
@@ -166,7 +149,6 @@ describe("AuthScreen — visual regression", () => {
       </MemoryRouter>
     );
 
-    // Default mode is sign-up, should show password hint
     expect(screen.getByText("auth_password_hint")).toBeInTheDocument();
   });
 
@@ -187,13 +169,11 @@ describe("AuthScreen — visual regression", () => {
       </MemoryRouter>
     );
 
-    // The wordmark uses spaced letters — check for the text content
     const bodyText = container.textContent || "";
-    expect(bodyText).toContain("A E T H E L");
-    expect(bodyText).toContain("M I R R O R");
+    expect(bodyText).toContain("AETHEL MIRROR");
   });
 
-  it("Google button has transparent background and visible border", () => {
+  it("Google button has white background (monochrome CTA)", () => {
     render(
       <MemoryRouter>
         <AuthScreen onSuccess={vi.fn()} onBack={vi.fn()} />
@@ -201,11 +181,11 @@ describe("AuthScreen — visual regression", () => {
     );
 
     const googleButton = screen.getByText("Google").closest("button")!;
-    expect(googleButton.className).toMatch(/bg-transparent/);
-    expect(googleButton.className).toMatch(/border/);
+    expect(googleButton.className).toMatch(/bg-foreground/);
+    expect(googleButton.className).toMatch(/text-background/);
   });
 
-  it("Continue button is inside a form element", () => {
+  it("CONTINUE button is inside a form element", () => {
     const { container } = render(
       <MemoryRouter>
         <AuthScreen onSuccess={vi.fn()} onBack={vi.fn()} />
@@ -215,7 +195,7 @@ describe("AuthScreen — visual regression", () => {
     const form = container.querySelector("form");
     expect(form).not.toBeNull();
 
-    const continueButton = within(form!).getByText("Continue");
+    const continueButton = within(form!).getByText("CONTINUE");
     expect(continueButton).toBeInTheDocument();
     expect(continueButton.getAttribute("type")).toBe("submit");
   });

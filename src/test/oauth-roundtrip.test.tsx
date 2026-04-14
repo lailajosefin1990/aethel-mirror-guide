@@ -199,9 +199,17 @@ describe("Google OAuth round-trip: questionData persistence", () => {
     const user = userEvent.setup();
     renderIndex();
 
-    const cta = await screen.findByText("hero_get_third_way");
+    // Step 0: Click BEGIN → lands on birth step
+    const cta = await screen.findByText("BEGIN");
     await user.click(cta);
 
+    // Step 1: Complete birth step — click mock location then submit
+    const locationBtn = await screen.findByTestId("location-autocomplete");
+    await user.click(locationBtn);
+    const birthSubmit = await screen.findByText("birth_cta");
+    await user.click(birthSubmit);
+
+    // Step 2: Now on question step
     const domainButton = await screen.findByText("domain_work");
     await user.click(domainButton);
 
@@ -311,9 +319,17 @@ describe("Google OAuth round-trip: questionData persistence", () => {
     const user = userEvent.setup();
     renderIndex();
 
-    const cta = await screen.findByText("hero_get_third_way");
+    // Step 0: Click BEGIN → lands on birth step
+    const cta = await screen.findByText("BEGIN");
     await user.click(cta);
 
+    // Step 1: Complete birth step
+    const locationBtn = await screen.findByTestId("location-autocomplete");
+    await user.click(locationBtn);
+    const birthSubmit = await screen.findByText("birth_cta");
+    await user.click(birthSubmit);
+
+    // Step 2: Now on question step
     const domainButton = await screen.findByText("domain_work");
     await user.click(domainButton);
 
