@@ -150,12 +150,27 @@ const Index = () => {
       {showConsentGate && <ConsentGate onAccept={handleConsentAccept} />}
       {showCrisis && <CrisisInterstitial onReturn={handleCrisisReturn} />}
       {["question", "auth", "birth", "loading", "reading"].includes(view) && (
-        <ProgressStepper currentStep={
-          view === "birth" ? 1 :
-          view === "question" ? 2 :
-          view === "auth" ? 3 :
-          view === "loading" ? 3 : 4
-        } />
+        profileBirthData?.birth_date && view !== "birth" ? (
+          // Returning user: birth already saved — show 3-step stepper
+          <ProgressStepper
+            labels={["Ask", "Generate", "Third Way"]}
+            currentStep={
+              view === "question" ? 1 :
+              view === "auth" || view === "loading" ? 2 : 3
+            }
+          />
+        ) : (
+          // New user: full 4-step stepper
+          <ProgressStepper
+            labels={["Anchor", "Ask", "Sign in", "Third Way"]}
+            currentStep={
+              view === "birth" ? 1 :
+              view === "question" ? 2 :
+              view === "auth" ? 3 :
+              view === "loading" ? 3 : 4
+            }
+          />
+        )
       )}
       <div ref={mainRef} id="main-content" tabIndex={-1} className="outline-none">
       <AnimatePresence mode="wait">

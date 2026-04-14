@@ -328,12 +328,19 @@ describe("DecisionJournal", () => {
 
 // ─── ProgressStepper ───────────────────────────────────────────────
 describe("ProgressStepper", () => {
-  it("renders 4 step labels", () => {
+  it("renders default 4-step labels for new users", () => {
     render(<ProgressStepper currentStep={1} />);
-    const labels = ["Anchor", "Ask", "Sign in", "Third Way"];
-    labels.forEach((label) => {
+    ["Anchor", "Ask", "Sign in", "Third Way"].forEach((label) => {
       expect(screen.getByText(label)).toBeInTheDocument();
     });
+  });
+
+  it("renders custom 3-step labels for returning users", () => {
+    render(<ProgressStepper currentStep={1} labels={["Ask", "Generate", "Third Way"]} />);
+    ["Ask", "Generate", "Third Way"].forEach((label) => {
+      expect(screen.getByText(label)).toBeInTheDocument();
+    });
+    expect(screen.queryByText("Anchor")).not.toBeInTheDocument();
   });
 
   it("highlights the current step", () => {
