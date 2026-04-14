@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import * as Sentry from "@sentry/react";
 
-const VAPID_PUBLIC_KEY = "BIPhVlqDPTcgHGeIO5Sh5ZNutBAraNW7WnyQzI7TM8_OE0bu7cf-HisXm-nI7DoqbdfvIOfGqB3hm3f22gC9qJ8";
+const VAPID_PUBLIC_KEY = "BLkvTDgNqxWxT88ZO1SUlaVHG7doaEJqeYu4pSgcqL0bRyDjVp3BSAi-5o7RmHgoBCJWKxSD84sunKvpipnD6UM";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);

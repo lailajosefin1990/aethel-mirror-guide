@@ -60,14 +60,45 @@ function computeAspects(transitPlanets: any, natalPlanets: any): string[] {
   return aspects;
 }
 
-async function fetchChartData(chartApiUrl: string, params: Record<string, string | number>, timeoutMs = 5000) {
-  const qs = new URLSearchParams(
-    Object.entries(params).map(([k, v]) => [k, String(v)])
-  ).toString();
+const ASTRO_BASE = "https://api.astrology-api.io/api/v3";
+
+async function fetchNatalChart(apiKey: string, birthData: any, timeoutMs = 7000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(`${chartApiUrl}/chart?${qs}`, { signal: controller.signal });
+    const res = await fetch(`${ASTRO_BASE}/charts/natal`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ subject: { name: "user", birth_data: birthData } }),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    clearTimeout(timer);
+    return null;
+  }
+}
+
+async function fetchTransitChart(apiKey: string, birthData: any, transitDate: Date, lat: number, lng: number, timeoutMs = 7000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${ASTRO_BASE}/charts/transit`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subject: { name: "user", birth_data: birthData },
+        transit_time: {
+          datetime: {
+            year: transitDate.getFullYear(), month: transitDate.getMonth() + 1, day: transitDate.getDate(),
+            hour: 12, minute: 0, latitude: lat, longitude: lng, timezone: "UTC",
+          },
+        },
+      }),
+      signal: controller.signal,
+    });
     clearTimeout(timer);
     if (!res.ok) return null;
     return await res.json();
@@ -86,7 +117,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const CHART_API_URL = Deno.env.get("CHART_API_URL");
+    const ASTROLOGY_API_KEY = Deno.env.get("ASTROLOGY_API_KEY");
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -172,32 +203,39 @@ serve(async (req) => {
     const birthLat = profile.birth_lat;
     const birthLng = profile.birth_lng;
 
+    // Build birth data for astrology-api.io v3
+    const [bYear, bMonth, bDay] = birthDate.split("-").map(Number);
+    const [bHour, bMinute] = birthTime.split(":").map(Number);
+    const apiBirthData = ASTROLOGY_API_KEY && birthLat && birthLng ? {
+      year: bYear, month: bMonth, day: bDay,
+      hour: bHour || 12, minute: bMinute || 0, second: 0,
+      latitude: parseFloat(String(birthLat)),
+      longitude: parseFloat(String(birthLng)),
+      timezone: "UTC",
+    } : null;
+
     let natalChartData: any = null;
-    if (CHART_API_URL && birthLat && birthLng) {
-      const [year, month, day] = birthDate.split("-").map(Number);
-      const [hour, minute] = birthTime.split(":").map(Number);
-      natalChartData = await fetchChartData(CHART_API_URL, {
-        year, month, day, hour: hour || 12, minute: minute || 0,
-        lat: birthLat, lng: birthLng,
-      });
+    if (ASTROLOGY_API_KEY && apiBirthData) {
+      natalChartData = await fetchNatalChart(ASTROLOGY_API_KEY, apiBirthData);
     }
 
     // Build natal context string (reused for every day)
     let natalContext = "";
-    if (natalChartData) {
-      const planets = natalChartData.natal_chart?.planets || {};
-      const formatP = (name: string, data: any) => {
-        let line = `${name}: ${data.degrees}° ${data.sign} (${data.house} house)`;
-        if (data.retrograde) line += " RETROGRADE";
-        return line;
-      };
-      const lines = PLANET_NAMES
-        .filter(p => planets[p])
-        .map(p => formatP(p.charAt(0).toUpperCase() + p.slice(1), planets[p]));
-      const asc = natalChartData.natal_chart?.ascendant;
-      const mc = natalChartData.natal_chart?.midheaven;
-      if (asc) lines.push(`Ascendant: ${asc.degrees}° ${asc.sign}`);
-      if (mc) lines.push(`Midheaven: ${mc.degrees}° ${mc.sign}`);
+    if (natalChartData?.subject_data) {
+      const sd = natalChartData.subject_data;
+      const KEYS = ["sun","moon","mercury","venus","mars","jupiter","saturn","uranus","neptune","pluto"];
+      const lines = KEYS
+        .filter(k => sd[k])
+        .map(k => {
+          const p = sd[k];
+          const retro = p.retrograde ? " RETROGRADE" : "";
+          const house = p.house ? ` (${p.house.replace("_House","")} house)` : "";
+          return `${p.name}: ${p.position?.toFixed(1)}° ${p.sign}${house}${retro}`;
+        });
+      const asc = sd.first_house;
+      const mc = sd.tenth_house;
+      if (asc) lines.push(`Ascendant: ${asc.position?.toFixed(1)}° ${asc.sign}`);
+      if (mc) lines.push(`Midheaven: ${mc.position?.toFixed(1)}° ${mc.sign}`);
 
       natalContext = `\nNATAL CHART (Swiss Ephemeris):\n${lines.join("\n")}`;
     }
@@ -211,29 +249,30 @@ serve(async (req) => {
 
       // Fetch transit positions for this specific date
       let transitAspects = "";
-      if (CHART_API_URL && birthLat && birthLng && natalChartData) {
-        const transitData = await fetchChartData(CHART_API_URL, {
-          year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate(),
-          hour: 12, minute: 0, lat: birthLat, lng: birthLng,
-        });
+      if (ASTROLOGY_API_KEY && apiBirthData && birthLat && birthLng) {
+        const transitData = await fetchTransitChart(ASTROLOGY_API_KEY, apiBirthData, date, birthLat, birthLng);
 
-        if (transitData?.natal_chart?.planets) {
-          const tp = transitData.natal_chart.planets;
-          const np = natalChartData.natal_chart?.planets || {};
-          const aspects = computeAspects(tp, np);
+        if (transitData?.chart_data) {
+          const positions: any[] = transitData.chart_data.planetary_positions || [];
+          const transitPlanets = positions
+            .filter((p: any) => p.name?.endsWith("_transit"))
+            .map((p: any) => {
+              const retro = p.is_retrograde ? " RETROGRADE" : "";
+              return `${p.name.replace("_transit","")}: ${p.degree?.toFixed(1)}° ${p.sign}${retro}`;
+            });
 
-          const transitLines = PLANET_NAMES
-            .filter(p => tp[p])
-            .map(p => `${p}: ${tp[p].degrees}° ${tp[p].sign}${tp[p].retrograde ? " RETROGRADE" : ""}`)
-            .join("\n");
+          const aspects: any[] = (transitData.chart_data.aspects || []).slice(0, 8);
+          const aspectLines = aspects.map((a: any) =>
+            `${a.point1.replace("_transit"," transit")} ${a.aspect_type} ${a.point2.replace("_natal"," natal")} (orb ${a.orb?.toFixed(1)}°)`
+          );
 
           transitAspects = `
 
 TODAY'S KEY TRANSITS (real, calculated):
-${transitLines}
+${transitPlanets.join("\n")}
 
 ASPECTS TO NATAL CHART:
-${aspects.length > 0 ? aspects.slice(0, 8).join("\n") : "No major aspects within 6° orb."}`;
+${aspectLines.length > 0 ? aspectLines.join("\n") : "No major aspects."}`;
         }
       }
 
