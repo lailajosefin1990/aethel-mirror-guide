@@ -60,11 +60,6 @@ const Index = () => {
   const { view, activeTab, questionData, readingData, profileBirthData, journalEntries,
     regenerationCount, paywallOpen, pushSheetOpen, showConsentGate, showCrisis } = state;
 
-  // Debug: trace render state (remove after debugging)
-  useEffect(() => {
-    console.log("[RENDER]", { view, user: !!user, authLoading, profileLoaded: state.profileLoaded, entries: journalEntries.length });
-  }, [view, user, authLoading, state.profileLoaded, journalEntries.length]);
-
   useEffect(() => {
     const titles: Record<string, string> = {
       home: "Aethel Mirror — Decision Clarity Through Six Ancient Systems",

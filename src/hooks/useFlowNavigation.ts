@@ -177,17 +177,21 @@ export function useFlowNavigation(
     setView("loading");
   }, [subscriptionTier, monthlyReadingCount, profileBirthData, state.birthData, dispatch, setView]);
 
-  // Auto-navigate authenticated users from home → dashboard
+  // Auto-navigate based on auth state
   const hasRedirected = useRef(false);
 
   useEffect(() => {
     if (hasRedirected.current) return;
-    // Wait for auth to resolve
     if (authLoading) return;
-    // Authenticated user on home → redirect to dashboard
+
     if (user && view === "home") {
+      // Authenticated user on home → go to dashboard
       hasRedirected.current = true;
       setView("dashboard");
+    } else if (!user && ["dashboard", "loading", "reading"].includes(view)) {
+      // Unauthenticated user on a protected route → go to home
+      hasRedirected.current = true;
+      setView("home");
     }
   }, [user, authLoading, view, setView]);
 
