@@ -67,6 +67,22 @@ function useLoggedInHook(initialState_: AppState) {
   return { state, dispatch, ...nav };
 }
 
+
+const SAVED_BIRTH_FIXTURE = {
+  birth_date: "1990-06-15",
+  birth_time: "14:30",
+  birth_place: "Barcelona",
+  birth_lat: 41.387,
+  birth_lng: 2.168,
+  birth_timezone: "Europe/Madrid",
+};
+
+const returningUserStateFixture: AppState = {
+  ...initialState,
+  profileBirthData: SAVED_BIRTH_FIXTURE,
+  profileLoaded: true,
+};
+
 // ─── Tests ─────────────────────────────────────────────────────────
 describe("useFlowNavigation — URL↔view sync guard", () => {
   beforeEach(() => {
@@ -218,21 +234,26 @@ describe("useFlowNavigation — URL→view sync on mount", () => {
     expect(result.current.state.view).toBe("birth");
   });
 
-  it("mounting on /mirror sets view to dashboard", () => {
-    const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/mirror") });
+  it("mounting on /mirror sets view to dashboard (authenticated)", () => {
+    const { result } = renderHook(() => useLoggedInHook(returningUserStateFixture), { wrapper: createWrapper("/mirror") });
     expect(result.current.state.view).toBe("dashboard");
   });
 
   it("mounting on /mirror/journey sets view to dashboard and tab to journey", () => {
-    const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/mirror/journey") });
+    const { result } = renderHook(() => useLoggedInHook(returningUserStateFixture), { wrapper: createWrapper("/mirror/journey") });
     expect(result.current.state.view).toBe("dashboard");
     expect(result.current.state.activeTab).toBe("journey");
   });
 
   it("mounting on /mirror/settings sets view to dashboard and tab to settings", () => {
-    const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/mirror/settings") });
+    const { result } = renderHook(() => useLoggedInHook(returningUserStateFixture), { wrapper: createWrapper("/mirror/settings") });
     expect(result.current.state.view).toBe("dashboard");
     expect(result.current.state.activeTab).toBe("settings");
+  });
+
+  it("unauthenticated user on /mirror redirects to home", () => {
+    const { result } = renderHook(() => useTestHook(), { wrapper: createWrapper("/mirror") });
+    expect(result.current.state.view).toBe("home");
   });
 
   it("mounting on / keeps view as home", () => {
@@ -440,7 +461,7 @@ describe("useFlowNavigation — returning user with saved birth data", () => {
 
   it("handleStartReading skips birth and goes to question", () => {
     const { result } = renderHook(
-      () => useLoggedInHook(returningUserState),
+      () => useLoggedInHook(returningUserStateFixture),
       { wrapper: createWrapper("/") }
     );
 
@@ -454,7 +475,7 @@ describe("useFlowNavigation — returning user with saved birth data", () => {
 
   it("hydrates birthData state from profileBirthData on start", () => {
     const { result } = renderHook(
-      () => useLoggedInHook(returningUserState),
+      () => useLoggedInHook(returningUserStateFixture),
       { wrapper: createWrapper("/") }
     );
 
@@ -492,7 +513,7 @@ describe("useFlowNavigation — returning user with saved birth data", () => {
 
   it("question submit goes straight to loading (skips auth)", () => {
     const { result } = renderHook(
-      () => useLoggedInHook(returningUserState),
+      () => useLoggedInHook(returningUserStateFixture),
       { wrapper: createWrapper("/") }
     );
 
@@ -517,7 +538,7 @@ describe("useFlowNavigation — returning user with saved birth data", () => {
 
   it("full returning-user flow: start → question → loading (2 steps, not 4)", () => {
     const { result } = renderHook(
-      () => useLoggedInHook(returningUserState),
+      () => useLoggedInHook(returningUserStateFixture),
       { wrapper: createWrapper("/") }
     );
 
@@ -564,7 +585,7 @@ describe("useFlowNavigation — returning user with saved birth data", () => {
 
   it("birth data reaches the reading flow after skip", () => {
     const { result } = renderHook(
-      () => useLoggedInHook(returningUserState),
+      () => useLoggedInHook(returningUserStateFixture),
       { wrapper: createWrapper("/") }
     );
 
