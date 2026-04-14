@@ -96,6 +96,13 @@ serve(async (req) => {
 
     if (!res.ok) {
       const err = await res.text();
+      // Treat auth failures (invalid/missing key) as non-fatal — don't crash the app
+      if (res.status === 401 || res.status === 403) {
+        console.warn(`[WELCOME-EMAIL] Resend auth failed (${res.status}) — email not sent`);
+        return new Response(JSON.stringify({ skipped: true, reason: "resend_auth_failed" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       throw new Error(`Resend error: ${res.status} ${err}`);
     }
 
