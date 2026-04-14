@@ -177,19 +177,31 @@ export function useFlowNavigation(
     setView("loading");
   }, [subscriptionTier, monthlyReadingCount, profileBirthData, state.birthData, dispatch, setView]);
 
-  // Auto-navigate to dashboard when user is loaded with readings (initial load only)
+  // Auto-navigate to dashboard when authenticated user lands on home
   const isInitialLoad = useRef(true);
 
   useEffect(() => {
     if (!isInitialLoad.current) return;
-    if (user && !authLoading && profileLoaded && view === "home" && journalEntries.length > 0) {
-      isInitialLoad.current = false;
-      setView("dashboard");
-    }
     if (!authLoading) {
       isInitialLoad.current = false;
+      if (user && view === "home" && profileLoaded) {
+        setView("dashboard");
+      }
     }
-  }, [user, authLoading, profileLoaded, journalEntries.length, view, setView]);
+  }, [user, authLoading, profileLoaded, view, setView]);
+
+  // Safety: if auth is done + user exists but profile takes too long, force dashboard
+  useEffect(() => {
+    if (!user || authLoading || view !== "home") return;
+    const fallback = setTimeout(() => {
+      if (view === "home" && !profileLoaded) {
+        console.warn("[nav] Profile load timeout — forcing dashboard");
+        dispatch({ type: "SET_PROFILE_LOADED", loaded: true });
+        setView("dashboard");
+      }
+    }, 3000);
+    return () => clearTimeout(fallback);
+  }, [user, authLoading, view, profileLoaded, dispatch, setView]);
 
   // OAuth return flow — user lands back on home with question + birth in sessionStorage
   useEffect(() => {
