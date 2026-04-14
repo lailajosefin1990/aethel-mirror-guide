@@ -4,18 +4,22 @@ const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_KEY;
 
 export const initPostHog = () => {
   if (!POSTHOG_KEY) return;
-  posthog.init(POSTHOG_KEY, {
-    api_host: "https://us.i.posthog.com",
-    person_profiles: "identified_only",
-    capture_pageview: true,
-    capture_pageleave: true,
-    enable_recording_console_log: false,
-    session_recording: {
-      maskAllInputs: true,
-      maskTextSelector: "*",
-    },
-    autocapture: false,
-  });
+  try {
+    posthog.init(POSTHOG_KEY, {
+      api_host: "https://us.i.posthog.com",
+      person_profiles: "identified_only",
+      capture_pageview: true,
+      capture_pageleave: true,
+      enable_recording_console_log: false,
+      session_recording: {
+        maskAllInputs: true,
+        maskTextSelector: "*",
+      },
+      autocapture: false,
+    });
+  } catch (err) {
+    console.warn("PostHog init failed:", err);
+  }
 };
 
 export const identifyUser = (userId: string, email?: string) => {
