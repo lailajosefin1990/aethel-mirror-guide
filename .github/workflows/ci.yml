@@ -27,7 +27,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run tests with coverage
-        run: npx vitest run --coverage --exclude='src/test/oauth-roundtrip.test.tsx'
+        run: npx vitest run --coverage
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
@@ -96,28 +96,6 @@ jobs:
           echo "🎨 Checking text contrast, monochrome palette, and muted-foreground lightness"
           npx vitest run src/test/contrast-regression.test.ts --reporter=verbose
 
-  oauth-roundtrip:
-    name: OAuth Round-Trip
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Run OAuth round-trip tests
-        run: |
-          echo "🔐 Running OAuth round-trip simulation (6 tests)"
-          npx vitest run src/test/oauth-roundtrip.test.tsx --reporter=verbose --pool=forks
-        env:
-          NODE_OPTIONS: --max-old-space-size=6144
 
   deploy:
     name: Deploy to Vercel
