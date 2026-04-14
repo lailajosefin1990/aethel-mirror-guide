@@ -7,7 +7,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const FROM_EMAIL = "hello@aethelmirror.com";
+// Use Resend's default domain until aethelmirror.com is verified
+const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "Aethel Mirror <onboarding@resend.dev>";
 const APP_URL = "https://aethelmirror.com";
 
 serve(async (req) => {
@@ -87,7 +88,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: `Aethel Mirror <${FROM_EMAIL}>`,
+        from: FROM_EMAIL,
         to: [email],
         subject: "Your mirror is ready ✦",
         html,

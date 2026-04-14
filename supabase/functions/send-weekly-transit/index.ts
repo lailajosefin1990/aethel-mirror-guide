@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
-const FROM_EMAIL = "hello@aethelmirror.com";
+const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "Aethel Mirror <onboarding@resend.dev>";
 const APP_URL = "https://aethelmirror.com";
 
 const corsHeaders = {
@@ -53,7 +53,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       Authorization: `Bearer ${RESEND_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from: `Aethel Mirror <${FROM_EMAIL}>`, to: [to], subject, html }),
+    body: JSON.stringify({ from: FROM_EMAIL, to: [to], subject, html }),
   });
   if (!res.ok) {
     const err = await res.text();
