@@ -215,6 +215,8 @@ const resources = {
       transit_today: "Today",
       transit_relevant: "Relevant to: {{domain}}",
       transit_revisit: "Revisit this decision →",
+      transit_preview_add_birth: "Update your birth data in Settings to refine these readings.",
+      transit_preview_generic_hint: "Add your birth data for personalised readings.",
       // Evidence page
       evidence_heading: "D O E S   I T   W O R K ?",
       evidence_subtitle: "We track outcomes. Here's what the mirror has shown.",
@@ -438,6 +440,8 @@ const resources = {
       transit_today: "Hoy",
       transit_relevant: "Relevante para: {{domain}}",
       transit_revisit: "Revisar esta decisión →",
+      transit_preview_add_birth: "Actualiza tu fecha de nacimiento en Ajustes para afinar estas lecturas.",
+      transit_preview_generic_hint: "Añade tu fecha de nacimiento para lecturas personalizadas.",
       // Evidence page
       evidence_heading: "¿ F U N C I O N A ?",
       evidence_subtitle: "Rastreamos resultados. Esto es lo que el espejo ha mostrado.",

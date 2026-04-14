@@ -52,23 +52,27 @@ const SettingsScreen = () => {
   useEffect(() => {
     if (!user) return;
     const loadData = async () => {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("referral_code, birth_time, birth_date, birth_place_name")
-        .eq("user_id", user.id)
-        .single();
-      if (profile?.referral_code) setReferralCode(profile.referral_code);
-      if (profile?.birth_time) { setCurrentBirthTime(profile.birth_time); setBirthTimeValue(profile.birth_time); }
-      if (profile?.birth_date) { setCurrentBirthDate(profile.birth_date); setBirthDateValue(profile.birth_date); }
-      if (profile?.birth_place_name) { setCurrentBirthPlace(profile.birth_place_name); setBirthPlaceValue(profile.birth_place_name); }
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("referral_code, birth_time, birth_date, birth_place_name")
+          .eq("user_id", user.id)
+          .single();
+        if (profile?.referral_code) setReferralCode(profile.referral_code);
+        if (profile?.birth_time) { setCurrentBirthTime(profile.birth_time); setBirthTimeValue(profile.birth_time); }
+        if (profile?.birth_date) { setCurrentBirthDate(profile.birth_date); setBirthDateValue(profile.birth_date); }
+        if (profile?.birth_place_name) { setCurrentBirthPlace(profile.birth_place_name); setBirthPlaceValue(profile.birth_place_name); }
 
-      const { data: referrals } = await supabase
-        .from("referrals")
-        .select("id, status, reward_granted")
-        .eq("referrer_user_id", user.id);
-      if (referrals) {
-        setReferralCount(referrals.length);
-        setRewardsEarned(referrals.filter((r: any) => r.reward_granted).length);
+        const { data: referrals } = await supabase
+          .from("referrals")
+          .select("id, status, reward_granted")
+          .eq("referrer_user_id", user.id);
+        if (referrals) {
+          setReferralCount(referrals.length);
+          setRewardsEarned(referrals.filter((r: any) => r.reward_granted).length);
+        }
+      } catch (err) {
+        console.warn("[Settings] Failed to load profile/referral data:", err);
       }
     };
     loadData();
