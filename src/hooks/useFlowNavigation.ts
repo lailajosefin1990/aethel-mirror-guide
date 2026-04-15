@@ -355,9 +355,21 @@ export function useFlowNavigation(
       }
     }
 
-    // Birth data was collected in step 1 → go straight to loading
-    proceedAfterAuth();
-  }, [user, pendingSave, profileLoaded, profileBirthData, proceedAfterAuth, handleSave, dispatch, setView]);
+    // If there's a pending question → generate the reading
+    // If no question (direct sign-in from landing page) → go to dashboard
+    const hasPendingQuestion = questionData || sessionStorage.getItem("aethel_pending_question");
+    if (hasPendingQuestion) {
+      if (!questionData) {
+        try {
+          const q = JSON.parse(sessionStorage.getItem("aethel_pending_question") || "");
+          dispatch({ type: "SET_QUESTION", data: q });
+        } catch { /* proceed anyway */ }
+      }
+      proceedAfterAuth();
+    } else {
+      setView("dashboard");
+    }
+  }, [user, questionData, pendingSave, profileLoaded, profileBirthData, proceedAfterAuth, handleSave, dispatch, setView]);
 
   const handleLoadingComplete = useCallback(() => {
     setView("reading");
