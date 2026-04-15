@@ -41,20 +41,24 @@ serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
+    // Check for active OR trialing subscriptions (29-day free trial)
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 1,
+      limit: 5,
     });
 
-    if (subscriptions.data.length === 0) {
+    const activeSub = subscriptions.data.find(
+      (s: any) => s.status === "active" || s.status === "trialing"
+    );
+
+    if (!activeSub) {
       return new Response(JSON.stringify({ subscribed: false, tier: "free" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    const subscription = subscriptions.data[0];
+    const subscription = activeSub;
     const productId = subscription.items.data[0].price.product;
     const subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
 
@@ -70,11 +74,18 @@ serve(async (req) => {
       stripe_customer_id: customerId,
     }).eq("user_id", user.id);
 
+    const isTrialing = subscription.status === "trialing";
+    const trialEnd = subscription.trial_end
+      ? new Date(subscription.trial_end * 1000).toISOString()
+      : null;
+
     return new Response(JSON.stringify({
       subscribed: true,
       tier,
       product_id: productId,
       subscription_end: subscriptionEnd,
+      is_trialing: isTrialing,
+      trial_end: trialEnd,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

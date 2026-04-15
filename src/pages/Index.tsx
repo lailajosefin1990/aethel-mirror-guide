@@ -38,7 +38,7 @@ const slideTransition = { duration: 0.35, ease: "easeOut" as const };
 
 const Index = () => {
   const { i18n } = useTranslation();
-  const { user, loading: authLoading, subscriptionTier, monthlyReadingCount, refreshReadingCount } = useAuth();
+  const { user, loading: authLoading, subscriptionTier, isTrialing, trialDaysLeft, monthlyReadingCount, refreshReadingCount } = useAuth();
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   useProfileData(user, i18n, dispatch);
@@ -248,6 +248,8 @@ const Index = () => {
                     onUpgrade={handleUpgrade}
                     hasBirthTime={!!profileBirthData?.birth_time}
                     loading={!state.profileLoaded}
+                    isTrialing={isTrialing}
+                    trialDaysLeft={trialDaysLeft}
                   />
                 </ViewErrorBoundary>
               )}

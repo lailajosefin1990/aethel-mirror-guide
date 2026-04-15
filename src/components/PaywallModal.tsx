@@ -118,7 +118,7 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
                           : "border border-foreground/20 text-foreground hover:border-foreground/40"
                       }`}
                     >
-                      {loading === tier.name ? "..." : isPro ? `Start ${tier.name} — ${tier.price}` : "Start 7-day free trial"}
+                      {loading === tier.name ? "..." : isPro ? `Start ${tier.name} — ${tier.price}` : "Start 29-day free trial"}
                     </button>
                     {!isPro && (
                       <p className="font-body text-[11px] text-foreground/40 mt-1.5 text-center">

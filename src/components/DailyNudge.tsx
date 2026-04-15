@@ -18,6 +18,8 @@ interface DailyNudgeProps {
   onUpgrade?: () => void;
   hasBirthTime?: boolean;
   loading?: boolean;
+  isTrialing?: boolean;
+  trialDaysLeft?: number | null;
 }
 
 const nudges = [
@@ -36,7 +38,7 @@ const weeklyOptions = [
   { emoji: "🌕", label: "Clear" },
 ];
 
-const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscriptionTier = "free", remainingReadings = 1, onUpgrade, hasBirthTime = false, loading }: DailyNudgeProps) => {
+const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscriptionTier = "free", remainingReadings = 1, onUpgrade, hasBirthTime = false, loading, isTrialing, trialDaysLeft }: DailyNudgeProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const today = new Date();
@@ -163,6 +165,23 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
           </motion.p>
         )}
       </AnimatePresence>
+
+      {isTrialing && trialDaysLeft != null && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="w-full px-4 py-3 border border-foreground/15 mb-4 text-center"
+        >
+          <p className="font-body text-[13px] text-foreground/70">
+            {trialDaysLeft > 0
+              ? `${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left on your free trial`
+              : "Your free trial ends today"}
+          </p>
+          <p className="font-body text-[11px] text-foreground/40 mt-1">
+            Unlimited readings included
+          </p>
+        </motion.div>
+      )}
 
       <motion.button
         initial={{ opacity: 0, y: 12 }}

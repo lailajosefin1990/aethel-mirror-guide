@@ -9,6 +9,8 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   subscriptionTier: SubscriptionTier;
+  isTrialing: boolean;
+  trialDaysLeft: number | null;
   monthlyReadingCount: number;
   signOut: () => Promise<void>;
   checkSubscription: () => Promise<void>;
@@ -22,6 +24,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>("free");
+  const [isTrialing, setIsTrialing] = useState(false);
+  const [trialDaysLeft, setTrialDaysLeft] = useState<number | null>(null);
   const [monthlyReadingCount, setMonthlyReadingCount] = useState(0);
 
   const checkSubscription = useCallback(async () => {
@@ -30,6 +34,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) return;
       if (data?.tier) {
         setSubscriptionTier(data.tier as SubscriptionTier);
+      }
+      if (data?.is_trialing) {
+        setIsTrialing(true);
+        if (data.trial_end) {
+          const daysLeft = Math.ceil((new Date(data.trial_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          setTrialDaysLeft(Math.max(0, daysLeft));
+        }
+      } else {
+        setIsTrialing(false);
+        setTrialDaysLeft(null);
       }
     } catch {
       // silent fail
@@ -92,7 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{
-      user, session, loading, subscriptionTier,
+      user, session, loading, subscriptionTier, isTrialing, trialDaysLeft,
       monthlyReadingCount, signOut, checkSubscription, refreshReadingCount,
     }}>
       {children}

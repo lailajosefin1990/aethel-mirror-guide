@@ -8,7 +8,7 @@ import type { BirthData } from "@/components/BirthCoordinates";
 import type { AppState, AppAction, View } from "@/context/appReducer";
 import type { SubscriptionTier } from "@/lib/stripe";
 
-const FREE_READING_LIMIT = 3;
+const FREE_READING_LIMIT = 3; // readings per month for non-subscribed users
 
 const VIEW_TO_PATH: Record<View, string> = {
   home: "/",
