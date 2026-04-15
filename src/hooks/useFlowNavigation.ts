@@ -185,22 +185,34 @@ export function useFlowNavigation(
     if (authLoading) return;
 
     if (user && view === "home") {
-      // Authenticated user on home → go to dashboard
-      hasRedirected.current = true;
-      setView("dashboard");
+      // Check if this is an OAuth return with pending question data
+      const pendingQuestion = questionData || sessionStorage.getItem("aethel_pending_question");
+      if (pendingQuestion) {
+        // OAuth return: restore question + birth, then generate reading
+        hasRedirected.current = true;
+        if (!questionData) {
+          try {
+            const q = JSON.parse(sessionStorage.getItem("aethel_pending_question") || "");
+            dispatch({ type: "SET_QUESTION", data: q });
+          } catch { /* proceed anyway */ }
+        }
+        // Restore birth data from sessionStorage
+        const birthFromSession = restoreBirth();
+        if (birthFromSession) {
+          dispatch({ type: "SET_BIRTH_DATA", data: birthFromSession });
+        }
+        proceedAfterAuth();
+      } else {
+        // Normal login (no pending question): go to dashboard
+        hasRedirected.current = true;
+        setView("dashboard");
+      }
     } else if (!user && ["dashboard", "loading", "reading"].includes(view)) {
       // Unauthenticated user on a protected route → go to home
       hasRedirected.current = true;
       setView("home");
     }
-  }, [user, authLoading, view, setView]);
-
-  // OAuth return flow — user lands back on home with question + birth in sessionStorage
-  useEffect(() => {
-    if (user && !authLoading && questionData && view === "home") {
-      proceedAfterAuth();
-    }
-  }, [user, authLoading, questionData, view, proceedAfterAuth]);
+  }, [user, authLoading, view, questionData, dispatch, setView, proceedAfterAuth]);
 
   // Service worker push click handler
   useEffect(() => {
