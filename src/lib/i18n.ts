@@ -123,6 +123,7 @@ const resources = {
       error_rate_limit: "Too many requests. Please wait a moment.",
       // Hero
       hero_free_tag: "Free · No card needed",
+      hero_sign_in: "Already have an account? Sign in",
       hero_see_outcomes: "See real outcomes →",
       hero_how_it_works: "How it works ↓",
       hero_get_third_way: "Get my Third Way →",
@@ -240,6 +241,7 @@ const resources = {
       hero_subtitle: "Astrología. Diseño Humano. Un paso claro.",
       hero_cta: "Comenzar tu lectura →",
       hero_free_tag: "Gratis · Sin tarjeta",
+      hero_sign_in: "¿Ya tienes cuenta? Inicia sesión",
       hero_see_outcomes: "Ver resultados reales →",
       hero_how_it_works: "Cómo funciona ↓",
       hero_get_third_way: "Obtener mi Tercer Camino →",

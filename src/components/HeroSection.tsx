@@ -140,6 +140,13 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
               {t("hero_free_tag")}
             </p>
 
+            <button
+              onClick={() => navigate("/auth")}
+              className="font-body text-[13px] text-foreground/50 hover:text-foreground/70 underline underline-offset-2 transition-colors duration-300"
+            >
+              {t("hero_sign_in")}
+            </button>
+
             <a href="/evidence" onClick={() => trackEvent(EVENTS.EVIDENCE_LINK_HERO_CLICKED)} className="block font-body text-[13px] text-foreground/40 hover:text-foreground/60 underline underline-offset-2 mt-3 text-center transition-colors">
               {t("hero_see_outcomes")}
             </a>
