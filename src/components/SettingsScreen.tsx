@@ -29,6 +29,8 @@ const SettingsScreen = () => {
   const [portalLoading, setPortalLoading] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(true);
+  const [dailyNudges, setDailyNudges] = useState(1);
+  const [nudgeSaving, setNudgeSaving] = useState(false);
   const [referralCode, setReferralCode] = useState("");
   const [referralCount, setReferralCount] = useState(0);
   const [rewardsEarned, setRewardsEarned] = useState(0);
@@ -55,13 +57,14 @@ const SettingsScreen = () => {
       try {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("referral_code, birth_time, birth_date, birth_place_name")
+          .select("referral_code, birth_time, birth_date, birth_place_name, daily_nudge_count")
           .eq("user_id", user.id)
           .single();
         if (profile?.referral_code) setReferralCode(profile.referral_code);
         if (profile?.birth_time) { setCurrentBirthTime(profile.birth_time); setBirthTimeValue(profile.birth_time); }
         if (profile?.birth_date) { setCurrentBirthDate(profile.birth_date); setBirthDateValue(profile.birth_date); }
         if (profile?.birth_place_name) { setCurrentBirthPlace(profile.birth_place_name); setBirthPlaceValue(profile.birth_place_name); }
+        if (profile?.daily_nudge_count != null) setDailyNudges(profile.daily_nudge_count);
 
         const { data: referrals } = await supabase
           .from("referrals")
@@ -264,12 +267,46 @@ const SettingsScreen = () => {
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
         className="border border-border p-5 mb-5">
         <p className={sectionLabel}>{t("settings_notifications")}</p>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-5">
           <div>
             <p className="font-body text-[14px] text-foreground">{t("settings_push")}</p>
             <p className="font-body text-[12px] text-foreground/30">{t("settings_push_detail")}</p>
           </div>
           <Switch checked={pushEnabled} onCheckedChange={handlePushToggle} disabled={pushLoading} />
+        </div>
+
+        {/* Daily nudge frequency */}
+        <div className="border-t border-foreground/10 pt-4">
+          <p className="font-body text-[14px] text-foreground mb-1">{t("settings_nudge_count")}</p>
+          <p className="font-body text-[12px] text-foreground/30 mb-3">{t("settings_nudge_detail")}</p>
+          <div className="flex items-center gap-3">
+            {[0, 1, 2, 3, 4, 5, 6].map((n) => (
+              <button
+                key={n}
+                onClick={async () => {
+                  setDailyNudges(n);
+                  setNudgeSaving(true);
+                  try {
+                    if (user) {
+                      await supabase.from("profiles").update({ daily_nudge_count: n }).eq("user_id", user.id);
+                      toast.success(n === 0 ? t("settings_nudge_off") : `${n} ${t("settings_nudge_set")}`);
+                    }
+                  } catch {} finally { setNudgeSaving(false); }
+                }}
+                disabled={nudgeSaving}
+                className={`w-9 h-9 font-body text-[14px] border transition-all duration-200 ${
+                  dailyNudges === n
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-transparent text-foreground/50 border-foreground/15 hover:border-foreground/40"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          {dailyNudges === 0 && (
+            <p className="font-body text-[11px] text-foreground/35 mt-2">{t("settings_nudge_off_hint")}</p>
+          )}
         </div>
       </motion.div>
 

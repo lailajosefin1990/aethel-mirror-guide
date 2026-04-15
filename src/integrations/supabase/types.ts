@@ -257,6 +257,7 @@ export type Database = {
           birth_place_name: string | null
           birth_time: string | null
           birth_timezone: string | null
+          daily_nudge_count: number | null
           consent_accepted: boolean
           consent_date: string | null
           consent_prompt_dismissed: boolean
@@ -277,6 +278,7 @@ export type Database = {
           birth_place_name?: string | null
           birth_time?: string | null
           birth_timezone?: string | null
+          daily_nudge_count?: number | null
           consent_accepted?: boolean
           consent_date?: string | null
           consent_prompt_dismissed?: boolean
@@ -297,6 +299,7 @@ export type Database = {
           birth_place_name?: string | null
           birth_time?: string | null
           birth_timezone?: string | null
+          daily_nudge_count?: number | null
           consent_accepted?: boolean
           consent_date?: string | null
           consent_prompt_dismissed?: boolean
