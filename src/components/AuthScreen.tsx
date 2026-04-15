@@ -77,7 +77,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
           className="w-full max-w-app mx-auto text-center py-8"
         >
           <p className="font-display text-[28px] tracking-[0.25em] text-foreground uppercase mb-6">
-            AETHEL MIRROR
+            GUIDANCE JOURNAL
           </p>
           <p className="font-display text-[18px] text-foreground mb-2">{t("auth_check_email")}</p>
           <p className="font-body text-[13px] text-muted-foreground mb-6">
@@ -107,7 +107,7 @@ const AuthScreen = ({ onSuccess, onBack }: AuthScreenProps) => {
         className="w-full max-w-app mx-auto"
       >
         <p className="font-display text-[28px] tracking-[0.25em] text-foreground uppercase mb-4 text-center">
-          AETHEL MIRROR
+          GUIDANCE JOURNAL
         </p>
 
         <h2 className="font-display text-[24px] leading-[1.3] text-foreground text-center mb-2">

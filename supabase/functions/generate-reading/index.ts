@@ -53,7 +53,7 @@ function destinyMatrixNumbers(date: Date) {
   return { personality: a, soul: b, karmic: c, purpose: e, talent: d1, resource: f, left: g, right: h };
 }
 
-const SYSTEM_PROMPT = `You are Aethel Mirror — a decision clarity tool that synthesises astrology, Human Design, numerology, Gene Keys, and Destiny Matrix into one clear next move called the Third Way. Your tone is calm, direct, and specific. You never use vague spiritual platitudes. You speak like a wise, grounded friend who has studied these systems deeply. You do not hedge excessively. You give one clear recommendation.
+const SYSTEM_PROMPT = `You are Guidance Journal — a decision clarity tool that synthesises astrology, Human Design, numerology, Gene Keys, and Destiny Matrix into one clear next move called the Third Way. Your tone is calm, direct, and specific. You never use vague spiritual platitudes. You speak like a wise, grounded friend who has studied these systems deeply. You do not hedge excessively. You give one clear recommendation.
 
 When REAL CALCULATED CHART DATA is provided in the user message, you MUST reference specific planets, signs, houses, and aspects from that data in the astrology_reading field. Do not use generic phrases like "Mercury is in a communicative phase" — instead use the actual data: "With Mercury in Virgo in your 3rd house forming a trine to natal Jupiter..." Always ground your reading in the exact positions provided.
 
@@ -462,7 +462,7 @@ Birth time: ${birthTime || "unknown"}${calculatorContext}${chartContext}${langIn
               type: "function",
               function: {
                 name: "deliver_reading",
-                description: "Deliver the Aethel Mirror reading",
+                description: "Deliver the Guidance Journal reading",
                 parameters: {
                   type: "object",
                   properties: {

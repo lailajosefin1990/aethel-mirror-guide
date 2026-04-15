@@ -84,7 +84,7 @@ const PractitionerReadingOutput = ({
           <p className="font-display text-[16px] leading-[1.6] text-card-foreground">{reading.journal_prompt}</p>
         </div>
         <div className="print-footer hidden mt-12 pt-4 border-t border-gray-200">
-          <p style={{ fontSize: 10, color: "#aaa", textAlign: "center" }}>Prepared with Aethel Mirror</p>
+          <p style={{ fontSize: 10, color: "#aaa", textAlign: "center" }}>Prepared with Guidance Journal</p>
         </div>
         <div className="flex flex-col gap-3 pb-10 no-print">
           <button onClick={onSave} className="w-full h-[52px] rounded-sm bg-primary text-primary-foreground font-body font-medium text-[14px] tracking-wide hover:brightness-110 transition-all duration-300">
@@ -211,7 +211,7 @@ const PractitionerPortal = () => {
           <p className="font-display text-[14px] tracking-[0.35em] text-primary mb-6">P R A C T I T I O N E R</p>
           <h2 className="font-display text-[24px] leading-[1.3] text-foreground mb-4">Run readings for your clients.</h2>
           <p className="font-body text-[14px] text-muted-foreground mb-2 leading-relaxed">Prepare deeper sessions.</p>
-          <p className="font-body text-[14px] text-muted-foreground mb-10 leading-relaxed">Let the mirror do the groundwork.</p>
+          <p className="font-body text-[14px] text-muted-foreground mb-10 leading-relaxed">Let the journal do the groundwork.</p>
           <ul className="text-left space-y-3 mb-10 px-4">
             {STRIPE_TIERS.practitioner.features.map((f) => (
               <li key={f} className="flex items-start gap-3">

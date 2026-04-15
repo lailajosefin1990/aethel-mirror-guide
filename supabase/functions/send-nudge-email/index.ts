@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
-const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "Aethel Mirror <onboarding@resend.dev>";
+const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "Guidance Journal <onboarding@resend.dev>";
 const APP_URL = "https://aethelmirror.com";
 
 const corsHeaders = {

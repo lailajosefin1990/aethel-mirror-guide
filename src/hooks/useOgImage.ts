@@ -36,7 +36,7 @@ const useOgImage = ({ thirdWay, domain }: OgImageProps) => {
     };
     setMeta("og:image:width", "1080");
     setMeta("og:image:height", "1080");
-    setMeta("og:title", "My Third Way — Aethel Mirror");
+    setMeta("og:title", "My Third Way — Guidance Journal");
     setMeta("og:description", thirdWay.slice(0, 120));
 
     return () => {

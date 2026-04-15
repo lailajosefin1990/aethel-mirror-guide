@@ -7,7 +7,7 @@ const Cookies = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = "Cookie Policy — Aethel Mirror";
+    document.title = "Cookie Policy — Guidance Journal";
   }, []);
 
   return (
@@ -45,7 +45,7 @@ const Cookies = () => {
             </ul>
 
             <h3 className="font-display text-base text-foreground mt-4 mb-2">No Advertising Cookies</h3>
-            <p>Aethel Mirror does <strong className="text-foreground">not</strong> use any advertising or tracking cookies. We do not serve ads, sell data to advertisers, or use retargeting pixels.</p>
+            <p>Guidance Journal does <strong className="text-foreground">not</strong> use any advertising or tracking cookies. We do not serve ads, sell data to advertisers, or use retargeting pixels.</p>
           </section>
 
           <section>

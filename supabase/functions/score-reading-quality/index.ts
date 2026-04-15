@@ -80,9 +80,9 @@ serve(async (req) => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              from: "Aethel Mirror <noreply@updates.aethelmirror.com>",
+              from: "Guidance Journal <noreply@updates.aethelmirror.com>",
               to: ["admin@aethelmirror.com"],
-              subject: "🪞 Aethel: 500 training examples ready",
+              subject: "🪞 Guidance Journal: 500 training examples ready",
               html: `<p>Your fine-tuning dataset has crossed the 500 example threshold.</p>
 <p>Download your training data at /admin and begin the fine-tuning process on Mistral 7B or Llama 3 via HuggingFace.</p>
 <p><strong>This is the moment the moat begins.</strong></p>`,

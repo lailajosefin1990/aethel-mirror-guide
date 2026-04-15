@@ -69,14 +69,14 @@ const PaywallModal = ({ open, onClose, onRestorePurchase }: PaywallModalProps) =
             </button>
 
             <p className="font-body text-[11px] uppercase tracking-[0.3em] text-foreground/40 mb-3 text-center">
-              AETHEL MIRROR
+              GUIDANCE JOURNAL
             </p>
 
             <h2 className="font-display text-[24px] sm:text-[28px] leading-[1.2] text-foreground text-center mb-2">
               Your mirror is starting to know you.
             </h2>
             <p className="font-body text-[14px] text-foreground/50 text-center mb-2">
-              You've now seen how the Third Way works. Mirror gives you unlimited readings and the patterns your mirror has learned about you.
+              You've now seen how the Third Way works. Journal gives you unlimited readings and the patterns your journal has learned about you.
             </p>
             <p className="font-body text-[13px] text-foreground/30 text-center mb-8">
               Unlock unlimited readings and your full decision journal.

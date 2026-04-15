@@ -23,7 +23,7 @@ const howItems = [
 const TESTIMONIALS = [
   { text: "I was stuck between two job offers for weeks. The Third Way gave me a frame I hadn't considered — I negotiated a hybrid role instead.", author: "Maia R.", domain: "Work & Money" },
   { text: "Every reading has been eerily specific. I use it before any big conversation with my partner now.", author: "Jordan T.", domain: "Love & People" },
-  { text: "I was about to say yes to a collab that felt off. Aethel helped me see why — and gave me the words to say no gracefully.", author: "Sam K.", domain: "Visibility" },
+  { text: "I was about to say yes to a collab that felt off. Guidance Journal helped me see why — and gave me the words to say no gracefully.", author: "Sam K.", domain: "Visibility" },
 ];
 
 const HeroSection = ({ onStart }: HeroSectionProps) => {
@@ -50,7 +50,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
   return (
     <div className="min-h-screen flex flex-col">
       <p className="sr-only">
-        Aethel Mirror helps you make decisions using astrology, Human Design, numerology, Gene Keys, and Destiny Matrix. Get your Third Way — one specific action you can take in the next 48 hours.
+        Guidance Journal helps you make decisions using astrology, Human Design, numerology, Gene Keys, and Destiny Matrix. Get your Third Way — one specific action you can take in the next 48 hours.
       </p>
       <section className="flex-1 flex flex-col items-center justify-center px-5 py-16">
         <div className="w-full max-w-app flex flex-col items-center">
@@ -61,7 +61,7 @@ const HeroSection = ({ onStart }: HeroSectionProps) => {
             transition={{ duration: 1, delay: 0.2 }}
             className="font-display text-[28px] tracking-[0.25em] text-foreground uppercase mb-14"
           >
-            AETHEL MIRROR
+            GUIDANCE JOURNAL
           </motion.p>
 
           {/* Sample reading card */}

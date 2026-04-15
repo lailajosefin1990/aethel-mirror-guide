@@ -22,7 +22,7 @@ const Evidence = () => {
   const [notReady, setNotReady] = useState(false);
 
   useEffect(() => {
-    document.title = "Evidence — Aethel Mirror";
+    document.title = "Evidence — Guidance Journal";
     const load = async () => {
       try {
         const { data: result, error } = await supabase.functions.invoke("evidence");

@@ -11,7 +11,7 @@ export function initSentry() {
     Sentry.init({
       dsn,
       environment: import.meta.env.MODE,
-      release: "aethel-mirror@1.0.0",
+      release: "guidance-journal@1.0.0",
       tracesSampleRate: 0.1,
       replaysOnErrorSampleRate: 1.0,
       replaysSessionSampleRate: 0,

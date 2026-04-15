@@ -34,7 +34,7 @@ const ConsentUpgradeSheet = ({ open, onAccept, onDismiss }: ConsentUpgradeSheetP
             </button>
 
             <p className="font-display text-[18px] text-card-foreground mb-3">
-              Help the mirror get better.
+              Help the journal get better.
             </p>
 
             <p className="font-body text-[14px] text-muted-foreground leading-relaxed mb-6">

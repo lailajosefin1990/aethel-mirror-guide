@@ -37,7 +37,7 @@ const PushPermissionSheet = ({ open, onAccept, onDismiss }: PushPermissionSheetP
             </p>
             <p className="font-body text-[14px] text-muted-foreground mb-6 leading-relaxed">
               We'll nudge you in 48 hours to log what happened.
-              That's when the mirror gets personal.
+              That's when the journal gets personal.
             </p>
 
             <div className="flex flex-col gap-3">

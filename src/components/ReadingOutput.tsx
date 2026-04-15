@@ -123,7 +123,7 @@ const ReadingOutput = ({ domain, question, reading, onSave, onBack, onRegenerate
       const file = new File([cardBlob], "aethel-third-way.png", { type: "image/png" });
       await navigator.share({
         title: "My Third Way",
-        text: "My Third Way from Aethel Mirror",
+        text: "My Third Way from Guidance Journal",
         files: [file],
       });
     } catch {

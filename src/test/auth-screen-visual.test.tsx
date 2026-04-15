@@ -162,7 +162,7 @@ describe("AuthScreen — visual regression", () => {
     expect(screen.getByText("auth_sign_in")).toBeInTheDocument();
   });
 
-  it("renders the AETHEL MIRROR wordmark", () => {
+  it("renders the GUIDANCE JOURNAL wordmark", () => {
     const { container } = render(
       <MemoryRouter>
         <AuthScreen onSuccess={vi.fn()} onBack={vi.fn()} />
@@ -170,7 +170,7 @@ describe("AuthScreen — visual regression", () => {
     );
 
     const bodyText = container.textContent || "";
-    expect(bodyText).toContain("AETHEL MIRROR");
+    expect(bodyText).toContain("GUIDANCE JOURNAL");
   });
 
   it("Google button has white background (monochrome CTA)", () => {

@@ -13,7 +13,7 @@ serve(async (req) => {
   try {
     const url = new URL(req.url);
     const thirdWay = url.searchParams.get("text") || "Your Third Way";
-    const domain = url.searchParams.get("domain") || "AETHEL MIRROR";
+    const domain = url.searchParams.get("domain") || "GUIDANCE JOURNAL";
 
     // Escape for SVG
     const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

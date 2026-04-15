@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 
-const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "Aethel Mirror <onboarding@resend.dev>";
+const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "Guidance Journal <onboarding@resend.dev>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

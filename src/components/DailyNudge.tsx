@@ -148,7 +148,7 @@ const DailyNudge = ({ journalEntries, onNewReading, onRevisitDecision, subscript
         transition={{ duration: 0.5, delay: 0.1 }}
         className="font-body text-[11px] uppercase tracking-[0.3em] text-foreground/40 mb-4"
       >
-        AETHEL MIRROR · TODAY
+        GUIDANCE JOURNAL · TODAY
       </motion.p>
 
       <AnimatePresence>

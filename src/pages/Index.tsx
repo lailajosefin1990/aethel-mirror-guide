@@ -62,15 +62,15 @@ const Index = () => {
 
   useEffect(() => {
     const titles: Record<string, string> = {
-      home: "Aethel Mirror — Decision Clarity Through Six Ancient Systems",
-      question: "Ask Your Question | Aethel Mirror",
-      auth: "Sign In | Aethel Mirror",
-      birth: "Your Coordinates | Aethel Mirror",
-      loading: "Generating Your Reading | Aethel Mirror",
-      reading: "Your Third Way | Aethel Mirror",
-      dashboard: "Your Mirror | Aethel Mirror",
+      home: "Guidance Journal — Decision Clarity Through Six Ancient Systems",
+      question: "Ask Your Question | Guidance Journal",
+      auth: "Sign In | Guidance Journal",
+      birth: "Your Coordinates | Guidance Journal",
+      loading: "Generating Your Reading | Guidance Journal",
+      reading: "Your Third Way | Guidance Journal",
+      dashboard: "Your Mirror | Guidance Journal",
     };
-    document.title = titles[view] || "Aethel Mirror";
+    document.title = titles[view] || "Guidance Journal";
   }, [view]);
 
   const mainRef = useRef<HTMLDivElement>(null);

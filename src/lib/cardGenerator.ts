@@ -31,7 +31,7 @@ export function generateThirdWayCard(
         const fontDisplay = '"Cormorant Garamond", Georgia, serif';
         const fontBody = '"Inter", system-ui, sans-serif';
 
-        // Top: AETHEL MIRROR in gold
+        // Top: GUIDANCE JOURNAL in gold
         ctx.fillStyle = "#C9A84C";
         ctx.font = `400 28px ${fontDisplay}`;
         ctx.textAlign = "center";

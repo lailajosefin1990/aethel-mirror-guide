@@ -142,7 +142,7 @@ describe("DailyNudge", () => {
     render(
       <MemoryRouter><DailyNudge journalEntries={[]} onNewReading={vi.fn()} onRevisitDecision={vi.fn()} /></MemoryRouter>
     );
-    expect(screen.getByText(/AETHEL MIRROR.*TODAY/)).toBeInTheDocument();
+    expect(screen.getByText(/GUIDANCE JOURNAL.*TODAY/)).toBeInTheDocument();
     expect(screen.getByText("nudge_new_reading_btn")).toBeInTheDocument();
     expect(screen.getByText("nudge_todays_energy")).toBeInTheDocument();
     expect(screen.getByText("nudge_little_nudge")).toBeInTheDocument();

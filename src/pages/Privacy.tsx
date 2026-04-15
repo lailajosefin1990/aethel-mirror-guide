@@ -7,7 +7,7 @@ const Privacy = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = "Privacy Policy — Aethel Mirror";
+    document.title = "Privacy Policy — Guidance Journal";
   }, []);
 
   return (
@@ -95,7 +95,7 @@ const Privacy = () => {
 
           <section>
             <h2 className="font-display text-lg text-foreground mb-2">8. Children's Privacy</h2>
-            <p>Aethel Mirror is not intended for use by anyone under the age of 18. We do not knowingly collect data from minors. If you believe a minor has created an account, please contact us immediately.</p>
+            <p>Guidance Journal is not intended for use by anyone under the age of 18. We do not knowingly collect data from minors. If you believe a minor has created an account, please contact us immediately.</p>
           </section>
 
           <section>

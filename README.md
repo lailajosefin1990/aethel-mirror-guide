@@ -1,6 +1,6 @@
-# Aethel Mirror
+# Guidance Journal
 
-[![Build & Test](https://github.com/lailajosefin1990/aethel-mirror-guide/actions/workflows/ci.yml/badge.svg)](https://github.com/lailajosefin1990/aethel-mirror-guide/actions/workflows/ci.yml)
+[![Build & Test](https://github.com/lailajosefin1990/guidance-journal-guide/actions/workflows/ci.yml/badge.svg)](https://github.com/lailajosefin1990/guidance-journal-guide/actions/workflows/ci.yml)
 
 A decision clarity tool that synthesises astrology, Human Design, numerology, Gene Keys, and Destiny Matrix into one clear next move — the Third Way.
 

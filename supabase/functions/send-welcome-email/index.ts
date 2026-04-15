@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 // Use Resend's default domain until aethelmirror.com is verified
-const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "Aethel Mirror <onboarding@resend.dev>";
+const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") || "Guidance Journal <onboarding@resend.dev>";
 const APP_URL = "https://aethelmirror.com";
 
 serve(async (req) => {
